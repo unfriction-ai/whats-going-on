@@ -6,9 +6,20 @@ One skill body lives at `skills/whats-going-on/`. Host plugins and local install
 
 ### Cursor
 
-Preferred. Install the Cursor plugin (see root README once PR-B lands), or copy `skills/whats-going-on/` to `.cursor/skills/whats-going-on/` or `~/.cursor/skills/whats-going-on/`.
+Preferred. Local plugin for Customize.
 
-Invoke with `/whats-going-on`.
+```bash
+mkdir -p ~/.cursor/plugins/local
+rsync -a --delete \
+  --include='.cursor-plugin/***' \
+  --include='skills/***' \
+  --exclude='*' \
+  ./ ~/.cursor/plugins/local/whats-going-on/
+```
+
+Then open Cursor Customize and enable `whats-going-on`. Invoke with `/whats-going-on`.
+
+Fallback. Copy `skills/whats-going-on/` to `.cursor/skills/whats-going-on/` or `~/.cursor/skills/whats-going-on/`.
 
 ### Claude Code
 
