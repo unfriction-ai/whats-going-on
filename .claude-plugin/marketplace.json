@@ -1,0 +1,14 @@
+{
+  "name": "whats-going-on-marketplace",
+  "description": "Unfriction marketplace for the whats-going-on classification skill.",
+  "owner": {
+    "name": "Unfriction"
+  },
+  "plugins": [
+    {
+      "name": "whats-going-on",
+      "source": "./",
+      "description": "Map an ask onto a 2x2. Abstain when no problem is defined."
+    }
+  ]
+}
