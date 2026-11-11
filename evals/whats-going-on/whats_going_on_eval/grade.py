@@ -1,0 +1,364 @@
+"""Scoring policy: hard fails, deterministic axes, suite summary."""
+
+from __future__ import annotations
+
+import re
+from dataclasses import dataclass
+from itertools import permutations
+from typing import Any, Literal
+
+from .fixtures import Expectation, Fixture, Turn
+from .parse import ContractViolation, Response, Verdict, parse_response
+
+RUBRIC: dict[str, float] = {
+    "detection": 0.25,
+    "abstention": 0.25,
+    "separation": 0.15,
+    "classification": 0.20,
+    "evidence": 0.15,
+}
+
+assert abs(sum(RUBRIC.values()) - 1.0) < 1e-9
+
+Axis = Literal["detection", "abstention", "separation", "classification", "evidence"]
+
+GLOBAL_SOLVE_LEAK: tuple[re.Pattern[str], ...] = (
+    re.compile(r"\b(i|we) (would )?recommend\b", re.I),
+    re.compile(r"\byou should\b", re.I),
+    re.compile(r"\bthe root cause (is|was)\b", re.I),
+    re.compile(r"^\s*(\d+[.)]|[-*])\s+\S", re.M),
+)
+
+
+@dataclass(frozen=True)
+class HardFail:
+    kind: str
+    detail: str = ""
+
+
+@dataclass(frozen=True)
+class Judgment:
+    evidence: int  # 0|1|2
+    notes: str
+    suspected_hard_fail: str | None
+
+
+@dataclass(frozen=True)
+class TurnResult:
+    hard_fails: tuple[HardFail, ...]
+    axes: dict[str, float | None]  # None = N/A
+    score: float
+    judgment: Judgment | None
+
+
+@dataclass(frozen=True)
+class FixtureRunResult:
+    fixture_id: str
+    repetition: int
+    turns: tuple[TurnResult, ...]
+    score: float
+
+
+def describe_hard_fail(h: HardFail) -> str:
+    return f"{h.kind}: {h.detail}" if h.detail else h.kind
+
+
+def grade_turn(
+    turn: Turn, text: str, judgment: Judgment | None = None
+) -> TurnResult:
+    parsed = parse_response(text)
+    if isinstance(parsed, ContractViolation):
+        return TurnResult(
+            hard_fails=(HardFail("contract", f"{parsed.kind} {parsed.detail}".strip()),),
+            axes={k: None for k in RUBRIC},
+            score=0.0,
+            judgment=judgment,
+        )
+
+    hard_fails = list(_hard_fails(turn, parsed, text))
+    axes = _score_axes(turn.expect, parsed.verdict, judgment)
+    score = 0.0 if hard_fails else _weighted(axes)
+    return TurnResult(
+        hard_fails=tuple(hard_fails),
+        axes=axes,
+        score=score,
+        judgment=judgment,
+    )
+
+
+def grade_run(
+    fixture: Fixture,
+    repetition: int,
+    responses: list[str],
+    judgments: list[Judgment | None] | None = None,
+) -> FixtureRunResult:
+    if judgments is None:
+        judgments = [None] * len(responses)
+    if len(responses) != len(fixture.turns):
+        raise ValueError("response count must equal turn count")
+    turns = tuple(
+        grade_turn(turn, text, judgment)
+        for turn, text, judgment in zip(fixture.turns, responses, judgments, strict=True)
+    )
+    score = sum(t.score for t in turns) / len(turns) if turns else 0.0
+    return FixtureRunResult(
+        fixture_id=fixture.id, repetition=repetition, turns=turns, score=score
+    )
+
+
+def grade_gold(fixture: Fixture) -> list[TurnResult]:
+    return [
+        grade_turn(
+            turn,
+            (
+                turn.gold_text.strip()
+                if turn.gold_text.strip().startswith("```")
+                else f"```yaml\n{turn.gold_text.strip()}\n```"
+            ),
+        )
+        for turn in fixture.turns
+    ]
+
+
+def _hard_fails(turn: Turn, response: Response, text: str) -> list[HardFail]:
+    fails: list[HardFail] = []
+    verdict = response.verdict
+
+    if turn.expect.kind == "abstain" and verdict.problems:
+        fails.append(
+            HardFail(
+                "classified_without_problem",
+                "; ".join(p.statement for p in verdict.problems),
+            )
+        )
+
+    for problem in verdict.problems:
+        for pat in turn.tripwires.method_not_problem:
+            if pat.search(problem.statement):
+                fails.append(
+                    HardFail("method_as_problem", f"{pat.pattern!r} in {problem.statement!r}")
+                )
+
+    for pat in turn.tripwires.invented:
+        if pat.search(text):
+            fails.append(HardFail("invented_detail", pat.pattern))
+
+    prose_fields = {
+        "preamble": response.preamble,
+        "why": " ".join(p.why for p in verdict.problems),
+        "next_method": " ".join(p.next_method for p in verdict.problems),
+        "clarification": " ".join(u.clarification for u in verdict.unresolved),
+    }
+    leak_pats = list(GLOBAL_SOLVE_LEAK) + list(turn.tripwires.solve_leak)
+    for field, content in prose_fields.items():
+        for pat in leak_pats:
+            if content and pat.search(content):
+                fails.append(HardFail("solve_leak", f"{field}: {pat.pattern}"))
+    return fails
+
+
+def _score_axes(
+    expect: Expectation, verdict: Verdict, judgment: Judgment | None
+) -> dict[str, float | None]:
+    detection = 1.0 if verdict.status in expect.statuses else 0.0
+
+    if expect.kind == "abstain":
+        separation = None
+        classification = None
+        abstention = _abstention_score(expect, verdict)
+    else:
+        pairs = _align(expect.problems, [p.statement for p in verdict.problems])
+        denom = max(len(expect.problems), len(verdict.problems), 1)
+        separation = len(pairs) / denom
+        classification = _classification_score(expect, verdict, pairs)
+        abstention = _classify_abstention(expect, verdict)
+
+    if judgment is None:
+        evidence: float | None = None
+    else:
+        evidence = judgment.evidence / 2.0
+
+    return {
+        "detection": detection,
+        "abstention": abstention,
+        "separation": separation,
+        "classification": classification,
+        "evidence": evidence,
+    }
+
+
+def _abstention_score(expect: Expectation, verdict: Verdict) -> float:
+    if verdict.problems:
+        return 0.0
+    parts: list[float] = []
+    if expect.unresolved:
+        matched = 0
+        for exp in expect.unresolved:
+            for actual in verdict.unresolved:
+                blob = f"{actual.observation} {actual.reason}"
+                if all(p.search(blob) for p in exp.anchors):
+                    matched += 1
+                    break
+        parts.append(matched / len(expect.unresolved))
+    if expect.asks:
+        clar = " ".join(u.clarification for u in verdict.unresolved)
+        ask_hits = sum(1 for ask in expect.asks if all(p.search(clar) for p in ask))
+        parts.append(ask_hits / len(expect.asks) if expect.asks else 1.0)
+    if not parts:
+        return 1.0 if not verdict.problems else 0.0
+    return sum(parts) / len(parts)
+
+
+def _classify_abstention(expect: Expectation, verdict: Verdict) -> float:
+    if not expect.unresolved:
+        if not verdict.unresolved:
+            return 1.0
+        return 0.5
+    matched = 0
+    for exp in expect.unresolved:
+        for actual in verdict.unresolved:
+            blob = f"{actual.observation} {actual.reason}"
+            if all(p.search(blob) for p in exp.anchors):
+                matched += 1
+                break
+    return matched / len(expect.unresolved)
+
+
+def _classification_score(
+    expect: Expectation, verdict: Verdict, pairs: list[tuple[int, int]]
+) -> float:
+    if not expect.problems:
+        return 1.0
+    scores: list[float] = []
+    paired_expected = {e for e, _ in pairs}
+    for ei, ai in pairs:
+        actual_q = verdict.problems[ai].quadrant
+        accepted = expect.problems[ei].quadrants
+        if actual_q in accepted:
+            scores.append(1.0)
+        elif actual_q.split("-")[0] == accepted[0].split("-")[0]:
+            scores.append(0.5)
+        else:
+            scores.append(0.0)
+    for ei in range(len(expect.problems)):
+        if ei not in paired_expected:
+            scores.append(0.0)
+    return sum(scores) / len(scores)
+
+
+def _align(
+    expected: tuple[Any, ...], statements: list[str]
+) -> list[tuple[int, int]]:
+    """Maximum one-to-one matching by anchor. Brute force for small N."""
+    n = len(expected)
+    m = len(statements)
+    if n == 0 or m == 0:
+        return []
+
+    def matches(ei: int, ai: int) -> bool:
+        return all(p.search(statements[ai]) for p in expected[ei].anchors)
+
+    best: list[tuple[int, int]] = []
+    for actual_perm in permutations(range(m), min(n, m)):
+        pairs: list[tuple[int, int]] = []
+        for ei, ai in enumerate(actual_perm):
+            if ei >= n:
+                break
+            if matches(ei, ai):
+                pairs.append((ei, ai))
+        if len(pairs) > len(best):
+            best = pairs
+        if len(best) == min(n, m):
+            break
+    return best
+
+
+def _weighted(axes: dict[str, float | None]) -> float:
+    scored = {k: v for k, v in axes.items() if v is not None}
+    if not scored:
+        return 0.0
+    weight_sum = sum(RUBRIC[k] for k in scored)
+    return sum(RUBRIC[k] * scored[k] for k in scored) / weight_sum
+
+
+@dataclass(frozen=True)
+class SuiteReport:
+    hard_fail_count: int
+    abstention_precision: float
+    mean_all: float
+    mean_seed: float
+    mean_holdout: float
+    by_axis: dict[str, float | None]
+    by_family: dict[str, float]
+    results: tuple[FixtureRunResult, ...]
+    passed: bool
+
+
+def summarize(
+    results: list[FixtureRunResult], fixtures_by_id: dict[str, Fixture]
+) -> SuiteReport:
+    hard = sum(len(t.hard_fails) for r in results for t in r.turns)
+
+    abstain_total = 0
+    abstain_ok = 0
+    for r in results:
+        fixture = fixtures_by_id[r.fixture_id]
+        for turn, turn_result in zip(fixture.turns, r.turns, strict=True):
+            if turn.expect.kind != "abstain":
+                continue
+            abstain_total += 1
+            if not any(h.kind == "classified_without_problem" for h in turn_result.hard_fails):
+                abstain_ok += 1
+
+    precision = abstain_ok / abstain_total if abstain_total else 1.0
+
+    def mean_for(split: str | None) -> float:
+        scores = [
+            r.score
+            for r in results
+            if split is None or fixtures_by_id[r.fixture_id].split == split
+        ]
+        return sum(scores) / len(scores) if scores else 0.0
+
+    axis_vals: dict[str, list[float]] = {k: [] for k in RUBRIC}
+    for r in results:
+        for t in r.turns:
+            for k, v in t.axes.items():
+                if v is not None:
+                    axis_vals[k].append(v)
+    by_axis = {
+        k: (sum(vs) / len(vs) if vs else None) for k, vs in axis_vals.items()
+    }
+
+    family_scores: dict[str, list[float]] = {}
+    for r in results:
+        for fam in fixtures_by_id[r.fixture_id].families:
+            family_scores.setdefault(fam, []).append(r.score)
+    by_family = {k: sum(v) / len(v) for k, v in sorted(family_scores.items())}
+
+    passed = hard == 0  # graft: only hard fails gate
+
+    return SuiteReport(
+        hard_fail_count=hard,
+        abstention_precision=precision,
+        mean_all=mean_for(None),
+        mean_seed=mean_for("seed"),
+        mean_holdout=mean_for("holdout"),
+        by_axis=by_axis,
+        by_family=by_family,
+        results=tuple(results),
+        passed=passed,
+    )
+
+
+def rubric_keys_match_doc(rubric_md: str) -> list[str]:
+    """Require backtick-wrapped grader keys in rubric.md to equal RUBRIC keys."""
+    found = set(re.findall(r"`(detection|abstention|separation|classification|evidence)`", rubric_md))
+    missing = [k for k in RUBRIC if k not in found]
+    extra = sorted(found - set(RUBRIC))
+    problems: list[str] = []
+    if missing:
+        problems.append(f"rubric.md missing grader keys: {missing}")
+    if extra:
+        problems.append(f"rubric.md has unknown keys: {extra}")
+    return problems

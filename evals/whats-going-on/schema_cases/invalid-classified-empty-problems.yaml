@@ -1,0 +1,6 @@
+expect_ok: false
+body: |
+  status: classified
+  problems: []
+  unresolved: []
+  stop: true

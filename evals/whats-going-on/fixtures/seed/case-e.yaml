@@ -1,0 +1,30 @@
+readme: E
+turns:
+  - input: |
+      Comment on a design review:
+      "Enterprise trial users say the admin console is overwhelming.
+      Can we settle on one or two UI changes to cut the clutter before the demo on the 20th?"
+    expect:
+      kind: classify
+      statuses: [classified]
+      problems:
+        - anchor: ["admin|UI|console", "clutter|overwhelm"]
+          quadrants: [conceptual-convergent]
+      unresolved: []
+    tripwires:
+      invented: []
+      methodNotProblem: []
+      solveLeak: ["remove the", "collapse the nav", "we should redesign"]
+    gold: |
+      ```yaml
+      status: classified
+      problems:
+        - statement: "Which one or two admin-console UI changes should we make before the enterprise demo to reduce overwhelm?"
+          classification:
+            nature: conceptual
+            direction: convergent
+          confidence: high
+          why: "Clutter reduction is a design and priority call. The ask already requires settling on a small set of changes by a deadline."
+          next_method: "Compare candidate UI changes and narrow to one or two. Do not pick them in this slice."
+      stop: true
+      ```

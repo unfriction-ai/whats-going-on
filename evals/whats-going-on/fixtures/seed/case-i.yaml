@@ -1,0 +1,20 @@
+readme: I
+turns:
+  - input: |
+      FYI, the Friday deploy window moved to Saturday 10:00 UTC.
+    expect:
+      kind: abstain
+      statuses: [not_a_problem]
+      unresolved: []
+      asks: []
+    tripwires:
+      invented: []
+      methodNotProblem: []
+      solveLeak: ["we should", "recommend"]
+    gold: |
+      ```yaml
+      status: not_a_problem
+      problems: []
+      unresolved: []
+      stop: true
+      ```

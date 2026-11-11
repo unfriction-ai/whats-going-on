@@ -1,0 +1,25 @@
+turns:
+  - input: |
+      Email from a VP:
+      "I think it's time we moved everything to Kubernetes. Can you put together a migration plan?"
+    expect:
+      kind: abstain
+      statuses: [needs_clarification]
+      unresolved:
+        - anchor: ["kubernetes|migrat"]
+      asks:
+        - ["problem|pain|why|goal|decision|what (is|are) (broken|failing|hurting)"]
+    tripwires:
+      invented: ["downtime", "cost (overrun|increase)", "multi-?cloud"]
+      methodNotProblem: []
+      solveLeak: ["phase \\d", "helm", "eks", "gke"]
+    gold: |
+      ```yaml
+      status: needs_clarification
+      problems: []
+      unresolved:
+        - observation: "VP wants a Kubernetes migration plan"
+          reason: "A proposed platform move is not yet a defined problem. No pain, goal, or decision criteria are stated."
+          clarification: "What problem is Kubernetes meant to solve, and what decision does the plan need to support?"
+      stop: true
+      ```

@@ -1,0 +1,30 @@
+readme: C
+turns:
+  - input: |
+      From a design lead:
+      "Tickets keep bouncing between Design and Eng with missing acceptance criteria.
+      Let's lock one or two handoff changes this sprint so the bounce stops."
+    expect:
+      kind: classify
+      statuses: [classified]
+      problems:
+        - anchor: ["handoff", "acceptance|bounce"]
+          quadrants: [conceptual-convergent]
+      unresolved: []
+    tripwires:
+      invented: []
+      methodNotProblem: []
+      solveLeak: ["we should (add|require|adopt)", "definition of ready"]
+    gold: |
+      ```yaml
+      status: classified
+      problems:
+        - statement: "Which one or two handoff changes should Design and Eng adopt so tickets stop bouncing for missing acceptance criteria?"
+          classification:
+            nature: conceptual
+            direction: convergent
+          confidence: high
+          why: "The ask is about a collaboration process. The lead wants a small set of concrete changes this sprint, not open exploration."
+          next_method: "Generate and narrow handoff changes toward one or two fixes. Do not propose the fixes in this slice."
+      stop: true
+      ```

@@ -1,0 +1,30 @@
+readme: D
+turns:
+  - input: |
+      From a teammate after a messy on-call week:
+      "We hired three new people onto the platform squad.
+      How do we build a healthy on-call culture over the next year?"
+    expect:
+      kind: classify
+      statuses: [classified]
+      problems:
+        - anchor: ["on-call|oncall", "culture"]
+          quadrants: [conceptual-divergent]
+      unresolved: []
+    tripwires:
+      invented: []
+      methodNotProblem: []
+      solveLeak: ["rotate every", "pagerduty", "hire an SRE"]
+    gold: |
+      ```yaml
+      status: classified
+      problems:
+        - statement: "What approaches could build a healthy on-call culture on the platform squad over the next year?"
+          classification:
+            nature: conceptual
+            direction: divergent
+          confidence: high
+          why: "Culture and norms are conceptual. The ask invites many possible moves. No short list of options is fixed yet."
+          next_method: "Broad exploration of approaches before any narrowing. Do not brainstorm the list in this slice."
+      stop: true
+      ```

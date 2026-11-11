@@ -1,0 +1,29 @@
+readme: A
+turns:
+  - input: |
+      Slack from a product owner:
+      "Mobile is in a rough place right now and every eng has a different theory.
+      Can you help me figure out where we should even look first?"
+    expect:
+      kind: abstain
+      statuses: [needs_clarification]
+      unresolved:
+        - anchor: ["rough|mobile"]
+      asks:
+        - ["what (changed|metric|specifically)|which (metric|signal)"]
+        - ["how much|by how much|magnitude|how (big|bad)"]
+        - ["since when|when did|how long|timeframe|time ?frame"]
+    tripwires:
+      invented: ["crash", "retention", "churn", "store rank", "ANR", "rating"]
+      methodNotProblem: []
+      solveLeak: ["look (first )?at", "start (by|with) (checking|looking)"]
+    gold: |
+      ```yaml
+      status: needs_clarification
+      problems: []
+      unresolved:
+        - observation: "Mobile is in a rough place; eng has competing theories"
+          reason: "No measurable change, magnitude, or timeframe. Competing theories are not yet a defined question."
+          clarification: "What changed, by how much, and since when? What decision are you trying to make?"
+      stop: true
+      ```

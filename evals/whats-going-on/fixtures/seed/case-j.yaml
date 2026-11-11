@@ -1,0 +1,92 @@
+readme: J
+turns:
+  - input: "Mobile is in a rough place."
+    expect:
+      kind: abstain
+      statuses: [needs_clarification]
+      unresolved:
+        - anchor: ["rough|mobile"]
+      asks: []
+    tripwires:
+      invented: ["crash", "retention"]
+      methodNotProblem: []
+      solveLeak: []
+    gold: |
+      ```yaml
+      status: needs_clarification
+      problems: []
+      unresolved:
+        - observation: "Mobile is in a rough place"
+          reason: "No measurable change, magnitude, or timeframe."
+          clarification: "What changed, by how much, and since when?"
+      stop: true
+      ```
+  - input: "Crash-free sessions dropped 8% in four weeks. Why?"
+    expect:
+      kind: classify
+      statuses: [classified]
+      problems:
+        - anchor: ["crash-free|crash free", "why|cause|drop"]
+          quadrants: [analytical-convergent]
+      unresolved: []
+    tripwires:
+      invented: []
+      methodNotProblem: []
+      solveLeak: ["initiative"]
+    gold: |
+      ```yaml
+      status: classified
+      problems:
+        - statement: "Why did crash-free sessions drop 8% over four weeks?"
+          classification: { nature: analytical, direction: convergent }
+          confidence: high
+          why: "A measured drop with a timeframe. Data should converge on what changed."
+          next_method: "Evidence-based diagnosis from crash telemetry and release history."
+      stop: true
+      ```
+  - input: "What product or eng initiatives could recover crash-free sessions?"
+    expect:
+      kind: classify
+      statuses: [classified]
+      problems:
+        - anchor: ["initiative|approach|way", "recover|crash-free"]
+          quadrants: [conceptual-divergent]
+      unresolved: []
+    tripwires:
+      invented: []
+      methodNotProblem: []
+      solveLeak: []
+    gold: |
+      ```yaml
+      status: classified
+      problems:
+        - statement: "What product or eng initiatives could recover crash-free sessions?"
+          classification: { nature: conceptual, direction: divergent }
+          confidence: high
+          why: "Initiatives are design and judgment calls. The ask opens many options."
+          next_method: "Broad exploration of initiatives before narrowing. Do not list them in this slice."
+      stop: true
+      ```
+  - input: "Which of these three recovery initiatives should we fund?"
+    expect:
+      kind: classify
+      statuses: [classified]
+      problems:
+        - anchor: ["fund|choose|which"]
+          quadrants: [conceptual-convergent]
+      unresolved: []
+    tripwires:
+      invented: []
+      methodNotProblem: []
+      solveLeak: ["we should fund", "fund (the )?(first|second|third)"]
+    gold: |
+      ```yaml
+      status: classified
+      problems:
+        - statement: "Which of the three recovery initiatives should we fund?"
+          classification: { nature: conceptual, direction: convergent }
+          confidence: medium
+          why: "A funding choice among a fixed set is a judgment call that must settle on one."
+          next_method: "Set decision criteria and compare the three. Do not pick one in this slice."
+      stop: true
+      ```
