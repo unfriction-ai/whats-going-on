@@ -23,9 +23,28 @@ Fallback. Copy `skills/whats-going-on/` to `.cursor/skills/whats-going-on/` or `
 
 ### Claude Code
 
-Preferred. Install the Claude plugin from this repo's marketplace (see root README once PR-C lands), or copy the skill folder to `.claude/skills/whats-going-on/` or `~/.claude/skills/whats-going-on/`.
+Preferred. One-step install on Claude Code 2.1.275 or later.
 
-Plugin invoke is `/whats-going-on:whats-going-on`.
+```text
+/plugin install whats-going-on --marketplace unfriction-ai/whats-going-on
+```
+
+Or from the shell.
+
+```bash
+claude plugin marketplace add unfriction-ai/whats-going-on
+claude plugin install whats-going-on@whats-going-on-marketplace
+```
+
+Local checkout without marketplace.
+
+```bash
+claude --plugin-dir /path/to/whats-going-on
+```
+
+Plugin invoke. `/whats-going-on:whats-going-on`.
+
+Fallback. Copy the skill folder to `.claude/skills/whats-going-on/` or `~/.claude/skills/whats-going-on/`.
 
 ### Codex
 
