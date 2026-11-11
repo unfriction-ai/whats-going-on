@@ -1,6 +1,7 @@
 #!/usr/bin/env bash
-# Fail when the repo has more than one whats-going-on SKILL.md body, or when a
-# host manifest would mount evals/.
+# Fail when any whats-going-on SKILL.md drifts from the canonical body, or when a
+# host manifest would mount evals/. Identical-hash copies (Codex plugin tree) and
+# symlinks to the canonical path are allowed.
 set -euo pipefail
 
 ROOT="$(cd "$(dirname "$0")/.." && pwd)"
@@ -11,8 +12,8 @@ if [[ ! -f "$CANONICAL" ]]; then
   exit 1
 fi
 
-canon_real="$(python3 -c 'import os,sys; print(os.path.realpath(sys.argv[1]))' "$CANONICAL")"
 canon_hash="$(shasum -a 256 "$CANONICAL" | awk '{print $1}')"
+found=0
 
 while IFS= read -r f; do
   [[ -z "$f" ]] && continue
@@ -20,14 +21,11 @@ while IFS= read -r f; do
     */whats-going-on/SKILL.md) ;;
     *) continue ;;
   esac
+  found=1
   real="$(python3 -c 'import os,sys; print(os.path.realpath(sys.argv[1]))' "$f")"
   h="$(shasum -a 256 "$real" | awk '{print $1}')"
   if [[ "$h" != "$canon_hash" ]]; then
     echo "drifted SKILL.md at $f (hash $h != canonical $canon_hash)" >&2
-    exit 1
-  fi
-  if [[ "$real" != "$canon_real" ]] && [[ ! -L "$f" ]]; then
-    echo "extra real SKILL.md (not a symlink to canonical): $f -> $real" >&2
     exit 1
   fi
 done < <(
@@ -36,6 +34,11 @@ done < <(
     -type f -name SKILL.md -print \
     | sort
 )
+
+if [[ "$found" -eq 0 ]]; then
+  echo "no whats-going-on/SKILL.md found" >&2
+  exit 1
+fi
 
 while IFS= read -r -d '' manifest; do
   if grep -Eiq 'evals/' "$manifest"; then
