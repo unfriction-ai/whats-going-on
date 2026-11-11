@@ -10,7 +10,7 @@ Do not copy `evals/` into any host skills path. Full matrix. [docs/install.md](d
 
 | Host | Preferred install |
 |---|---|
-| Cursor | Plugin (coming next) or copy to `.cursor/skills/whats-going-on/` / `~/.cursor/skills/whats-going-on/` |
+| Cursor | Local plugin under `~/.cursor/plugins/local/whats-going-on` (see [docs/install.md](docs/install.md)), then Customize. Or copy to `.cursor/skills/whats-going-on/` / `~/.cursor/skills/whats-going-on/` |
 | Claude Code | Plugin (coming next) or copy to `.claude/skills/whats-going-on/` / `~/.claude/skills/whats-going-on/` |
 | Codex | Copy to `~/.agents/skills/whats-going-on/` or `.agents/skills/whats-going-on/` (legacy `.codex/skills` still works on older builds) |
 
