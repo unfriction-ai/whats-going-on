@@ -1,0 +1,30 @@
+readme: G
+turns:
+  - input: |
+      A teammate spent a week building a spreadsheet of lines of code and deploy counts per service.
+      Two directors disagree on which services to sunset first.
+      The fight is about product strategy and customer impact, not code volume.
+    expect:
+      kind: classify
+      statuses: [classified]
+      problems:
+        - anchor: ["sunset|priorit", "service"]
+          quadrants: [conceptual-convergent]
+      unresolved: []
+    tripwires:
+      invented: []
+      methodNotProblem: ["lines of code|LOC|deploy counts"]
+      solveLeak: ["sunset service", "we should keep"]
+    gold: |
+      ```yaml
+      status: classified
+      problems:
+        - statement: "How should the directors decide which services to sunset first?"
+          classification:
+            nature: conceptual
+            direction: convergent
+          confidence: high
+          why: "The conflict is strategy and customer impact. They need decision criteria, not another size spreadsheet."
+          next_method: "Clarify decision criteria and trade-offs among services. Do not expand the LOC spreadsheet in this slice."
+      stop: true
+      ```

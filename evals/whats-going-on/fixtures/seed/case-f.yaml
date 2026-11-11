@@ -1,0 +1,39 @@
+readme: F
+turns:
+  - input: |
+      From the director of engineering after a staging outage:
+      "I want to know exactly why staging went down last night, and I want three realistic
+      ways to stop this class of failure, ranked by how likely they are to work."
+    expect:
+      kind: classify
+      statuses: [classified]
+      problems:
+        - anchor: ["why", "staging|went down|outage"]
+          quadrants: [analytical-convergent]
+        - anchor: ["prevent|stop|ways|options", "failure|class"]
+          quadrants: [conceptual-divergent]
+      unresolved: []
+    tripwires:
+      invented: []
+      methodNotProblem: []
+      solveLeak: ["root cause was", "we should add", "phase 1"]
+    gold: |
+      ```yaml
+      status: classified
+      problems:
+        - statement: "Why did staging go down last night?"
+          classification:
+            nature: analytical
+            direction: convergent
+          confidence: high
+          why: "The ask wants an exact reason. Evidence should converge on what happened."
+          next_method: "Evidence-based incident diagnosis. Finish this before prevention options."
+        - statement: "What realistic ways could prevent this class of failure, ranked by likelihood?"
+          classification:
+            nature: conceptual
+            direction: divergent
+          confidence: medium
+          why: "Prevention options are design and judgment. Ranking comes after options exist. Initially divergent."
+          next_method: "After the why is settled, explore prevention options, then rank. Do not invent options here."
+      stop: true
+      ```

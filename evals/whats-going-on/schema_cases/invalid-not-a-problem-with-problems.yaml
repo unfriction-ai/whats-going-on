@@ -1,0 +1,11 @@
+expect_ok: false
+body: |
+  status: not_a_problem
+  problems:
+    - statement: "Why did staging go down?"
+      classification: { nature: analytical, direction: convergent }
+      confidence: high
+      why: "Asks for a cause."
+      next_method: "Diagnose from logs."
+  unresolved: []
+  stop: true

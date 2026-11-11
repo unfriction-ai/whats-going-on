@@ -1,0 +1,10 @@
+expect_ok: true
+derived_status: needs_clarification
+body: |
+  status: needs_clarification
+  problems: []
+  unresolved:
+    - observation: "Mobile is in a rough place"
+      reason: "No measurable change."
+      clarification: "What changed, by how much, and since when?"
+  stop: true

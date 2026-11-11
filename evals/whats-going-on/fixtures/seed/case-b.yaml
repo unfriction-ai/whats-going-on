@@ -1,0 +1,30 @@
+readme: B
+turns:
+  - input: |
+      From your engineering manager:
+      "Need p99 latency estimates for the checkout API before Friday's capacity review.
+      We'll use them to set the Q1 hardware budget."
+    expect:
+      kind: classify
+      statuses: [classified]
+      problems:
+        - anchor: ["p99|latency", "checkout"]
+          quadrants: [analytical-convergent]
+      unresolved: []
+    tripwires:
+      invented: []
+      methodNotProblem: []
+      solveLeak: ["\\dms\\b", "estimate(d)? (is|of) \\d"]
+    gold: |
+      ```yaml
+      status: classified
+      problems:
+        - statement: "What p99 latency estimates for the checkout API should inform the Q1 hardware budget?"
+          classification:
+            nature: analytical
+            direction: convergent
+          confidence: high
+          why: "Latency estimation needs quantitative data. The objective is one figure for a defined capacity decision."
+          next_method: "Estimate from production telemetry and load assumptions. Do not open an architecture redesign workshop."
+      stop: true
+      ```

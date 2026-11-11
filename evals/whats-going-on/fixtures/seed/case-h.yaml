@@ -1,0 +1,36 @@
+readme: H
+turns:
+  - input: |
+      Incident call notes (2026-11-10):
+      Checkout API timeouts spiked across three regions this morning.
+      Ops wants a two-day architecture workshop on "resilient request paths" this week.
+      Someone mentioned the connection pool max was lowered in yesterday's config change.
+    expect:
+      kind: classify
+      statuses: [partial]
+      problems:
+        - anchor: ["timeout|pool", "checkout"]
+          quadrants: [analytical-divergent]
+      unresolved:
+        - anchor: ["workshop|architecture"]
+    tripwires:
+      invented: []
+      methodNotProblem: ["workshop|resilient request"]
+      solveLeak: ["raise the pool", "roll back the config", "we should run the workshop"]
+    gold: |
+      ```yaml
+      status: partial
+      problems:
+        - statement: "Are checkout API timeouts explained by the lowered connection-pool max, or by something else measurable?"
+          classification:
+            nature: analytical
+            direction: divergent
+          confidence: medium
+          why: "The notes point at a data-checkable cause space. Several explanations remain open."
+          next_method: "Gather facts on pool config, error rates, and timing before any architecture workshop."
+      unresolved:
+        - observation: "Ops wants a two-day architecture workshop on resilient request paths"
+          reason: "That is a proposed approach, not a defined problem. Redesign may be wrong if the pool config is the cause."
+          clarification: "What decision must this week's work settle? Confirm root cause first, or commit to redesign regardless?"
+      stop: true
+      ```
