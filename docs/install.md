@@ -48,13 +48,26 @@ Fallback. Copy the skill folder to `.claude/skills/whats-going-on/` or `~/.claud
 
 ### Codex
 
-Preferred user path. `~/.agents/skills/whats-going-on/`.
+Preferred. Marketplace add, then install from `/plugins`.
 
-Preferred repo path. `.agents/skills/whats-going-on/`.
+```bash
+codex plugin marketplace add unfriction-ai/whats-going-on
+```
 
-Legacy. `~/.codex/skills/whats-going-on/` and `.codex/skills/whats-going-on/` still work on older Codex builds. Prefer `.agents/skills`.
+Then open `/plugins` and install `whats-going-on`.
 
-Plugin install via Codex `/plugins` lands with PR-D.
+Preferred user skill path without a plugin.
+
+```bash
+mkdir -p ~/.agents/skills
+cp -R skills/whats-going-on ~/.agents/skills/whats-going-on
+```
+
+Preferred repo path. `.agents/skills/whats-going-on/` (symlink in this repo).
+
+Personal-copy fallback. `$skill-installer` against `skills/whats-going-on/`.
+
+Legacy. `~/.codex/skills/whats-going-on/` and `.codex/skills/whats-going-on/` on older Codex builds only. Prefer `~/.agents/skills`.
 
 ## Check the repo
 
