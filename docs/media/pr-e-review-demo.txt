@@ -1,0 +1,5 @@
+=== install-local --host all demo ===
+installed cursor -> /var/folders/t0/p67dnw_51wgb_1ft7y3fh0d80000gn/T/tmp.lKPy80swQy/.cursor/plugins/local/whats-going-on
+installed claude -> /var/folders/t0/p67dnw_51wgb_1ft7y3fh0d80000gn/T/tmp.lKPy80swQy/.claude/skills/whats-going-on
+installed codex -> /var/folders/t0/p67dnw_51wgb_1ft7y3fh0d80000gn/T/tmp.lKPy80swQy/.agents/skills/whats-going-on
+exit:0
