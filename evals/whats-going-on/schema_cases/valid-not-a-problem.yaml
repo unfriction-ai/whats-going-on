@@ -1,0 +1,7 @@
+expect_ok: true
+derived_status: not_a_problem
+body: |
+  status: not_a_problem
+  problems: []
+  unresolved: []
+  stop: true
