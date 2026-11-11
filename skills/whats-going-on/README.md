@@ -106,15 +106,15 @@ An empty `problems` list is valid when status is `needs_clarification` or `not_a
 
 ## Install
 
-Copy this folder so each tool can load `SKILL.md`.
+This folder is the canonical skill body. Keep `SKILL.md` and this README together. Symlink or copy this folder into a host skills path. See [docs/install.md](../../docs/install.md) for the full matrix.
 
-| Tool | Typical location |
+| Tool | Preferred location |
 |---|---|
 | Cursor | `.cursor/skills/whats-going-on/` in the project, or `~/.cursor/skills/whats-going-on/` for all projects |
 | Claude Code | `.claude/skills/whats-going-on/` in the project, or `~/.claude/skills/whats-going-on/` |
-| Codex | `.codex/skills/whats-going-on/` in the project, or the Codex skills directory your install documents |
+| Codex | `~/.agents/skills/whats-going-on/` or `.agents/skills/whats-going-on/` |
 
-Keep `SKILL.md` and this README together. Symlink one folder into each tool path if you want a single copy.
+Codex legacy path. `.codex/skills/whats-going-on/` (and `~/.codex/skills/`) on older builds only.
 
 Executable evals live in the sibling folder `evals/whats-going-on/`. Do not copy that folder into a tool skills path.
 
