@@ -2,6 +2,21 @@
 
 One skill body lives at `skills/whats-going-on/`. Host plugins and local installs point at that folder. Never copy `evals/` into a skills or plugin mount.
 
+## One-command local install
+
+```bash
+./scripts/install-local.sh --host all
+```
+
+| `--host` | Destination under `$HOME` |
+|---|---|
+| `cursor` | `.cursor/plugins/local/whats-going-on` (plugin manifest + skills only) |
+| `claude` | `.claude/skills/whats-going-on` |
+| `codex` | `.agents/skills/whats-going-on` |
+| `all` | all three |
+
+Re-running is idempotent. Marketplace publish stays out of this script.
+
 ## Hosts
 
 ### Cursor

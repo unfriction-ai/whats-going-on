@@ -1,0 +1,6 @@
+SKILL.md destinations after --host all
+$HOME/.agents/skills/whats-going-on/SKILL.md
+$HOME/.claude/skills/whats-going-on/SKILL.md
+$HOME/.cursor/plugins/local/whats-going-on/skills/whats-going-on/SKILL.md
+
+evals mounts (expect none)
