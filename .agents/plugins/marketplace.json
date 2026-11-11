@@ -1,0 +1,20 @@
+{
+  "name": "whats-going-on",
+  "interface": {
+    "displayName": "whats-going-on"
+  },
+  "plugins": [
+    {
+      "name": "whats-going-on",
+      "source": {
+        "source": "local",
+        "path": "./plugins/whats-going-on"
+      },
+      "policy": {
+        "installation": "AVAILABLE",
+        "authentication": "ON_INSTALL"
+      },
+      "category": "Productivity"
+    }
+  ]
+}

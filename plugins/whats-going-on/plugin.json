@@ -1,0 +1,6 @@
+{
+  "$schema": "https://agent-plugins.org/schemas/1.0.0/plugin.schema.json",
+  "name": "whats-going-on",
+  "version": "0.1.0",
+  "description": "Map an ask onto a 2x2 (analytical/conceptual x convergent/divergent). Abstain when no problem is defined. Do not diagnose or solve."
+}

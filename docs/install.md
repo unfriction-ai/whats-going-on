@@ -48,13 +48,28 @@ Fallback. Copy the skill folder to `.claude/skills/whats-going-on/` or `~/.claud
 
 ### Codex
 
-Preferred user path. `~/.agents/skills/whats-going-on/`.
+Preferred. Marketplace add, then install from `/plugins`.
 
-Preferred repo path. `.agents/skills/whats-going-on/`.
+```bash
+codex plugin marketplace add unfriction-ai/whats-going-on
+```
 
-Legacy. `~/.codex/skills/whats-going-on/` and `.codex/skills/whats-going-on/` still work on older Codex builds. Prefer `.agents/skills`.
+Then open `/plugins` and install `whats-going-on`.
 
-Plugin install via Codex `/plugins` lands with PR-D.
+Preferred user skill path without a plugin.
+
+```bash
+mkdir -p ~/.agents/skills
+cp -R skills/whats-going-on ~/.agents/skills/whats-going-on
+```
+
+Preferred repo path. `.agents/skills/whats-going-on/` (symlink in this repo).
+
+Plugin packaging. `plugins/whats-going-on/skills/whats-going-on/` is a checksum-checked copy of the canonical skill. Codex plugin cache does not follow symlinks into that tree.
+
+Personal-copy fallback. `$skill-installer` against `skills/whats-going-on/`.
+
+Legacy. `~/.codex/skills/whats-going-on/` and `.codex/skills/whats-going-on/` on older Codex builds only. Prefer `~/.agents/skills`.
 
 ## Check the repo
 
@@ -62,4 +77,4 @@ Plugin install via Codex `/plugins` lands with PR-D.
 bash scripts/assert-canonical-skill.sh
 ```
 
-That script fails if a second real `SKILL.md` drifts from the canonical file, or if a host manifest references `evals/`.
+That script fails if any `whats-going-on/SKILL.md` drifts from the canonical hash, or if a host manifest references `evals/`. Identical-hash copies are allowed.

@@ -12,7 +12,7 @@ Do not copy `evals/` into any host skills path. Full matrix. [docs/install.md](d
 |---|---|
 | Cursor | Local plugin under `~/.cursor/plugins/local/whats-going-on` (see [docs/install.md](docs/install.md)), then Customize. Or copy to `.cursor/skills/whats-going-on/` / `~/.cursor/skills/whats-going-on/` |
 | Claude Code | `/plugin install whats-going-on --marketplace unfriction-ai/whats-going-on`. Invoke `/whats-going-on:whats-going-on`. Or copy to `.claude/skills/` / `~/.claude/skills/` |
-| Codex | Copy to `~/.agents/skills/whats-going-on/` or `.agents/skills/whats-going-on/` (legacy `.codex/skills` still works on older builds) |
+| Codex | `codex plugin marketplace add unfriction-ai/whats-going-on` then install from `/plugins`, or copy to `~/.agents/skills/whats-going-on/` (legacy `.codex/skills` on older builds only) |
 
 ```bash
 bash scripts/assert-canonical-skill.sh
