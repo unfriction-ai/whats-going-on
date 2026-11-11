@@ -4,15 +4,23 @@ Slice 1 coding-agent skill. Maps an unstructured ask onto a 2×2 (analytical or 
 
 ## Install
 
+One command for local Cursor, Claude Code, and Codex paths.
+
+```bash
+./scripts/install-local.sh --host all
+```
+
+Host-only. `./scripts/install-local.sh --host cursor|claude|codex`
+
 Canonical skill directory. `skills/whats-going-on/`.
 
-Do not copy `evals/` into any host skills path. Full matrix. [docs/install.md](docs/install.md).
+Do not copy `evals/` into any host skills path. Full matrix and marketplace flows. [docs/install.md](docs/install.md).
 
 | Host | Preferred install |
 |---|---|
-| Cursor | Local plugin under `~/.cursor/plugins/local/whats-going-on` (see [docs/install.md](docs/install.md)), then Customize. Or copy to `.cursor/skills/whats-going-on/` / `~/.cursor/skills/whats-going-on/` |
-| Claude Code | `/plugin install whats-going-on --marketplace unfriction-ai/whats-going-on`. Invoke `/whats-going-on:whats-going-on`. Or copy to `.claude/skills/` / `~/.claude/skills/` |
-| Codex | `codex plugin marketplace add unfriction-ai/whats-going-on` then install from `/plugins`, or copy to `~/.agents/skills/whats-going-on/` (legacy `.codex/skills` on older builds only) |
+| Cursor | `./scripts/install-local.sh --host cursor`, then Customize. Or local plugin under `~/.cursor/plugins/local/whats-going-on` |
+| Claude Code | `./scripts/install-local.sh --host claude`, or `/plugin install whats-going-on --marketplace unfriction-ai/whats-going-on`. Invoke `/whats-going-on:whats-going-on` |
+| Codex | `./scripts/install-local.sh --host codex`, or `codex plugin marketplace add unfriction-ai/whats-going-on` then `/plugins` (legacy `.codex/skills` on older builds only) |
 
 ```bash
 bash scripts/assert-canonical-skill.sh
@@ -28,7 +36,7 @@ Product contract and worked cases. `skills/whats-going-on/README.md`.
 <paste the situation>
 ```
 
-Claude Code plugin sessions use `/whats-going-on:whats-going-on` once the Claude plugin is installed.
+Claude Code plugin sessions use `/whats-going-on:whats-going-on`.
 
 ## Evals
 
