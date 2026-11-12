@@ -4,6 +4,7 @@ turns:
       From your engineering manager:
       "Need p99 latency estimates for the checkout API before Friday's capacity review.
       We'll use them to set the Q1 hardware budget."
+    restatement: "An engineering manager asks for p99 latency estimates for the checkout API before Friday's capacity review. Those estimates are for the Q1 hardware budget."
     expect:
       kind: classify
       statuses: [classified]

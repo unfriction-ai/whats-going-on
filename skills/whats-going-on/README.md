@@ -80,6 +80,18 @@ Assess each extracted problem on its own. Failure to classify one must not block
 4. Classification is a snapshot. The quadrant describes the current reasoning objective, not a permanent property of the situation.
 5. No solving. No root-cause hunt, issue trees, brainstorms, plans, or recommendations in this slice.
 
+## The restatement
+
+The reply is exactly two sentences, then one fenced `yaml` block, then nothing.
+
+The first sentence names who asks for what, in the asker's terms. When nobody asks for anything, write exactly `No ask is stated.`
+
+The second sentence says what is going on. Use only facts from the input. When the input includes a link you could not open, say so in this sentence.
+
+The restatement reports. It does not name a problem, a cause, a quadrant, or a fix. Those belong in the YAML. When the input defines no problem, a short restatement is the right one.
+
+When the two sentences disagree with `problems` or `unresolved`, rewrite the sentences. Do not add a problem so that they match.
+
 ## Output contract
 
 ```yaml

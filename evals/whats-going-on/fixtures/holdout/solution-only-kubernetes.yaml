@@ -2,6 +2,7 @@ turns:
   - input: |
       Email from a VP:
       "I think it's time we moved everything to Kubernetes. Can you put together a migration plan?"
+    restatement: "A VP asks for a migration plan to move everything to Kubernetes. They say they think it is time."
     expect:
       kind: abstain
       statuses: [needs_clarification]

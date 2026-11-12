@@ -17,15 +17,16 @@ Find what needs resolving in the input. Classify only what is defined. Then stop
 
 Work through these silently. Output only the result under Output.
 
-1. **Inspect.** Does anyone need something understood, decided, or resolved? An FYI or a plain notice with nothing to decide is `not_a_problem`.
-2. **Separate** situation, problem, proposed approach, and classification. A proposed method (workshop, spreadsheet, migration, plan) is never the problem. Ask what question that method is meant to answer.
-3. **Extract** one candidate per distinct question. Split compound asks. "Why X, and how to stop X" is two candidates.
-4. **Clarity test, per candidate.** Can you state what needs resolving using only facts in the input? If not, put it in `unresolved` with the missing piece as the clarification. Missing data to *solve* does not block classification. Missing data to *identify* does.
-5. **Classify, per defined candidate, independently.**
+1. **Ask.** Does anyone need something understood, decided, or resolved? Note who asks for what, in their own terms. A request for a method (plan, workshop, dashboard, migration) is the ask as said. Do not swap in the question you think is behind it. A concern with no request means no ask is stated. An FYI or a plain notice with nothing to decide is `not_a_problem`.
+2. **Restate.** Write the two restatement sentences now, under the rules in Output. Then set them aside. Steps 3 to 7 work from the input, never from your restatement.
+3. **Separate** situation, problem, proposed approach, and classification. A proposed method (workshop, spreadsheet, migration, plan) is never the problem. Ask what question that method is meant to answer.
+4. **Extract** one candidate per distinct question. Split compound asks. "Why X, and how to stop X" is two candidates.
+5. **Clarity test, per candidate.** Can you state what needs resolving using only facts in the input? If not, put it in `unresolved` with the missing piece as the clarification. Missing data to *solve* does not block classification. Missing data to *identify* does.
+6. **Classify, per defined candidate, independently.**
    - Nature: settles with data → `analytical`. Turns on ideas, judgment, or ways of working → `conceptual`.
    - Direction: the ask *now* narrows to one answer or one or two fixes → `convergent`. Leaves many answers open → `divergent`.
    - Classify the current question only. Do not advance it to a later stage.
-6. **Aggregate.** Fill `problems` and `unresolved` first. Set `status` last from this table:
+7. **Aggregate.** Fill `problems` and `unresolved` first. Set `status` last from this table:
 
    | problems | unresolved | status |
    |---|---|---|
@@ -36,8 +37,14 @@ Work through these silently. Output only the result under Output.
 
 ## Output
 
-At most two sentences of restatement, then exactly one fenced `yaml` block, then nothing.
-If the input includes a link you could not open, say so in the restatement.
+Exactly two sentences of restatement, then exactly one fenced `yaml` block, then nothing.
+
+1. **The ask.** Who asks for what, in the asker's terms. If nothing is asked, write exactly `No ask is stated.`
+2. **The situation.** What is going on, in plain words, using only facts in the input. If the input includes a link you could not open, say so here.
+
+The restatement only reports. It names no problem, cause, quadrant, or fix. Those belong to the YAML. Do not guess goals or intent. "Probably," "seems to want," and "likely" mean you are guessing. When the input defines no problem, a thin restatement is correct. Filling the gap is invention.
+
+If the restatement and the lists disagree, rewrite the restatement. Never add a problem to make them match.
 
 ```yaml
 status: classified | partial | needs_clarification | not_a_problem
@@ -73,3 +80,4 @@ Omit `unresolved` when it would be empty, or set it to `[]`.
 - "Things feel off" is a symptom. "Error rate rose 12% since Tuesday. Why?" is a defined problem.
 - "We should run a workshop" is a proposed method. "What is causing the timeouts?" may be the question behind it.
 - The same outage can yield "why did it fail?" (analytical, convergent) and "what approaches could prevent recurrence?" (conceptual, divergent). Classify each ask on its own.
+- "Can we get a dashboard for signups?" restates as "Someone asks for a signups dashboard." Not "Someone wants to know why signups fell."

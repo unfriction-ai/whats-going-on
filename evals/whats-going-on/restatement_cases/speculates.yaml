@@ -1,0 +1,3 @@
+input: "Costs are high."
+preamble: "The VP probably wants lower costs."
+expect_fail: restatement_speculates

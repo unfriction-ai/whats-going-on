@@ -4,6 +4,7 @@ turns:
       From the director of engineering after a staging outage:
       "I want to know exactly why staging went down last night, and I want three realistic
       ways to stop this class of failure, ranked by how likely they are to work."
+    restatement: "The director of engineering asks why staging went down last night and for three realistic ways to stop this class of failure. They want those ways ranked."
     expect:
       kind: classify
       statuses: [classified]

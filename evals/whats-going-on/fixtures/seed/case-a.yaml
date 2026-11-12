@@ -4,6 +4,7 @@ turns:
       Slack from a product owner:
       "Mobile is in a rough place right now and every eng has a different theory.
       Can you help me figure out where we should even look first?"
+    restatement: "A product owner asks for help figuring out where to look first. They say mobile is in a rough place and every eng has a different theory."
     expect:
       kind: abstain
       statuses: [needs_clarification]

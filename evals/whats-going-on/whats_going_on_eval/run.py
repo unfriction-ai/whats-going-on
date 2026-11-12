@@ -1,5 +1,3 @@
-"""Operator entry: check | run | grade | compare."""
-
 from __future__ import annotations
 
 import argparse
@@ -13,10 +11,12 @@ from .agents import HostNotWired, build_prompt, invoke
 from .drift import check_suite
 from .fixtures import load_suite
 from .grade import FixtureRunResult, grade_run, summarize
+from .invariance import InvarianceError, compare, invariance_payload, preamble_outcome_problems
 from .manifest import (
     AGENTS,
     EVAL_DIR,
     FIXTURES_DIR,
+    REPORTS_DIR,
     RUBRIC_PATH,
     SCHEMA_CASES_DIR,
     SKILL_DIR,
@@ -34,6 +34,7 @@ def cmd_check() -> int:
     problems = check_suite(fixtures, readme=readme, skill=skill, rubric_md=rubric_md)
     schema_problems = _check_schema_cases()
     problems_text = [f"{p.kind}: {p.detail}" for p in problems] + schema_problems
+    problems_text.extend(preamble_outcome_problems())
 
     if problems_text:
         print("check FAILED")
@@ -43,7 +44,7 @@ def cmd_check() -> int:
 
     families = sorted({fam for f in fixtures for fam in f.families})
     print("check OK")
-    print(f"  fixtures: {len(fixtures)}  skill_view: {skill_view_hash()}")
+    print(f"  fixtures: {len(fixtures)}  skill_view: {skill_view_hash(SKILL_DIR)}")
     print(f"  families: {', '.join(families)}")
     print(f"  schema_cases: {_schema_case_count()} ok")
     return 0
@@ -108,7 +109,7 @@ def cmd_run(args: argparse.Namespace) -> int:
     else:
         skill_src = SKILL_DIR
 
-    run_id = args.resume or new_run_id(args.agent)
+    run_id = args.resume or new_run_id(args.agent, skill_src)
     write_manifest(
         run_id,
         {
@@ -118,6 +119,7 @@ def cmd_run(args: argparse.Namespace) -> int:
             "judge": bool(args.judge),
             "skill": str(skill_src) if skill_src else "none",
         },
+        skill_src,
     )
 
     results: list[FixtureRunResult] = []
@@ -132,7 +134,7 @@ def cmd_run(args: argparse.Namespace) -> int:
                     result = invoke(
                         agent=args.agent,
                         user_input=turn.input,
-                        skill_src=skill_src or SKILL_DIR,
+                        skill_src=skill_src,
                         session_workspace=workspace,
                     )
                     workspace = result.workspace
@@ -167,6 +169,7 @@ def cmd_run(args: argparse.Namespace) -> int:
             "mean_holdout": report.mean_holdout,
             "by_axis": report.by_axis,
             "by_family": report.by_family,
+            "restatement_disagreement_rate": report.restatement_disagreement_rate,
         },
     )
     _print_report(run_id, report)
@@ -207,10 +210,36 @@ def cmd_grade(run_id: str) -> int:
             "mean_holdout": report.mean_holdout,
             "by_axis": report.by_axis,
             "by_family": report.by_family,
+            "restatement_disagreement_rate": report.restatement_disagreement_rate,
             "regraded": True,
         },
     )
     _print_report(run_id, report)
+    return 0 if report.passed else 1
+
+
+def cmd_invariance(base: str, treat: str, noise: str | None) -> int:
+    try:
+        report = compare(base, treat, noise)
+    except InvarianceError as exc:
+        print(str(exc), file=sys.stderr)
+        print(
+            "invariance reads stored transcripts only. A live A/B needs a wired host.",
+            file=sys.stderr,
+        )
+        return 2
+    out = REPORTS_DIR / treat / "invariance.json"
+    out.write_text(json.dumps(invariance_payload(report), indent=2) + "\n")
+    status = "PASS" if report.passed else "FAIL"
+    noise_text = "na" if report.disagreement_noise is None else f"{report.disagreement_noise:.2f}"
+    print(
+        f"invariance {status}  turns={report.turns}  "
+        f"modal_mismatches={len(report.modal_mismatches)}  "
+        f"contract_fail_base={report.contract_fail_base}  "
+        f"contract_fail_treat={report.contract_fail_treat}  "
+        f"disagreement={report.disagreement_treat:.2f}  noise={noise_text}"
+    )
+    print(f"wrote {out}")
     return 0 if report.passed else 1
 
 
@@ -261,6 +290,14 @@ def build_parser() -> argparse.ArgumentParser:
     grade_p = sub.add_parser("grade", help="Re-score a run from transcripts")
     grade_p.add_argument("run_id")
 
+    inv_p = sub.add_parser(
+        "invariance",
+        help="Compare stored runs. Does not invoke a host.",
+    )
+    inv_p.add_argument("base")
+    inv_p.add_argument("treat")
+    inv_p.add_argument("--noise", default="", help="Second baseline run, for the noise floor")
+
     compare_p = sub.add_parser("compare", help="Blind A/B packet for poteto-mode eval")
     compare_p.add_argument("run_a")
     compare_p.add_argument("run_b")
@@ -282,6 +319,8 @@ def main(argv: list[str] | None = None) -> int:
         return cmd_run(args)
     if args.cmd == "grade":
         return cmd_grade(args.run_id)
+    if args.cmd == "invariance":
+        return cmd_invariance(args.base, args.treat, args.noise or None)
     if args.cmd == "compare":
         return cmd_compare(args.run_a, args.run_b, blind=args.blind)
     parser.error(f"unknown command {args.cmd}")

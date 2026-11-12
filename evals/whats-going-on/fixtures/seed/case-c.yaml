@@ -4,6 +4,7 @@ turns:
       From a design lead:
       "Tickets keep bouncing between Design and Eng with missing acceptance criteria.
       Let's lock one or two handoff changes this sprint so the bounce stops."
+    restatement: "A design lead asks to lock one or two handoff changes this sprint so the bounce stops. Tickets keep bouncing between Design and Eng with missing acceptance criteria."
     expect:
       kind: classify
       statuses: [classified]

@@ -8,12 +8,12 @@ from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
 
-from .manifest import REPORTS_DIR, SUITE_VERSION, skill_view_hash
+from .manifest import REPORTS_DIR, SUITE_VERSION, hash_skill_source
 
 
-def new_run_id(agent: str) -> str:
+def new_run_id(agent: str, skill_src: Path | None) -> str:
     stamp = datetime.now(timezone.utc).strftime("%Y-%m-%dT%H%M%SZ")
-    return f"{stamp}-{agent}-{skill_view_hash()}"
+    return f"{stamp}-{agent}-{hash_skill_source(skill_src)}"
 
 
 def run_dir(run_id: str) -> Path:
@@ -22,12 +22,12 @@ def run_dir(run_id: str) -> Path:
     return path
 
 
-def write_manifest(run_id: str, payload: dict[str, Any]) -> Path:
+def write_manifest(run_id: str, payload: dict[str, Any], skill_src: Path | None) -> Path:
     path = run_dir(run_id) / "manifest.json"
     payload = {
         **payload,
         "suite_version": SUITE_VERSION,
-        "skill_view_hash": skill_view_hash(),
+        "skill_view_hash": hash_skill_source(skill_src),
     }
     path.write_text(json.dumps(payload, indent=2) + "\n")
     return path

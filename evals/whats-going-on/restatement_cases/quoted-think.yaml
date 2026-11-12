@@ -1,0 +1,3 @@
+input: "I think it's time we moved everything to Kubernetes."
+preamble: "The VP thinks it's time to move to Kubernetes."
+expect_fail: null

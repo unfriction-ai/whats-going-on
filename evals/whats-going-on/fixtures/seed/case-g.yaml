@@ -4,6 +4,7 @@ turns:
       A teammate spent a week building a spreadsheet of lines of code and deploy counts per service.
       Two directors disagree on which services to sunset first.
       The fight is about product strategy and customer impact, not code volume.
+    restatement: "Two directors disagree on which services to sunset first. A teammate built a spreadsheet of lines of code and deploy counts, and the fight is about product strategy and customer impact."
     expect:
       kind: classify
       statuses: [classified]

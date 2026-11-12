@@ -1,0 +1,3 @@
+input: "The review moved to Thursday."
+preamble: "No ask is stated. The review moved to Thursday."
+expect_fail: null
