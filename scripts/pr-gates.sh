@@ -1,6 +1,5 @@
 #!/usr/bin/env bash
-# Omit -e so a failing gate does not skip the rest.
-set -uo pipefail
+set -euo pipefail
 
 ROOT="$(cd "$(dirname "$0")/.." && pwd)"
 failed=()
@@ -10,10 +9,10 @@ gate() {
   local name="$1"
   shift
   echo "== ${name} ($*) =="
+  local rc=0
   (
     cd "$ROOT" && "$@"
-  )
-  local rc=$?
+  ) || rc=$?
   echo "exit ${rc}"
   ran=$((ran + 1))
   if [[ "$rc" -ne 0 ]]; then

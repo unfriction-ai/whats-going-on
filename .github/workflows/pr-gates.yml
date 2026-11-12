@@ -1,4 +1,3 @@
-# scripts/pr-gates.sh owns the gate list. This job only prepares Python.
 name: pr-gates
 
 on:
