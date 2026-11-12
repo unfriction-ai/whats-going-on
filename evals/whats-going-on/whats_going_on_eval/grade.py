@@ -7,8 +7,8 @@ from dataclasses import dataclass
 from itertools import permutations
 from typing import Any, Literal
 
-from .fixtures import Expectation, Fixture, Turn
-from .parse import ContractViolation, Response, Verdict, parse_response
+from .fixtures import Expectation, Fixture, Turn, _gold_response_text
+from .parse import ContractViolation, Response, Verdict, parse_response, parse_restatement
 
 RUBRIC: dict[str, float] = {
     "detection": 0.25,
@@ -21,6 +21,17 @@ RUBRIC: dict[str, float] = {
 assert abs(sum(RUBRIC.values()) - 1.0) < 1e-9
 
 Axis = Literal["detection", "abstention", "separation", "classification", "evidence"]
+
+RESTATEMENT_CLASSIFIES = (
+    re.compile(r"\b(analytical|conceptual|convergent|divergent|quadrant)\b", re.I),
+    re.compile(r"\bthe (real |actual |underlying |core )?(problem|issue|cause) (is|was)\b", re.I),
+)
+RESTATEMENT_SPECULATES = (
+    re.compile(
+        r"\b(probably|likely|presumably|seems? to (want|need)|sounds like|their goal)\b",
+        re.I,
+    ),
+)
 
 GLOBAL_SOLVE_LEAK: tuple[re.Pattern[str], ...] = (
     re.compile(r"\b(i|we) (would )?recommend\b", re.I),
@@ -49,6 +60,7 @@ class TurnResult:
     axes: dict[str, float | None]  # None = N/A
     score: float
     judgment: Judgment | None
+    restatement_agreement: Literal["agree", "disagree", "n/a"] = "n/a"
 
 
 @dataclass(frozen=True)
@@ -83,6 +95,7 @@ def grade_turn(
         axes=axes,
         score=score,
         judgment=judgment,
+        restatement_agreement=restatement_agreement(turn, parsed),
     )
 
 
@@ -108,14 +121,7 @@ def grade_run(
 
 def grade_gold(fixture: Fixture) -> list[TurnResult]:
     return [
-        grade_turn(
-            turn,
-            (
-                turn.gold_text.strip()
-                if turn.gold_text.strip().startswith("```")
-                else f"```yaml\n{turn.gold_text.strip()}\n```"
-            ),
-        )
+        grade_turn(turn, _gold_response_text(turn.restatement, turn.gold_text))
         for turn in fixture.turns
     ]
 
@@ -154,7 +160,32 @@ def _hard_fails(turn: Turn, response: Response, text: str) -> list[HardFail]:
         for pat in leak_pats:
             if content and pat.search(content):
                 fails.append(HardFail("solve_leak", f"{field}: {pat.pattern}"))
+    fails.extend(_restatement_fails(turn, response.preamble))
     return fails
+
+
+def _restatement_fails(turn: Turn, preamble: str) -> list[HardFail]:
+    text = preamble.strip()
+    if not text:
+        return [HardFail("restatement_missing")]
+    fails: list[HardFail] = []
+    if any(pat.search(text) for pat in RESTATEMENT_CLASSIFIES):
+        fails.append(HardFail("restatement_classifies"))
+    if any(pat.search(text) and not pat.search(turn.input) for pat in RESTATEMENT_SPECULATES):
+        fails.append(HardFail("restatement_speculates"))
+    return fails
+
+
+def restatement_agreement(turn: Turn, response: Response) -> Literal["agree", "disagree", "n/a"]:
+    parsed = parse_restatement(response.preamble)
+    if parsed is None:
+        return "n/a"
+    status = response.verdict.status
+    if not parsed.ask_stated and status in ("classified", "partial"):
+        return "disagree"
+    if status == "not_a_problem" and parsed.ask_stated:
+        return "disagree"
+    return "agree"
 
 
 def _score_axes(
@@ -292,6 +323,7 @@ class SuiteReport:
     by_family: dict[str, float]
     results: tuple[FixtureRunResult, ...]
     passed: bool
+    restatement_disagreement_rate: float
 
 
 def summarize(
@@ -336,6 +368,12 @@ def summarize(
             family_scores.setdefault(fam, []).append(r.score)
     by_family = {k: sum(v) / len(v) for k, v in sorted(family_scores.items())}
 
+    labels = [t.restatement_agreement for r in results for t in r.turns]
+    compared = [label for label in labels if label != "n/a"]
+    disagreement_rate = (
+        sum(1 for label in compared if label == "disagree") / len(compared) if compared else 0.0
+    )
+
     passed = hard == 0  # graft: only hard fails gate
 
     return SuiteReport(
@@ -348,6 +386,7 @@ def summarize(
         by_family=by_family,
         results=tuple(results),
         passed=passed,
+        restatement_disagreement_rate=disagreement_rate,
     )
 
 

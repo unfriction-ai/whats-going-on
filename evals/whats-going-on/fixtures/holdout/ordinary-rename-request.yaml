@@ -2,6 +2,7 @@ turns:
   - input: |
       Please rename the checkout service from payments-api to checkout-api in the deploy manifests.
       No behavior change. Ticket OPS-4412.
+    restatement: "Someone asks to rename the checkout service from payments-api to checkout-api in the deploy manifests. They say there is no behavior change and cite ticket OPS-4412."
     expect:
       kind: abstain
       statuses: [not_a_problem]

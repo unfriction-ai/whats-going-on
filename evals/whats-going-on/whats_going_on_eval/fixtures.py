@@ -59,6 +59,7 @@ class Turn:
     input: str
     expect: Expectation
     tripwires: Tripwires
+    restatement: str
     gold_text: str
     gold: Response
 
@@ -210,16 +211,24 @@ def _parse_tripwires(raw: Any) -> Tripwires:
     )
 
 
+def _gold_response_text(restatement: str, gold_block: str) -> str:
+    block = gold_block.strip()
+    if not block.startswith("```"):
+        block = f"```yaml\n{block}\n```"
+    return f"{restatement.strip()}\n\n{block}"
+
+
 def _parse_turn(raw: dict[str, Any]) -> Turn:
     input_text = raw.get("input")
     if not isinstance(input_text, str) or not input_text.strip():
         raise ValueError("turn.input must be a non-empty string")
+    restatement = raw.get("restatement")
+    if not isinstance(restatement, str) or not restatement.strip():
+        raise ValueError("turn.restatement must be a non-empty string")
     gold_text = raw.get("gold")
     if not isinstance(gold_text, str) or not gold_text.strip():
         raise ValueError("turn.gold must be a non-empty string")
-    gold_response_text = gold_text.strip()
-    if not gold_response_text.startswith("```"):
-        gold_response_text = f"```yaml\n{gold_response_text}\n```"
+    gold_response_text = _gold_response_text(restatement, gold_text)
     parsed = parse_response(gold_response_text)
     if not isinstance(parsed, Response):
         raise ValueError(f"gold does not parse: {parsed.kind} {parsed.detail}")
@@ -229,6 +238,7 @@ def _parse_turn(raw: dict[str, Any]) -> Turn:
         input=input_text,
         expect=_parse_expectation(raw["expect"]),
         tripwires=_parse_tripwires(raw.get("tripwires")),
+        restatement=restatement.strip(),
         gold_text=gold_text,
         gold=parsed,
     )

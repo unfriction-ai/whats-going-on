@@ -1,0 +1,3 @@
+input: "Latency is high."
+preamble: "You ask a convergent question about latency."
+expect_fail: restatement_classifies

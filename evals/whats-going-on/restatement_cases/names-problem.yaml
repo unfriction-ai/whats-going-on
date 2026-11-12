@@ -1,0 +1,3 @@
+input: "The deploy failed."
+preamble: "The real problem is the deploy."
+expect_fail: restatement_classifies

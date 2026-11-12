@@ -5,6 +5,7 @@ turns:
       Checkout API timeouts spiked across three regions this morning.
       Ops wants a two-day architecture workshop on "resilient request paths" this week.
       Someone mentioned the connection pool max was lowered in yesterday's config change.
+    restatement: "Ops asks for a two-day architecture workshop on resilient request paths this week. Checkout API timeouts spiked across three regions this morning, and someone mentioned the connection pool max was lowered in yesterday's config change."
     expect:
       kind: classify
       statuses: [partial]

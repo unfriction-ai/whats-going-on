@@ -1,0 +1,20 @@
+turns:
+  - input: |
+      FYI, the design review moved from Thursday to next Tuesday at 15:00.
+    restatement: "No ask is stated. The design review moved from Thursday to next Tuesday at 15:00."
+    expect:
+      kind: abstain
+      statuses: [not_a_problem]
+      unresolved: []
+      asks: []
+    tripwires:
+      invented: ["conflict", "clash", "resched"]
+      methodNotProblem: []
+      solveLeak: []
+    gold: |
+      ```yaml
+      status: not_a_problem
+      problems: []
+      unresolved: []
+      stop: true
+      ```

@@ -31,6 +31,9 @@ python -m whats_going_on_eval run --agent claude --skill none
 # Re-grade stored transcripts after a harness fix.
 python -m whats_going_on_eval grade <runId>
 
+# Compare stored runs. Does not invoke a host. Live A/B needs a wired host.
+python -m whats_going_on_eval invariance <baseRun> <treatRun> --noise <baseRun2>
+
 # Blind A/B packet for /poteto-mode eval.
 python -m whats_going_on_eval compare <runA> <runB> --blind
 ```

@@ -4,6 +4,7 @@ turns:
       Comment on a design review:
       "Enterprise trial users say the admin console is overwhelming.
       Can we settle on one or two UI changes to cut the clutter before the demo on the 20th?"
+    restatement: "Someone asks to settle on one or two UI changes to cut the clutter before the demo on the 20th. Enterprise trial users say the admin console is overwhelming."
     expect:
       kind: classify
       statuses: [classified]
