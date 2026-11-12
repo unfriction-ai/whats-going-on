@@ -22,8 +22,10 @@ Do not copy `evals/` into any host skills path. Full matrix and marketplace flow
 | Claude Code | `./scripts/install-local.sh --host claude`, or `/plugin install whats-going-on --marketplace unfriction-ai/whats-going-on`. Invoke `/whats-going-on:whats-going-on` |
 | Codex | `./scripts/install-local.sh --host codex`, or `codex plugin marketplace add unfriction-ai/whats-going-on` then `/plugins` (legacy `.codex/skills` on older builds only) |
 
+Create the eval venv in the Evals section first. From the repo root, run `bash scripts/pr-gates.sh`. It wraps `whats_going_on_eval check` and `assert-canonical-skill.sh`.
+
 ```bash
-bash scripts/assert-canonical-skill.sh
+bash scripts/pr-gates.sh
 ```
 
 Product contract and worked cases. `skills/whats-going-on/README.md`.
@@ -47,7 +49,8 @@ cd evals/whats-going-on
 python3 -m venv .venv
 source .venv/bin/activate
 pip install -r requirements.txt
-python -m whats_going_on_eval check
+cd ../..
+bash scripts/pr-gates.sh
 ```
 
 ## License
