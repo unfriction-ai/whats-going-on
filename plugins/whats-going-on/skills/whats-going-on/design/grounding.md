@@ -65,3 +65,9 @@ Executable eval shape for slice 1:
 - Restatement may precede classification but must not invent a problem.
 - README cases A–J are the seed gold set (already rewritten off the training course).
 - Design for agent-readable instructions. Types and fixtures should make illegal outcomes hard.
+
+## Upstream in-your-own-words
+
+The ask and restatement steps take one idea from pstack `in-your-own-words`: restate the situation before you act. This skill does not call that skill and does not install it.
+
+That skill is `disable-model-invocation: true`, so this one cannot invoke it. `AGENT_MOUNT` copies only `SKILL.md`, so an eval run would not see it. It also restates goals, which here would be a guess, and it assumes a problem exists, which contradicts abstention on an FYI. The preamble in this skill is the restatement. There is no new YAML key.

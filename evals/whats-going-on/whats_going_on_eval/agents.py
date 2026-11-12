@@ -7,7 +7,7 @@ import tempfile
 from dataclasses import dataclass
 from pathlib import Path
 
-from .manifest import AGENT_MOUNT, HOST_SKILL_DIR, SKILL_DIR
+from .manifest import AGENT_MOUNT, HOST_SKILL_DIR
 
 
 @dataclass(frozen=True)
@@ -20,15 +20,15 @@ class HostNotWired(RuntimeError):
     """Raised when the operator asks for a live agent run before CLIs are wired."""
 
 
-def materialize_skill(skill_src: Path | None = None) -> Path:
-    """Copy AGENT_MOUNT files into a temp workspace under the host skill path layout."""
-    src = skill_src or SKILL_DIR
+def materialize_skill(skill_src: Path | None) -> Path:
     workspace = Path(tempfile.mkdtemp(prefix="wgo-eval-"))
     for rel in HOST_SKILL_DIR.values():
         dest = workspace / rel
         dest.mkdir(parents=True, exist_ok=True)
+        if skill_src is None:
+            continue
         for name in AGENT_MOUNT:
-            shutil.copy2(src / name, dest / name)
+            shutil.copy2(skill_src / name, dest / name)
     return workspace
 
 
@@ -40,7 +40,7 @@ def invoke(
     *,
     agent: str,
     user_input: str,
-    skill_src: Path | None = None,
+    skill_src: Path | None,
     session_workspace: Path | None = None,
 ) -> InvokeResult:
     if agent not in HOST_SKILL_DIR:

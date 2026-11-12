@@ -26,6 +26,8 @@ Quadrant = Literal[
 
 PREAMBLE_BUDGET = 400
 
+NO_ASK = "No ask is stated."
+
 FENCE_RE = re.compile(r"```yaml\s*\n(.*?)```", re.DOTALL | re.IGNORECASE)
 
 
@@ -50,6 +52,12 @@ class Verdict:
     status: Status
     problems: tuple[ClassifiedProblem, ...]
     unresolved: tuple[Unresolved, ...]
+
+
+@dataclass(frozen=True)
+class Restatement:
+    text: str
+    ask_stated: bool
 
 
 @dataclass(frozen=True)
@@ -86,6 +94,14 @@ def describe_violation(v: ContractViolation) -> str:
     if v.detail:
         return f"{v.kind}: {v.detail}"
     return v.kind
+
+
+def parse_restatement(preamble: str) -> Restatement | None:
+    text = preamble.strip()
+    if not text:
+        return None
+    no_ask = NO_ASK in text
+    return Restatement(text=text, ask_stated=not no_ask)
 
 
 def parse_response(text: str) -> Response | ContractViolation:

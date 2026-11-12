@@ -1,6 +1,7 @@
 readme: J
 turns:
   - input: "Mobile is in a rough place."
+    restatement: "No ask is stated. Someone says mobile is in a rough place."
     expect:
       kind: abstain
       statuses: [needs_clarification]
@@ -22,6 +23,7 @@ turns:
       stop: true
       ```
   - input: "Crash-free sessions dropped 8% in four weeks. Why?"
+    restatement: "Someone asks why crash-free sessions dropped 8% in four weeks. Crash-free sessions dropped 8% in four weeks."
     expect:
       kind: classify
       statuses: [classified]
@@ -45,6 +47,7 @@ turns:
       stop: true
       ```
   - input: "What product or eng initiatives could recover crash-free sessions?"
+    restatement: "Someone asks what product or eng initiatives could recover crash-free sessions. The question is about recovering crash-free sessions."
     expect:
       kind: classify
       statuses: [classified]
@@ -68,6 +71,7 @@ turns:
       stop: true
       ```
   - input: "Which of these three recovery initiatives should we fund?"
+    restatement: "Someone asks which of these three recovery initiatives should be funded. The choice is among three recovery initiatives."
     expect:
       kind: classify
       statuses: [classified]

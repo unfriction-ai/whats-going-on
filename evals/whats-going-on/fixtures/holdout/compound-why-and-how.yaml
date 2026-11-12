@@ -1,0 +1,37 @@
+turns:
+  - input: |
+      The on-call lead wrote: "Why did the nightly billing batch fail, and how do we stop it from happening again?"
+    restatement: "The on-call lead asks why the nightly billing batch failed and how to stop it from happening again. The nightly billing batch failed."
+    expect:
+      kind: classify
+      statuses: [classified]
+      problems:
+        - anchor: ["why", "billing|batch|fail"]
+          quadrants: [analytical-convergent]
+        - anchor: ["stop|again", "fail|batch"]
+          quadrants: [conceptual-divergent]
+      unresolved: []
+    tripwires:
+      invented: []
+      methodNotProblem: []
+      solveLeak: ["root cause was", "we should add"]
+    gold: |
+      ```yaml
+      status: classified
+      problems:
+        - statement: "Why did the nightly billing batch fail?"
+          classification:
+            nature: analytical
+            direction: convergent
+          confidence: high
+          why: "The ask wants the reason the batch failed. Evidence should converge on what happened."
+          next_method: "Evidence-based incident diagnosis. Finish this before prevention options."
+        - statement: "What approaches could stop the nightly billing batch from failing again?"
+          classification:
+            nature: conceptual
+            direction: divergent
+          confidence: medium
+          why: "Prevention approaches are design and judgment. Several moves stay open."
+          next_method: "After the why is settled, explore prevention approaches. Do not invent them here."
+      stop: true
+      ```
