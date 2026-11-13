@@ -9,7 +9,6 @@ from .chain import derive_mount, lint_chain, load_chain
 
 SUITE_VERSION = 1
 
-# Files that may exist under skills/whats-going-on/ in the repo.
 SKILL_ROOT_ALLOWED = frozenset(
     {
         "README.md",
@@ -38,8 +37,6 @@ RUBRIC_PATH = EVAL_DIR / "rubric.md"
 
 
 def agent_mount(skill_dir: Path | None = None) -> tuple[str, ...]:
-    """Measured mount, derived from the chain. Never includes README.md."""
-
     root = skill_dir or SKILL_DIR
     mount = derive_mount(load_chain(root))
     if "README.md" in mount:

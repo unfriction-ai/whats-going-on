@@ -1,9 +1,3 @@
-"""Playbook chain: stage order, mount derivation, and lint.
-
-Monolith mode (no playbooks/ yet): one virtual stage whose body is SKILL.md.
-Shipped mode: ## Chain in the coordinator plus playbook frontmatter.
-"""
-
 from __future__ import annotations
 
 import re
@@ -22,8 +16,6 @@ FRONTMATTER_RE = re.compile(r"^---\s*\n(?P<body>.*?)\n---\s*\n", re.DOTALL)
 
 @dataclass(frozen=True)
 class StageSpec:
-    """One stage in the problem-solving chain."""
-
     name: str
     playbook_rel: str | None
     skills: tuple[str, ...]
@@ -35,7 +27,7 @@ class StageSpec:
 class Chain:
     skill_dir: Path
     stages: tuple[StageSpec, ...]
-    mode: str  # "monolith" | "playbooks"
+    mode: str
 
 
 @dataclass(frozen=True)
@@ -93,8 +85,6 @@ def load_chain(skill_dir: Path) -> Chain:
 
 
 def derive_mount(chain: Chain) -> tuple[str, ...]:
-    """Relative paths copied into a measured workspace. Never includes README."""
-
     paths: list[str] = ["SKILL.md"]
     seen = {"SKILL.md"}
     for stage in chain.stages:
@@ -183,7 +173,6 @@ def _lint_playbooks(chain: Chain) -> list[ChainProblem]:
 
     for stage in chain.stages:
         if stage.playbook_rel is None:
-            # Listed in ## Chain but file not shipped yet: allowed.
             continue
         path = skill_dir / stage.playbook_rel
         if not path.is_file():
