@@ -22,7 +22,7 @@ from .manifest import (
     SKILL_DIR,
     skill_view_hash,
 )
-from .parse import Response, parse_response
+from .parse import Halt, Response, parse_response
 from .runs import new_run_id, write_blind_compare, write_manifest, write_report, write_transcript
 
 
@@ -68,16 +68,32 @@ def _check_schema_cases() -> list[str]:
             problems.append(f"schema_cases/{path.name}: need expect_ok and body")
             continue
         text = doc["body"]
-        if not str(text).strip().startswith("```"):
+        if "```" not in str(text):
             text = f"```yaml\n{text}\n```"
         parsed = parse_response(str(text))
-        ok = isinstance(parsed, Response)
+        want_halt = doc.get("wire") == "halt"
+        if want_halt:
+            ok = isinstance(parsed, Halt)
+        else:
+            ok = isinstance(parsed, Response)
         if bool(doc["expect_ok"]) != ok:
-            detail = parsed.kind if not ok else "parsed_ok"
+            if isinstance(parsed, Response):
+                detail = "parsed_response"
+            elif isinstance(parsed, Halt):
+                detail = "parsed_halt"
+            else:
+                detail = parsed.kind
             problems.append(
                 f"schema_cases/{path.name}: expect_ok={doc['expect_ok']} got {detail}"
             )
+        elif ok and want_halt and "next_stage" in doc:
+            assert isinstance(parsed, Halt)
+            if parsed.next_stage != doc["next_stage"]:
+                problems.append(
+                    f"schema_cases/{path.name}: next_stage want {doc['next_stage']} got {parsed.next_stage}"
+                )
         elif ok and "derived_status" in doc:
+            assert isinstance(parsed, Response)
             if parsed.verdict.status != doc["derived_status"]:
                 problems.append(
                     f"schema_cases/{path.name}: derived_status want {doc['derived_status']} got {parsed.verdict.status}"

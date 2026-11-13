@@ -1,0 +1,9 @@
+expect_ok: false
+wire: halt
+body: |
+  ```yaml
+  next_stage: structure-the-problem
+  available: false
+  status: classified
+  stop: true
+  ```
