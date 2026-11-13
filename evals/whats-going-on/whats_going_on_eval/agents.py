@@ -12,6 +12,7 @@ from .manifest import HOST_SKILL_DIR, INSTALL_SKILL_DIR, agent_mount
 
 INVOKE_TIMEOUT_S = 600
 
+
 @dataclass(frozen=True)
 class InvokeResult:
     text: str
@@ -176,7 +177,7 @@ def invoke(
 
 
 def scratch_home() -> Path:
-    """A HOME with no user skills or plugins. Only the login keychain links through, so the CLI stays signed in."""
+    """The agent CLI reads its auth token from the login keychain, which macOS resolves under HOME."""
     home = Path(tempfile.mkdtemp(prefix="wgo-home-"))
     keychains = Path.home() / "Library" / "Keychains"
     if keychains.is_dir():

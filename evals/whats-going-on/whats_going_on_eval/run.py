@@ -14,6 +14,7 @@ from .agents import (
     build_prompt,
     host_load_problems,
     invoke,
+    materialize_skill,
     nested_leaf_rels,
 )
 from .chain import load_chain
@@ -165,7 +166,7 @@ def cmd_run(args: argparse.Namespace) -> int:
         for fixture in fixtures:
             for rep in range(1, args.repeat + 1):
                 responses: list[str] = []
-                workspace = None
+                workspace = materialize_skill(skill_src)
                 try:
                     for turn_i, turn in enumerate(fixture.turns):
                         result = invoke(
@@ -174,7 +175,6 @@ def cmd_run(args: argparse.Namespace) -> int:
                             skill_src=skill_src,
                             session_workspace=workspace,
                         )
-                        workspace = result.workspace
                         write_transcript(
                             run_id,
                             fixture.id,
@@ -185,8 +185,7 @@ def cmd_run(args: argparse.Namespace) -> int:
                         )
                         responses.append(result.text)
                 finally:
-                    if workspace is not None:
-                        shutil.rmtree(workspace, ignore_errors=True)
+                    shutil.rmtree(workspace, ignore_errors=True)
                 results.append(grade_run(fixture, rep, responses))
     except HostNotWired as exc:
         print(str(exc), file=sys.stderr)
