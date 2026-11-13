@@ -5,6 +5,8 @@ from __future__ import annotations
 import hashlib
 from pathlib import Path
 
+from .chain import derive_mount, lint_chain, load_chain
+
 SUITE_VERSION = 1
 
 # Files that may exist under skills/whats-going-on/ in the repo.
@@ -13,11 +15,9 @@ SKILL_ROOT_ALLOWED = frozenset(
         "README.md",
         "SKILL.md",
         "design",
+        "playbooks",
     }
 )
-
-# Strict subset copied into measured eval workspaces. README stays off that disk.
-AGENT_MOUNT: tuple[str, ...] = ("SKILL.md",)
 
 HOST_SKILL_DIR = {
     "cursor": ".cursor/skills/whats-going-on",
@@ -36,13 +36,20 @@ RESTATEMENT_CASES_DIR = EVAL_DIR / "restatement_cases"
 REPORTS_DIR = EVAL_DIR / "reports"
 RUBRIC_PATH = EVAL_DIR / "rubric.md"
 
-assert "README.md" not in AGENT_MOUNT
-assert set(AGENT_MOUNT) <= {"README.md", "SKILL.md"} | set(AGENT_MOUNT)
+
+def agent_mount(skill_dir: Path | None = None) -> tuple[str, ...]:
+    """Measured mount, derived from the chain. Never includes README.md."""
+
+    root = skill_dir or SKILL_DIR
+    mount = derive_mount(load_chain(root))
+    if "README.md" in mount:
+        raise RuntimeError("README.md must not be in the derived mount")
+    return mount
 
 
 def skill_view_hash(skill_dir: Path) -> str:
     h = hashlib.sha256()
-    for rel in AGENT_MOUNT:
+    for rel in agent_mount(skill_dir):
         data = (skill_dir / rel).read_bytes()
         h.update(rel.encode())
         h.update(b"\0")
@@ -70,3 +77,11 @@ def assert_skill_tree_clean(skill_dir: Path | None = None) -> None:
         raise RuntimeError(
             f"skill directory has unexpected files (answer-key contamination risk): {unexpected}"
         )
+
+
+def assert_chain_ok(skill_dir: Path | None = None) -> None:
+    root = skill_dir or SKILL_DIR
+    problems = lint_chain(load_chain(root))
+    if problems:
+        detail = "; ".join(f"{p.kind}: {p.detail}" for p in problems)
+        raise RuntimeError(f"chain lint failed: {detail}")
