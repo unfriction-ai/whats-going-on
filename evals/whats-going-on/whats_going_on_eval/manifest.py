@@ -24,6 +24,12 @@ HOST_SKILL_DIR = {
     "codex": ".codex/skills/whats-going-on",
 }
 
+INSTALL_SKILL_DIR = {
+    "cursor": ".cursor/plugins/local/whats-going-on/skills/whats-going-on",
+    "claude": ".claude/skills/whats-going-on",
+    "codex": ".agents/skills/whats-going-on",
+}
+
 AGENTS = tuple(HOST_SKILL_DIR.keys())
 
 REPO_ROOT = Path(__file__).resolve().parents[3]

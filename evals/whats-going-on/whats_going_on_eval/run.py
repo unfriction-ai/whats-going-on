@@ -7,7 +7,7 @@ from pathlib import Path
 
 import yaml
 
-from .agents import HostNotWired, build_prompt, invoke
+from .agents import HostNotWired, build_prompt, host_load_problems, invoke, nested_leaf_rels
 from .chain import load_chain
 from .drift import check_suite
 from .fixtures import load_suite
@@ -18,9 +18,11 @@ from .manifest import (
     EVAL_DIR,
     FIXTURES_DIR,
     REPORTS_DIR,
+    REPO_ROOT,
     RUBRIC_PATH,
     SCHEMA_CASES_DIR,
     SKILL_DIR,
+    agent_mount,
     read_mount,
     skill_view_hash,
 )
@@ -42,6 +44,7 @@ def cmd_check() -> int:
     schema_problems = _check_schema_cases()
     problems_text = [f"{p.kind}: {p.detail}" for p in problems] + schema_problems
     problems_text.extend(preamble_outcome_problems())
+    problems_text.extend(host_load_problems(SKILL_DIR, REPO_ROOT))
 
     if problems_text:
         print("check FAILED")
@@ -50,10 +53,12 @@ def cmd_check() -> int:
         return 2
 
     families = sorted({fam for f in fixtures for fam in f.families})
+    leaves = nested_leaf_rels(agent_mount(SKILL_DIR))
     print("check OK")
     print(f"  fixtures: {len(fixtures)}  skill_view: {skill_view_hash(SKILL_DIR)}")
     print(f"  families: {', '.join(families)}")
     print(f"  schema_cases: {_schema_case_count()} ok")
+    print(f"  nested_leaves: {', '.join(Path(rel).parent.as_posix() for rel in leaves)}")
     return 0
 
 
@@ -296,7 +301,10 @@ def build_parser() -> argparse.ArgumentParser:
     )
     sub = parser.add_subparsers(dest="cmd", required=True)
 
-    sub.add_parser("check", help="Drift, gold self-test, schema_cases (no agent)")
+    sub.add_parser(
+        "check",
+        help="Drift, gold self-test, schema_cases, nested-leaf load (no agent)",
+    )
 
     run_p = sub.add_parser("run", help="Invoke an agent host and grade")
     run_p.add_argument("--agent", choices=AGENTS, default="cursor")
