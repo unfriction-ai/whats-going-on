@@ -1,0 +1,11 @@
+expect_ok: true
+wire: halt
+next_stage: structure-the-problem
+body: |
+  The next stage, structure the problem, is not available yet.
+
+  ```yaml
+  next_stage: structure-the-problem
+  available: false
+  stop: true
+  ```

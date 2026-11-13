@@ -8,7 +8,14 @@ from itertools import permutations
 from typing import Any, Literal
 
 from .fixtures import Expectation, Fixture, Turn, _gold_response_text
-from .parse import ContractViolation, Response, Verdict, parse_response, parse_restatement
+from .parse import (
+    ContractViolation,
+    Halt,
+    Response,
+    Verdict,
+    parse_response,
+    parse_restatement,
+)
 
 RUBRIC: dict[str, float] = {
     "detection": 0.25,
@@ -82,6 +89,13 @@ def grade_turn(
     if isinstance(parsed, ContractViolation):
         return TurnResult(
             hard_fails=(HardFail("contract", f"{parsed.kind} {parsed.detail}".strip()),),
+            axes={k: None for k in RUBRIC},
+            score=0.0,
+            judgment=judgment,
+        )
+    if isinstance(parsed, Halt):
+        return TurnResult(
+            hard_fails=(HardFail("contract", "unexpected_halt"),),
             axes={k: None for k in RUBRIC},
             score=0.0,
             judgment=judgment,

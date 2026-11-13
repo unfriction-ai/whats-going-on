@@ -1,14 +1,9 @@
-"""Playbook chain: stage order, mount derivation, and lint.
-
-Monolith mode (no playbooks/ yet): one virtual stage whose body is SKILL.md.
-Shipped mode: ## Chain in the coordinator plus playbook frontmatter.
-"""
-
 from __future__ import annotations
 
 import re
 from dataclasses import dataclass
 from pathlib import Path
+from typing import Literal
 
 import yaml
 
@@ -19,23 +14,37 @@ CHAIN_SECTION_RE = re.compile(
 CHAIN_ITEM_RE = re.compile(r"^\d+\.\s+([a-z0-9-]+)\s*$", re.MULTILINE)
 FRONTMATTER_RE = re.compile(r"^---\s*\n(?P<body>.*?)\n---\s*\n", re.DOTALL)
 
+ChainMode = Literal["monolith", "playbooks"]
+
 
 @dataclass(frozen=True)
-class StageSpec:
-    """One stage in the problem-solving chain."""
+class MonolithStage:
+    name: Literal["define-the-problem"] = "define-the-problem"
+    produces: Literal["problem_map"] = "problem_map"
 
+
+@dataclass(frozen=True)
+class ShippedStage:
     name: str
-    playbook_rel: str | None
+    playbook_rel: str
     skills: tuple[str, ...]
     consumes: str | None
     produces: str
 
 
 @dataclass(frozen=True)
+class UnshippedStage:
+    name: str
+
+
+Stage = MonolithStage | ShippedStage | UnshippedStage
+
+
+@dataclass(frozen=True)
 class Chain:
     skill_dir: Path
-    stages: tuple[StageSpec, ...]
-    mode: str  # "monolith" | "playbooks"
+    stages: tuple[Stage, ...]
+    mode: ChainMode
 
 
 @dataclass(frozen=True)
@@ -51,37 +60,21 @@ def load_chain(skill_dir: Path) -> Chain:
         return Chain(
             skill_dir=skill_dir,
             mode="monolith",
-            stages=(
-                StageSpec(
-                    name="define-the-problem",
-                    playbook_rel=None,
-                    skills=(),
-                    consumes=None,
-                    produces="problem_map",
-                ),
-            ),
+            stages=(MonolithStage(),),
         )
 
     coordinator = (skill_dir / "SKILL.md").read_text(encoding="utf-8")
     order = _parse_chain_order(coordinator)
     by_stem = {path.stem: path for path in shipped}
-    stages: list[StageSpec] = []
+    stages: list[Stage] = []
     for name in order:
         path = by_stem.get(name)
         if path is None:
-            stages.append(
-                StageSpec(
-                    name=name,
-                    playbook_rel=None,
-                    skills=(),
-                    consumes=None,
-                    produces="",
-                )
-            )
+            stages.append(UnshippedStage(name=name))
             continue
         meta = _parse_playbook_frontmatter(path)
         stages.append(
-            StageSpec(
+            ShippedStage(
                 name=name,
                 playbook_rel=f"playbooks/{path.name}",
                 skills=tuple(meta.get("skills") or ()),
@@ -93,12 +86,12 @@ def load_chain(skill_dir: Path) -> Chain:
 
 
 def derive_mount(chain: Chain) -> tuple[str, ...]:
-    """Relative paths copied into a measured workspace. Never includes README."""
-
     paths: list[str] = ["SKILL.md"]
     seen = {"SKILL.md"}
     for stage in chain.stages:
-        if stage.playbook_rel and stage.playbook_rel not in seen:
+        if not isinstance(stage, ShippedStage):
+            continue
+        if stage.playbook_rel not in seen:
             paths.append(stage.playbook_rel)
             seen.add(stage.playbook_rel)
         for skill in stage.skills:
@@ -112,16 +105,13 @@ def derive_mount(chain: Chain) -> tuple[str, ...]:
 
 
 def lint_chain(chain: Chain) -> list[ChainProblem]:
-    problems: list[ChainProblem] = []
     skill_dir = chain.skill_dir
 
     if not (skill_dir / "SKILL.md").is_file():
-        problems.append(ChainProblem("missing_coordinator", "SKILL.md is missing"))
-        return problems
+        return [ChainProblem("missing_coordinator", "SKILL.md is missing")]
 
     if not chain.stages:
-        problems.append(ChainProblem("empty_chain", "chain has no stages"))
-        return problems
+        return [ChainProblem("empty_chain", "chain has no stages")]
 
     if chain.mode == "monolith":
         return _lint_monolith(chain)
@@ -131,35 +121,18 @@ def lint_chain(chain: Chain) -> list[ChainProblem]:
 
 def _lint_monolith(chain: Chain) -> list[ChainProblem]:
     problems: list[ChainProblem] = []
-    if len(chain.stages) != 1:
+    if chain.mode != "monolith":
+        problems.append(
+            ChainProblem("monolith_shape", f"expected mode monolith, got {chain.mode!r}")
+        )
+    if len(chain.stages) != 1 or not isinstance(chain.stages[0], MonolithStage):
         problems.append(
             ChainProblem(
                 "monolith_shape",
-                f"monolith chain must have exactly one stage, got {len(chain.stages)}",
+                "monolith chain must be exactly one MonolithStage",
             )
         )
-    stage = chain.stages[0]
-    if stage.name != "define-the-problem":
-        problems.append(
-            ChainProblem(
-                "monolith_shape",
-                f"monolith stage must be define-the-problem, got {stage.name!r}",
-            )
-        )
-    if stage.playbook_rel is not None or stage.skills:
-        problems.append(
-            ChainProblem(
-                "monolith_shape",
-                "monolith stage must keep procedure in SKILL.md (no playbook_rel or skills)",
-            )
-        )
-    if stage.consumes is not None or stage.produces != "problem_map":
-        problems.append(
-            ChainProblem(
-                "monolith_shape",
-                "monolith stage must consume nothing and produce problem_map",
-            )
-        )
+        return problems
     mount = derive_mount(chain)
     if mount != ("SKILL.md",):
         problems.append(
@@ -182,8 +155,15 @@ def _lint_playbooks(chain: Chain) -> list[ChainProblem]:
         )
 
     for stage in chain.stages:
-        if stage.playbook_rel is None:
-            # Listed in ## Chain but file not shipped yet: allowed.
+        if isinstance(stage, UnshippedStage):
+            continue
+        if isinstance(stage, MonolithStage):
+            problems.append(
+                ChainProblem(
+                    "playbook_mode",
+                    "playbooks mode must not contain a MonolithStage",
+                )
+            )
             continue
         path = skill_dir / stage.playbook_rel
         if not path.is_file():
@@ -217,7 +197,7 @@ def _lint_playbooks(chain: Chain) -> list[ChainProblem]:
                     )
                 )
 
-    shipped = [stage for stage in chain.stages if stage.playbook_rel is not None]
+    shipped = [stage for stage in chain.stages if isinstance(stage, ShippedStage)]
     for prev, cur in zip(shipped, shipped[1:]):
         if cur.consumes != prev.produces:
             problems.append(
@@ -251,7 +231,12 @@ def _lint_playbooks(chain: Chain) -> list[ChainProblem]:
 
 
 def _orphan_leaf_dirs(chain: Chain) -> list[str]:
-    named = {skill for stage in chain.stages for skill in stage.skills}
+    named = {
+        skill
+        for stage in chain.stages
+        if isinstance(stage, ShippedStage)
+        for skill in stage.skills
+    }
     reserved = {
         "playbooks",
         "design",
