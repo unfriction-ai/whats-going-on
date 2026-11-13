@@ -7,7 +7,7 @@ import tempfile
 from dataclasses import dataclass
 from pathlib import Path
 
-from .manifest import AGENT_MOUNT, HOST_SKILL_DIR
+from .manifest import HOST_SKILL_DIR, agent_mount
 
 
 @dataclass(frozen=True)
@@ -22,13 +22,17 @@ class HostNotWired(RuntimeError):
 
 def materialize_skill(skill_src: Path | None) -> Path:
     workspace = Path(tempfile.mkdtemp(prefix="wgo-eval-"))
+    mount = agent_mount(skill_src) if skill_src is not None else ()
     for rel in HOST_SKILL_DIR.values():
         dest = workspace / rel
         dest.mkdir(parents=True, exist_ok=True)
         if skill_src is None:
             continue
-        for name in AGENT_MOUNT:
-            shutil.copy2(skill_src / name, dest / name)
+        for name in mount:
+            src = skill_src / name
+            out = dest / name
+            out.parent.mkdir(parents=True, exist_ok=True)
+            shutil.copy2(src, out)
     return workspace
 
 

@@ -10,7 +10,12 @@ import yaml
 
 from .fixtures import REQUIRED_FAMILIES, Expectation, Fixture, Tripwires, Turn, covered_families
 from .grade import _restatement_fails, grade_gold, rubric_keys_match_doc
-from .manifest import AGENT_MOUNT, RESTATEMENT_CASES_DIR, assert_skill_tree_clean
+from .manifest import (
+    RESTATEMENT_CASES_DIR,
+    agent_mount,
+    assert_chain_ok,
+    assert_skill_tree_clean,
+)
 from .parse import (
     CONFIDENCES,
     DIRECTIONS,
@@ -68,8 +73,16 @@ def check_suite(
     except RuntimeError as exc:
         problems.append(DriftProblem("skill_tree", str(exc)))
 
-    if "README.md" in AGENT_MOUNT:
-        problems.append(DriftProblem("mount", "README.md must not be in AGENT_MOUNT"))
+    try:
+        assert_chain_ok()
+    except RuntimeError as exc:
+        problems.append(DriftProblem("chain", str(exc)))
+
+    mount = agent_mount()
+    if "README.md" in mount:
+        problems.append(DriftProblem("mount", "README.md must not be in the derived mount"))
+    if not mount:
+        problems.append(DriftProblem("mount", "derived mount is empty"))
 
     covered = covered_families(fixtures)
     missing = sorted(REQUIRED_FAMILIES - covered)
