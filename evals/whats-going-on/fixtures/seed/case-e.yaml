@@ -27,5 +27,6 @@ turns:
           confidence: high
           why: "Clutter reduction is a design and priority call. The ask already requires settling on a small set of changes by a deadline."
           next_method: "Compare candidate UI changes and narrow to one or two. Do not pick them in this slice."
+      unresolved: []
       stop: true
       ```

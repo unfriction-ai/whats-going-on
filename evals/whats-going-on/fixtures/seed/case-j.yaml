@@ -44,6 +44,7 @@ turns:
           confidence: high
           why: "A measured drop with a timeframe. Data should converge on what changed."
           next_method: "Evidence-based diagnosis from crash telemetry and release history."
+      unresolved: []
       stop: true
       ```
   - input: "What product or eng initiatives could recover crash-free sessions?"
@@ -68,6 +69,7 @@ turns:
           confidence: high
           why: "Initiatives are design and judgment calls. The ask opens many options."
           next_method: "Broad exploration of initiatives before narrowing. Do not list them in this slice."
+      unresolved: []
       stop: true
       ```
   - input: "Which of these three recovery initiatives should we fund?"
@@ -92,5 +94,6 @@ turns:
           confidence: medium
           why: "A funding choice among a fixed set is a judgment call that must settle on one."
           next_method: "Set decision criteria and compare the three. Do not pick one in this slice."
+      unresolved: []
       stop: true
       ```

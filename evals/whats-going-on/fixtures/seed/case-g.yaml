@@ -27,5 +27,6 @@ turns:
           confidence: high
           why: "The conflict is strategy and customer impact. They need decision criteria, not another size spreadsheet."
           next_method: "Clarify decision criteria and trade-offs among services. Do not expand the LOC spreadsheet in this slice."
+      unresolved: []
       stop: true
       ```

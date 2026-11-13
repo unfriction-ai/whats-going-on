@@ -27,5 +27,6 @@ turns:
           confidence: high
           why: "The ask is about a collaboration process. The lead wants a small set of concrete changes this sprint, not open exploration."
           next_method: "Generate and narrow handoff changes toward one or two fixes. Do not propose the fixes in this slice."
+      unresolved: []
       stop: true
       ```

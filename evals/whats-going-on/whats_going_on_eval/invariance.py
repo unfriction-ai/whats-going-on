@@ -196,6 +196,7 @@ problems:
     confidence: high
     why: "A measured change with a timeframe."
     next_method: "Compare telemetry before and after the change."
+unresolved: []
 stop: true
 ```"""
     if not preamble.strip():

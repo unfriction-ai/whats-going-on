@@ -1,0 +1,10 @@
+expect_ok: false
+body: |
+  status: classified
+  problems:
+    - statement: "What p99 latency estimates for the checkout API should inform the Q1 hardware budget?"
+      classification: { nature: analytical, direction: convergent }
+      confidence: high
+      why: "Latency estimation needs quantitative data."
+      next_method: "Estimate from production telemetry."
+  stop: true

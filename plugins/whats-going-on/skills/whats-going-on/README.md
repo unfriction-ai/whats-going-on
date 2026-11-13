@@ -47,22 +47,15 @@ stateDiagram-v2
     [*] --> Inspect
 
     Inspect --> NotAProblem: No problem or decision
-    Inspect --> Extract: Potential problem(s) found
+    Inspect --> Extract: A concern is present
 
-    Extract --> Assess: For each candidate
+    Extract --> Clarity: Candidates listed
+    Clarity --> NeedsClarification: None defined enough
+    Clarity --> Primary: One or more defined
 
-    state Assess {
-        [*] --> CheckClarity
-        CheckClarity --> Abstain: Not defined enough
-        CheckClarity --> Classify: Defined enough
-        Abstain --> [*]
-        Classify --> [*]
-    }
-
-    Assess --> Aggregate: All candidates done
-    Aggregate --> Classified: All classified
-    Aggregate --> Partial: Mix of classified and unresolved
-    Aggregate --> NeedsClarification: None classified
+    Primary --> Classify: The one that must be answered first
+    Classify --> Classified: Nothing else open
+    Classify --> Partial: Other concerns deferred
 
     NotAProblem --> [*]
     Classified --> [*]
@@ -70,7 +63,7 @@ stateDiagram-v2
     NeedsClarification --> [*]
 ```
 
-Assess each extracted problem on its own. Failure to classify one must not block the others.
+Sharpen one primary problem, the one that must be answered first. Leave every other concern in `unresolved` until that primary is answered.
 
 ## Invariants
 
@@ -90,7 +83,7 @@ The second sentence says what is going on. Use only facts from the input. When t
 
 The restatement reports. It does not name a problem, a cause, a quadrant, or a fix. Those belong in the YAML. When the input defines no problem, a short restatement is the right one.
 
-When the two sentences disagree with `problems` or `unresolved`, rewrite the sentences. Do not add a problem so that they match.
+When the two sentences disagree with the primary or with `unresolved`, discard them and restate again. Do not edit the sentences in place. Do not add a problem so that they match.
 
 ## Output contract
 
@@ -114,7 +107,7 @@ unresolved:
 stop: true
 ```
 
-An empty `problems` list is valid when status is `needs_clarification` or `not_a_problem`.
+`problems` holds at most one item, the primary. An empty `problems` list is valid when status is `needs_clarification` or `not_a_problem`. Always emit `unresolved`. Write `[]` when it is empty.
 
 ## Install
 
@@ -198,6 +191,7 @@ problems:
     confidence: high
     why: "Latency estimation needs quantitative data. The objective is one figure for a defined capacity decision."
     next_method: "Estimate from production telemetry and load assumptions. Do not open an architecture redesign workshop."
+unresolved: []
 stop: true
 ```
 
@@ -229,6 +223,7 @@ problems:
     confidence: high
     why: "The ask is about a collaboration process. The lead wants a small set of concrete changes this sprint, not open exploration."
     next_method: "Generate and narrow handoff changes toward one or two fixes. Do not propose the fixes in this slice."
+unresolved: []
 stop: true
 ```
 
@@ -258,6 +253,7 @@ problems:
     confidence: high
     why: "Culture and norms are conceptual. The ask invites many possible moves. No short list of options is fixed yet."
     next_method: "Broad exploration of approaches before any narrowing. Do not brainstorm the list in this slice."
+unresolved: []
 stop: true
 ```
 
@@ -287,6 +283,7 @@ problems:
     confidence: high
     why: "Clutter reduction is a design and priority call. The ask already requires settling on a small set of changes by a deadline."
     next_method: "Compare candidate UI changes and narrow to one or two. Do not pick them in this slice."
+unresolved: []
 stop: true
 ```
 
@@ -349,6 +346,7 @@ problems:
     confidence: high
     why: "The conflict is strategy and customer impact. They need decision criteria, not another size spreadsheet."
     next_method: "Clarify decision criteria and trade-offs among services. Do not expand the LOC spreadsheet in this slice."
+unresolved: []
 stop: true
 ```
 
