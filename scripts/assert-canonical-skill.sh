@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Fail when any whats-going-on SKILL.md drifts from the canonical body, or when a
+# Fail when any whats-going-on skill copy drifts from the canonical tree, or when a
 # host manifest would mount evals/. Identical-hash copies (Codex plugin tree) and
 # symlinks to the canonical path are allowed.
 set -euo pipefail
@@ -13,6 +13,7 @@ if [[ ! -f "$CANONICAL" ]]; then
 fi
 
 canon_hash="$(shasum -a 256 "$CANONICAL" | awk '{print $1}')"
+canon_dir="$(python3 -c 'import os,sys; print(os.path.realpath(sys.argv[1]))' "$(dirname "$CANONICAL")")"
 found=0
 
 while IFS= read -r f; do
@@ -26,6 +27,11 @@ while IFS= read -r f; do
   h="$(shasum -a 256 "$real" | awk '{print $1}')"
   if [[ "$h" != "$canon_hash" ]]; then
     echo "drifted SKILL.md at $f (hash $h != canonical $canon_hash)" >&2
+    exit 1
+  fi
+  copy_dir="$(dirname "$real")"
+  if [[ "$copy_dir" != "$canon_dir" ]] && ! diff -rq -x '.*' "$canon_dir" "$copy_dir" >&2; then
+    echo "drifted skill tree at $(dirname "$f")" >&2
     exit 1
   fi
 done < <(

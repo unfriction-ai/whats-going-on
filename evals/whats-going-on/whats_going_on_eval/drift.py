@@ -8,11 +8,11 @@ from pathlib import Path
 
 import yaml
 
+from .chain import ChainMode
 from .fixtures import REQUIRED_FAMILIES, Expectation, Fixture, Tripwires, Turn, covered_families
 from .grade import _restatement_fails, grade_gold, rubric_keys_match_doc
 from .manifest import (
     RESTATEMENT_CASES_DIR,
-    agent_mount,
     assert_chain_ok,
     assert_skill_tree_clean,
 )
@@ -30,6 +30,15 @@ CONTRACT_RE = re.compile(
     r"```yaml\n(status: classified \| partial \| needs_clarification \| not_a_problem\n.*?)```",
     re.DOTALL,
 )
+
+CONTRACT_OWNER: dict[ChainMode, str] = {
+    "monolith": "SKILL.md",
+    "playbooks": "playbooks/define-the-problem.md",
+}
+SENTINEL_OWNER: dict[ChainMode, str] = {
+    "monolith": "SKILL.md",
+    "playbooks": "restate/SKILL.md",
+}
 
 CASE_HEADER_RE = re.compile(r"### Case ([A-J])\.")
 
@@ -63,7 +72,8 @@ def check_suite(
     fixtures: list[Fixture],
     *,
     readme: str,
-    skill: str,
+    mode: ChainMode,
+    mount: dict[str, str],
     rubric_md: str,
 ) -> list[DriftProblem]:
     problems: list[DriftProblem] = []
@@ -78,7 +88,6 @@ def check_suite(
     except RuntimeError as exc:
         problems.append(DriftProblem("chain", str(exc)))
 
-    mount = agent_mount()
     if "README.md" in mount:
         problems.append(DriftProblem("mount", "README.md must not be in the derived mount"))
     if not mount:
@@ -93,13 +102,20 @@ def check_suite(
         DriftProblem("rubric_binding", p) for p in rubric_keys_match_doc(rubric_md)
     )
 
-    problems.extend(_contract_drift(readme, skill))
+    contract_rel = CONTRACT_OWNER[mode]
+    sentinel_rel = SENTINEL_OWNER[mode]
+    for rel in (contract_rel, sentinel_rel):
+        if rel not in mount:
+            problems.append(DriftProblem("mount", f"{rel} is not on the derived mount"))
+    if contract_rel in mount:
+        problems.extend(_contract_drift(readme, contract_rel, mount[contract_rel]))
+    if sentinel_rel in mount:
+        problems.extend(_sentinel_sync(sentinel_rel, mount[sentinel_rel]))
     problems.extend(_enum_drift(readme))
     problems.extend(_seed_readme_drift(fixtures, readme))
     problems.extend(_gold_self_test(fixtures))
     problems.extend(_tripwire_vs_input(fixtures))
-    problems.extend(_skill_contamination(fixtures, skill))
-    problems.extend(_sentinel_sync(skill))
+    problems.extend(_skill_contamination(fixtures, mount))
     problems.extend(_restatement_guard_self_test(RESTATEMENT_CASES_DIR))
     return problems
 
@@ -109,16 +125,18 @@ def _extract_contract(doc: str) -> str | None:
     return match.group(1).strip() if match else None
 
 
-def _contract_drift(readme: str, skill: str) -> list[DriftProblem]:
+def _contract_drift(readme: str, owner_rel: str, owner: str) -> list[DriftProblem]:
     r = _extract_contract(readme)
-    s = _extract_contract(skill)
+    s = _extract_contract(owner)
     out: list[DriftProblem] = []
     if r is None:
         out.append(DriftProblem("contract_drift", "README missing output contract block"))
     if s is None:
-        out.append(DriftProblem("contract_drift", "SKILL.md missing output contract block"))
+        out.append(DriftProblem("contract_drift", f"{owner_rel} missing output contract block"))
     if r is not None and s is not None and r != s:
-        out.append(DriftProblem("contract_drift", "README and SKILL.md contract blocks differ"))
+        out.append(
+            DriftProblem("contract_drift", f"README and {owner_rel} contract blocks differ")
+        )
     return out
 
 
@@ -282,17 +300,17 @@ def _binds_sentinel_to_status(text: str) -> bool:
         start = index + len(NO_ASK)
 
 
-def _sentinel_sync(skill: str) -> list[DriftProblem]:
+def _sentinel_sync(owner_rel: str, owner: str) -> list[DriftProblem]:
     problems: list[DriftProblem] = []
-    if NO_ASK not in skill:
+    if NO_ASK not in owner:
         problems.append(
-            DriftProblem("sentinel_sync", "SKILL.md does not contain the restatement sentinel")
+            DriftProblem("sentinel_sync", f"{owner_rel} does not contain the restatement sentinel")
         )
-    if _binds_sentinel_to_status(skill):
+    if _binds_sentinel_to_status(owner):
         problems.append(
             DriftProblem(
                 "sentinel_status_binding",
-                "SKILL.md binds the restatement sentinel to a status",
+                f"{owner_rel} binds the restatement sentinel to a status",
             )
         )
     bound = f"If you write {NO_ASK} then status is not_a_problem."
@@ -389,21 +407,22 @@ def _restatement_guard_self_test(cases_dir: Path) -> list[DriftProblem]:
     return problems
 
 
-def _skill_contamination(fixtures: list[Fixture], skill: str) -> list[DriftProblem]:
+def _skill_contamination(fixtures: list[Fixture], mount: dict[str, str]) -> list[DriftProblem]:
     out: list[DriftProblem] = []
     for fixture in fixtures:
         for turn in fixture.turns:
             chunk = turn.input.strip()
             if len(chunk) < 40:
                 continue
-            for start in range(0, max(1, len(chunk) - 39)):
-                excerpt = chunk[start : start + 40]
-                if excerpt in skill:
-                    out.append(
-                        DriftProblem(
-                            "skill_contaminated",
-                            f"{fixture.id}: SKILL.md quotes fixture input {excerpt!r}",
+            for rel, text in mount.items():
+                for start in range(0, max(1, len(chunk) - 39)):
+                    excerpt = chunk[start : start + 40]
+                    if excerpt in text:
+                        out.append(
+                            DriftProblem(
+                                "skill_contaminated",
+                                f"{fixture.id}: {rel} quotes fixture input {excerpt!r}",
+                            )
                         )
-                    )
-                    break
+                        break
     return out

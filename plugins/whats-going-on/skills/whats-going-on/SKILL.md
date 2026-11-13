@@ -1,83 +1,60 @@
 ---
 name: whats-going-on
 description: >-
-  Maps a pasted ask, message, or situation into zero or more defined problems
-  and classifies each as analytical or conceptual and convergent or divergent,
-  abstaining when a problem is not defined. Stops before diagnosis or solutions.
-  Use when the user invokes /whats-going-on with a bug, email, Slack thread,
-  incident notes, or similar text.
+  Coordinates a problem-solving chain over a pasted ask, message, or situation.
+  Runs exactly one stage playbook per invocation, then stops. Stage 1 sharpens
+  at most one primary problem and classifies it as analytical or conceptual and
+  convergent or divergent, or abstains. Use when the user invokes
+  /whats-going-on with a bug, email, Slack thread, incident notes, or similar
+  text, or with "continue" after a prior result.
 disable-model-invocation: true
 ---
 
-# What's going on (slice 1: problem mapping)
+# What's going on
 
-Find what needs resolving in the input. Classify only what is defined. Then stop.
+Select one stage, run its playbook, emit its Output, stop.
 
-## Procedure
+## Chain
 
-Work through these silently. Output only the result under Output.
+1. define-the-problem
+2. structure-the-problem
+3. prioritize-the-issues
+4. develop-the-workplan
+5. conduct-analyses
+6. synthesize-findings
+7. develop-recommendations
 
-1. **Ask.** Does anyone need something understood, decided, or resolved? Note who asks for what, in their own terms. A request for a method (plan, workshop, dashboard, migration) is the ask as said. Do not swap in the question you think is behind it. A concern with no request means no ask is stated. An FYI or a plain notice with nothing to decide is `not_a_problem`.
-2. **Restate.** Write the two restatement sentences now, under the rules in Output. Then set them aside. Steps 3 to 7 work from the input, never from your restatement.
-3. **Separate** situation, problem, proposed approach, and classification. A proposed method (workshop, spreadsheet, migration, plan) is never the problem. Ask what question that method is meant to answer.
-4. **Extract** one candidate per distinct question. Split compound asks. "Why X, and how to stop X" is two candidates.
-5. **Clarity test, per candidate.** Can you state what needs resolving using only facts in the input? If not, put it in `unresolved` with the missing piece as the clarification. Missing data to *solve* does not block classification. Missing data to *identify* does.
-6. **Classify, per defined candidate, independently.**
-   - Nature: settles with data → `analytical`. Turns on ideas, judgment, or ways of working → `conceptual`.
-   - Direction: the ask *now* narrows to one answer or one or two fixes → `convergent`. Leaves many answers open → `divergent`.
-   - Classify the current question only. Do not advance it to a later stage.
-7. **Aggregate.** Fill `problems` and `unresolved` first. Set `status` last from this table:
+## Select
 
-   | problems | unresolved | status |
-   |---|---|---|
-   | empty | empty | `not_a_problem` |
-   | empty | some | `needs_clarification` |
-   | some | empty | `classified` |
-   | some | some | `partial` |
+| When | Stage |
+|---|---|
+| No prior result, or the message brings a new ask or new facts | define-the-problem |
+| The message asks to continue from the latest result | the stage after the one that produced that result |
+| Anything else | define-the-problem |
 
-## Output
+The latest result is the last fenced `yaml` block you emitted that has a `status` key. A block with a `status` key comes from define-the-problem. Continue carries its one primary problem forward. New material restarts at define-the-problem. Prior classifications do not advance on their own.
 
-Exactly two sentences of restatement, then exactly one fenced `yaml` block, then nothing.
+## Run
 
-1. **The ask.** Who asks for what, in the asker's terms. If nothing is asked, write exactly `No ask is stated.`
-2. **The situation.** What is going on, in plain words, using only facts in the input. If the input includes a link you could not open, say so here.
+1. Look for `playbooks/<stage>.md` next to this file. If it is missing, follow Halt and stop.
+2. Read the playbook. Read each skill its `skills` list names at `<skill>/SKILL.md` next to this file.
+3. Work through the playbook steps silently. Emit only the playbook's Output.
 
-The restatement only reports. It names no problem, cause, quadrant, or fix. Those belong to the YAML. Do not guess goals or intent. "Probably," "seems to want," and "likely" mean you are guessing. When the input defines no problem, a thin restatement is correct. Filling the gap is invention.
+## Halt
 
-If the restatement and the lists disagree, rewrite the restatement. Never add a problem to make them match.
+When the selected stage has no playbook file, write one plain sentence that says the stage is not available yet. Then write exactly one fenced `yaml` block with `next_stage` set to that stage, then nothing:
 
 ```yaml
-status: classified | partial | needs_clarification | not_a_problem
-
-problems:
-  - statement: "Clear statement of what needs resolving"
-    classification:
-      nature: analytical | conceptual
-      direction: convergent | divergent
-    confidence: high | medium | low
-    why: "Evidence for both dimensions"
-    next_method: "Kind of reasoning to use next, not the answer"
-
-unresolved:
-  - observation: "What was said"
-    reason: "Why this is not yet a defined problem"
-    clarification: "What to ask next"
-
+next_stage: structure-the-problem
+available: false
 stop: true
 ```
 
-An empty `problems` list is valid when status is `needs_clarification` or `not_a_problem`.
-Omit `unresolved` when it would be empty, or set it to `[]`.
+Give no diagnosis, options, or recommendations.
 
 ## Never
 
-- Invent facts, metrics, or causes to make a candidate classifiable.
-- Diagnose, list options, brainstorm, plan, or recommend. `next_method` names a kind of reasoning, not its result.
+- Run more than one playbook in one reply.
+- Write the restatement outside the `restate` skill.
+- Diagnose, list options, or recommend beyond the running playbook's Output.
 - Write anything after the YAML block.
-
-## Contrast pairs
-
-- "Things feel off" is a symptom. "Error rate rose 12% since Tuesday. Why?" is a defined problem.
-- "We should run a workshop" is a proposed method. "What is causing the timeouts?" may be the question behind it.
-- The same outage can yield "why did it fail?" (analytical, convergent) and "what approaches could prevent recurrence?" (conceptual, divergent). Classify each ask on its own.
-- "Can we get a dashboard for signups?" restates as "Someone asks for a signups dashboard." Not "Someone wants to know why signups fell."

@@ -1,6 +1,6 @@
 # whats-going-on evals
 
-Measures agent behavior under `skills/whats-going-on/`. This tree is a sibling of the skill directory. It is never installed with the skill. Measured runs mount only `SKILL.md`.
+Measures agent behavior under `skills/whats-going-on/`. This tree is a sibling of the skill directory. It is never installed with the skill. Measured runs mount the coordinator `SKILL.md`, each shipped playbook, and the leaf skills those playbooks name. `check` derives that mount from the coordinator's `## Chain`. `README.md` and `design/` stay off the mount.
 
 Requires Python 3.11+ and PyYAML.
 
@@ -59,4 +59,4 @@ Copy the nearest file under `fixtures/holdout/`. Do not store a `family` field. 
 
 ## Host wiring
 
-`run` prepares a temp workspace with `SKILL.md` only. Live host invoke is stubbed until a non-interactive Cursor, Claude Code, or Codex CLI is confirmed. `check` and `grade` work without a host.
+`run` prepares a temp workspace with the derived mount only. Live host invoke is stubbed until a non-interactive Cursor, Claude Code, or Codex CLI is confirmed. `check` and `grade` work without a host.
