@@ -176,13 +176,13 @@ def _validate_wire(raw: dict[str, Any], preamble: str) -> Outcome | ContractViol
         return ContractViolation("schema", f"status must be one of {STATUSES}")
 
     problems_raw = raw.get("problems", [])
-    unresolved_raw = raw.get("unresolved", [])
     if problems_raw is None:
         problems_raw = []
-    if unresolved_raw is None:
-        unresolved_raw = []
     if not isinstance(problems_raw, list):
         return ContractViolation("schema", "problems must be a list")
+    if "unresolved" not in raw:
+        return ContractViolation("schema", "unresolved is required")
+    unresolved_raw = raw["unresolved"]
     if not isinstance(unresolved_raw, list):
         return ContractViolation("schema", "unresolved must be a list")
     if len(problems_raw) > 1:

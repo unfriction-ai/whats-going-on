@@ -8,4 +8,5 @@ body: |
       confidence: high
       why: "Latency estimation needs quantitative data."
       next_method: "Estimate from production telemetry."
+  unresolved: []
   stop: true
