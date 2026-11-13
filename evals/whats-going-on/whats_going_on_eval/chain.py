@@ -230,13 +230,17 @@ def _lint_playbooks(chain: Chain) -> list[ChainProblem]:
     return problems
 
 
-def _orphan_leaf_dirs(chain: Chain) -> list[str]:
-    named = {
+def named_skills(chain: Chain) -> frozenset[str]:
+    return frozenset(
         skill
         for stage in chain.stages
         if isinstance(stage, ShippedStage)
         for skill in stage.skills
-    }
+    )
+
+
+def _orphan_leaf_dirs(chain: Chain) -> list[str]:
+    named = named_skills(chain)
     reserved = {
         "playbooks",
         "design",

@@ -5,7 +5,7 @@ from __future__ import annotations
 import hashlib
 from pathlib import Path
 
-from .chain import derive_mount, lint_chain, load_chain
+from .chain import derive_mount, lint_chain, load_chain, named_skills
 
 SUITE_VERSION = 1
 
@@ -44,6 +44,11 @@ def agent_mount(skill_dir: Path | None = None) -> tuple[str, ...]:
     return mount
 
 
+def read_mount(skill_dir: Path | None = None) -> dict[str, str]:
+    root = skill_dir or SKILL_DIR
+    return {rel: (root / rel).read_text(encoding="utf-8") for rel in agent_mount(root)}
+
+
 def skill_view_hash(skill_dir: Path) -> str:
     h = hashlib.sha256()
     for rel in agent_mount(skill_dir):
@@ -63,12 +68,13 @@ def hash_skill_source(skill_src: Path | None) -> str:
 
 def assert_skill_tree_clean(skill_dir: Path | None = None) -> None:
     root = skill_dir or SKILL_DIR
+    allowed = SKILL_ROOT_ALLOWED | named_skills(load_chain(root))
     unexpected: list[str] = []
     for path in root.iterdir():
         name = path.name
         if name.startswith("."):
             continue
-        if name not in SKILL_ROOT_ALLOWED:
+        if name not in allowed:
             unexpected.append(name)
     if unexpected:
         raise RuntimeError(
