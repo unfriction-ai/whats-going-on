@@ -36,7 +36,14 @@ from .manifest import (
     skill_view_hash,
 )
 from .parse import Halt, Response, parse_response
-from .runs import new_run_id, write_blind_compare, write_manifest, write_report, write_transcript
+from .runs import (
+    new_run_id,
+    read_transcript,
+    write_blind_compare,
+    write_manifest,
+    write_report,
+    write_transcript,
+)
 
 
 def cmd_check() -> int:
@@ -169,21 +176,23 @@ def cmd_run(args: argparse.Namespace) -> int:
                 workspace = materialize_skill(skill_src)
                 try:
                     for turn_i, turn in enumerate(fixture.turns):
-                        result = invoke(
-                            agent=args.agent,
-                            user_input=turn.input,
-                            skill_src=skill_src,
-                            session_workspace=workspace,
-                        )
-                        write_transcript(
-                            run_id,
-                            fixture.id,
-                            rep,
-                            turn_i,
-                            prompt=build_prompt(turn.input),
-                            response=result.text,
-                        )
-                        responses.append(result.text)
+                        text = read_transcript(run_id, fixture.id, rep, turn_i)
+                        if text is None:
+                            text = invoke(
+                                agent=args.agent,
+                                user_input=turn.input,
+                                skill_src=skill_src,
+                                session_workspace=workspace,
+                            ).text
+                            write_transcript(
+                                run_id,
+                                fixture.id,
+                                rep,
+                                turn_i,
+                                prompt=build_prompt(turn.input),
+                                response=text,
+                            )
+                        responses.append(text)
                 finally:
                     shutil.rmtree(workspace, ignore_errors=True)
                 results.append(grade_run(fixture, rep, responses))
