@@ -59,6 +59,6 @@ Copy the nearest file under `fixtures/holdout/`. Do not store a `family` field. 
 
 ## Host wiring
 
-`run` prepares a temp workspace with the derived mount only. Live host invoke is stubbed until a non-interactive Cursor, Claude Code, or Codex CLI is confirmed. `check` and `grade` work without a host.
+`run` prepares a temp workspace with the derived mount only. `run --agent cursor` invokes the Cursor agent CLI in that workspace and grades its stdout. Claude and Codex still stop before a live invoke. `check` and `grade` work without a host.
 
 `check` copies that mount into a temp workspace for each host. It also runs `scripts/install-local.sh --host all` with `HOME` set to a temp directory. `check` fails when a nested leaf is missing from the workspace or from the install. `README.md` and `design/` stay off the workspace. The install still contains them, because they ship in the package and stay off the mount.
