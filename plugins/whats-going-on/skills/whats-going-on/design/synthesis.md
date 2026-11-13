@@ -79,14 +79,14 @@ Status is derived from whether `problems` and `unresolved` are empty. Parser rej
 - Case J is one continuing session. Tests lifecycle leakage.
 - Only hard fails gate exit code. Score is for comparing revisions.
 - Python eval harness. No Bun required for operators.
-- Live agent invoke may be stubbed until host CLIs are confirmed. `check` and schema grading run without a host.
+- Claude and Codex invoke stay unwired until those CLIs are confirmed. `check` and schema grading run without a host.
 
 ## Open questions and risks
 
-- Host CLIs for non-interactive Cursor, Claude Code, and Codex against a temp skill dir.
+- Host CLIs for non-interactive Claude Code and Codex against a temp skill dir. Cursor uses the agent CLI.
 - Whether hosts still load `~/.cursor/skills` during measured runs.
 - Case J turn 4 refers to "these three initiatives" without listing them. Fixture expects conceptual convergent per README.
 
 ## Next implementation step
 
-Done: `SKILL.md`, sibling eval package, parse, grade, fixtures A–J plus holdouts, drift check, schema_cases, operator README. `python -m whats_going_on_eval check` passes. Wire `agents.invoke` when a host CLI is confirmed.
+Done: `SKILL.md`, sibling eval package, parse, grade, fixtures A–J plus holdouts, drift check, schema_cases, operator README. `python -m whats_going_on_eval check` passes. Cursor `agents.invoke` calls the agent CLI. Claude and Codex stay unwired.

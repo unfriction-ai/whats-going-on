@@ -435,4 +435,4 @@ python -m whats_going_on_eval run --agent cursor --only case-a,case-f --repeat 1
 - Case A must abstain and ask for change, magnitude, and timeframe (or equivalent clarity).
 - Case F must return the why as the one problem and defer the prevention ask to `unresolved`.
 - If the agent proposes mobile fixes or a prevention plan, slice 1 failed.
-- `check` needs no agent. `run` needs a wired host CLI (stubbed until confirmed).
+- `check` needs no agent. `run --agent cursor` invokes the Cursor CLI. Claude and Codex are not wired yet.
