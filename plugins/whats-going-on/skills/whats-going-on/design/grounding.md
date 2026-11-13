@@ -15,13 +15,14 @@ Pipeline:
 1. Inspect without assuming a problem exists.
 2. Separate situation, problem, proposed approach, and classification.
 3. Extract zero or more problem candidates.
-4. Per candidate, abstain if undefined, else classify on analytical/conceptual × convergent/divergent.
-5. Aggregate to `not_a_problem` | `needs_clarification` | `classified` | `partial`.
-6. Stop. No solving.
+4. Sharpen one primary problem, the one that must be answered first. Leave every other candidate in `unresolved`.
+5. If that primary is undefined, abstain. Otherwise classify it on analytical/conceptual × convergent/divergent.
+6. Aggregate to `not_a_problem`, `needs_clarification`, `classified`, or `partial`.
+7. Stop. No solving.
 
-Output is the YAML contract in the README (`status`, `problems[]`, `unresolved[]`, `stop`).
+Output is the YAML contract in the README. `problems` has zero items or one item. Always emit `unresolved` and `stop`.
 
-Invariants: identification before classification, independent multi-problem classification, valid abstention, snapshot not lifecycle, no solving.
+Invariants: identification before classification, one primary problem, valid abstention, snapshot not lifecycle, no solving.
 
 ## Eval requirements (from shared design chat)
 
@@ -34,11 +35,11 @@ Test families to cover:
 | Family | Expected |
 |---|---|
 | Clear single problem | Identify and classify |
-| Multiple independent problems | Separate and classify each |
+| Multiple independent problems | Classify the one primary. Defer the rest. |
 | Ordinary request / FYI | `not_a_problem` or abstain |
 | Vague dissatisfaction | `needs_clarification` |
 | Proposed solution without demonstrated problem | Do not treat method as problem |
-| Compound ask | Split |
+| Compound ask | One primary. Other parts stay unresolved. |
 | Successive narrower asks | Reclassify as snapshot, not auto-lifecycle |
 
 Rubric weights (proposed):
