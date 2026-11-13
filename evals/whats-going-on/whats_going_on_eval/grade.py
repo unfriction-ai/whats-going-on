@@ -4,11 +4,11 @@ from __future__ import annotations
 
 import re
 from dataclasses import dataclass
-from itertools import permutations
-from typing import Any, Literal
+from typing import Literal
 
-from .fixtures import Expectation, Fixture, Turn, _gold_response_text
+from .fixtures import Expectation, ExpectedProblem, Fixture, Turn, _gold_response_text
 from .parse import (
+    ClassifiedProblem,
     ContractViolation,
     Halt,
     Response,
@@ -212,10 +212,9 @@ def _score_axes(
         classification = None
         abstention = _abstention_score(expect, verdict)
     else:
-        pairs = _align(expect.problems, [p.statement for p in verdict.problems])
-        denom = max(len(expect.problems), len(verdict.problems), 1)
-        separation = len(pairs) / denom
-        classification = _classification_score(expect, verdict, pairs)
+        pair = _primary_pair(expect, verdict)
+        separation = 1.0 if pair else 0.0
+        classification = _classification_score(pair)
         abstention = _classify_abstention(expect, verdict)
 
     if judgment is None:
@@ -269,53 +268,26 @@ def _classify_abstention(expect: Expectation, verdict: Verdict) -> float:
     return matched / len(expect.unresolved)
 
 
-def _classification_score(
-    expect: Expectation, verdict: Verdict, pairs: list[tuple[int, int]]
-) -> float:
-    if not expect.problems:
+def _primary_pair(
+    expect: Expectation, verdict: Verdict
+) -> tuple[ExpectedProblem, ClassifiedProblem] | None:
+    if not expect.problems or not verdict.problems:
+        return None
+    expected, actual = expect.problems[0], verdict.problems[0]
+    if all(p.search(actual.statement) for p in expected.anchors):
+        return expected, actual
+    return None
+
+
+def _classification_score(pair: tuple[ExpectedProblem, ClassifiedProblem] | None) -> float:
+    if pair is None:
+        return 0.0
+    expected, actual = pair
+    if actual.quadrant in expected.quadrants:
         return 1.0
-    scores: list[float] = []
-    paired_expected = {e for e, _ in pairs}
-    for ei, ai in pairs:
-        actual_q = verdict.problems[ai].quadrant
-        accepted = expect.problems[ei].quadrants
-        if actual_q in accepted:
-            scores.append(1.0)
-        elif actual_q.split("-")[0] == accepted[0].split("-")[0]:
-            scores.append(0.5)
-        else:
-            scores.append(0.0)
-    for ei in range(len(expect.problems)):
-        if ei not in paired_expected:
-            scores.append(0.0)
-    return sum(scores) / len(scores)
-
-
-def _align(
-    expected: tuple[Any, ...], statements: list[str]
-) -> list[tuple[int, int]]:
-    """Maximum one-to-one matching by anchor. Brute force for small N."""
-    n = len(expected)
-    m = len(statements)
-    if n == 0 or m == 0:
-        return []
-
-    def matches(ei: int, ai: int) -> bool:
-        return all(p.search(statements[ai]) for p in expected[ei].anchors)
-
-    best: list[tuple[int, int]] = []
-    for actual_perm in permutations(range(m), min(n, m)):
-        pairs: list[tuple[int, int]] = []
-        for ei, ai in enumerate(actual_perm):
-            if ei >= n:
-                break
-            if matches(ei, ai):
-                pairs.append((ei, ai))
-        if len(pairs) > len(best):
-            best = pairs
-        if len(best) == min(n, m):
-            break
-    return best
+    if actual.quadrant.split("-")[0] == expected.quadrants[0].split("-")[0]:
+        return 0.5
+    return 0.0
 
 
 def _weighted(axes: dict[str, float | None]) -> float:

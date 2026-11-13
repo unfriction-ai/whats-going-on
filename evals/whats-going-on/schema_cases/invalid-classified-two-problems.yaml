@@ -1,0 +1,16 @@
+expect_ok: false
+body: |
+  status: classified
+  problems:
+    - statement: "Why did checkout latency rise?"
+      classification: { nature: analytical, direction: convergent }
+      confidence: high
+      why: "A measured change with a timeframe."
+      next_method: "Compare telemetry before and after the change."
+    - statement: "What approaches could keep checkout latency low?"
+      classification: { nature: conceptual, direction: divergent }
+      confidence: medium
+      why: "Prevention approaches are design and judgment."
+      next_method: "Explore approaches before narrowing."
+  unresolved: []
+  stop: true

@@ -8,6 +8,7 @@ from pathlib import Path
 import yaml
 
 from .agents import HostNotWired, build_prompt, invoke
+from .chain import load_chain
 from .drift import check_suite
 from .fixtures import load_suite
 from .grade import FixtureRunResult, grade_run, summarize
@@ -20,6 +21,7 @@ from .manifest import (
     RUBRIC_PATH,
     SCHEMA_CASES_DIR,
     SKILL_DIR,
+    read_mount,
     skill_view_hash,
 )
 from .parse import Halt, Response, parse_response
@@ -29,9 +31,14 @@ from .runs import new_run_id, write_blind_compare, write_manifest, write_report,
 def cmd_check() -> int:
     fixtures = load_suite(FIXTURES_DIR)
     readme = (SKILL_DIR / "README.md").read_text()
-    skill = (SKILL_DIR / "SKILL.md").read_text()
     rubric_md = RUBRIC_PATH.read_text()
-    problems = check_suite(fixtures, readme=readme, skill=skill, rubric_md=rubric_md)
+    problems = check_suite(
+        fixtures,
+        readme=readme,
+        mode=load_chain(SKILL_DIR).mode,
+        mount=read_mount(SKILL_DIR),
+        rubric_md=rubric_md,
+    )
     schema_problems = _check_schema_cases()
     problems_text = [f"{p.kind}: {p.detail}" for p in problems] + schema_problems
     problems_text.extend(preamble_outcome_problems())

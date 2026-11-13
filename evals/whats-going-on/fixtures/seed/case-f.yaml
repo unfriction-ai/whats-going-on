@@ -7,20 +7,19 @@ turns:
     restatement: "The director of engineering asks why staging went down last night and for three realistic ways to stop this class of failure. They want those ways ranked."
     expect:
       kind: classify
-      statuses: [classified]
+      statuses: [partial]
       problems:
         - anchor: ["why", "staging|went down|outage"]
           quadrants: [analytical-convergent]
+      unresolved:
         - anchor: ["prevent|stop|ways|options", "failure|class"]
-          quadrants: [conceptual-divergent]
-      unresolved: []
     tripwires:
       invented: []
       methodNotProblem: []
       solveLeak: ["root cause was", "we should add", "phase 1"]
     gold: |
       ```yaml
-      status: classified
+      status: partial
       problems:
         - statement: "Why did staging go down last night?"
           classification:
@@ -29,12 +28,9 @@ turns:
           confidence: high
           why: "The ask wants an exact reason. Evidence should converge on what happened."
           next_method: "Evidence-based incident diagnosis. Finish this before prevention options."
-        - statement: "What realistic ways could prevent this class of failure, ranked by likelihood?"
-          classification:
-            nature: conceptual
-            direction: divergent
-          confidence: medium
-          why: "Prevention options are design and judgment. Ranking comes after options exist. Initially divergent."
-          next_method: "After the why is settled, explore prevention options, then rank. Do not invent options here."
+      unresolved:
+        - observation: "The director also wants three realistic ways to stop this class of failure, ranked by likelihood"
+          reason: "Deferred until the primary problem is answered. Prevention options depend on why staging went down."
+          clarification: "Ask about prevention again once the cause of the outage is settled."
       stop: true
       ```

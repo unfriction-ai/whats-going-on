@@ -4,20 +4,19 @@ turns:
     restatement: "The on-call lead asks why the nightly billing batch failed and how to stop it from happening again. The nightly billing batch failed."
     expect:
       kind: classify
-      statuses: [classified]
+      statuses: [partial]
       problems:
         - anchor: ["why", "billing|batch|fail"]
           quadrants: [analytical-convergent]
+      unresolved:
         - anchor: ["stop|again", "fail|batch"]
-          quadrants: [conceptual-divergent]
-      unresolved: []
     tripwires:
       invented: []
       methodNotProblem: []
       solveLeak: ["root cause was", "we should add"]
     gold: |
       ```yaml
-      status: classified
+      status: partial
       problems:
         - statement: "Why did the nightly billing batch fail?"
           classification:
@@ -25,13 +24,10 @@ turns:
             direction: convergent
           confidence: high
           why: "The ask wants the reason the batch failed. Evidence should converge on what happened."
-          next_method: "Evidence-based incident diagnosis. Finish this before prevention options."
-        - statement: "What approaches could stop the nightly billing batch from failing again?"
-          classification:
-            nature: conceptual
-            direction: divergent
-          confidence: medium
-          why: "Prevention approaches are design and judgment. Several moves stay open."
-          next_method: "After the why is settled, explore prevention approaches. Do not invent them here."
+          next_method: "Evidence-based incident diagnosis. Finish this before prevention approaches."
+      unresolved:
+        - observation: "The on-call lead also asks how to stop the nightly billing batch from failing again"
+          reason: "Deferred until the primary problem is answered. Prevention approaches depend on why the batch failed."
+          clarification: "Ask about prevention again once the cause of the batch failure is settled."
       stop: true
       ```
