@@ -1,11 +1,10 @@
-"""Host agent invocation. Stub until a non-interactive CLI is confirmed."""
-
 from __future__ import annotations
 
 import os
 import shutil
 import subprocess
 import tempfile
+from collections.abc import Callable
 from dataclasses import dataclass
 from pathlib import Path
 
@@ -19,7 +18,31 @@ class InvokeResult:
 
 
 class HostNotWired(RuntimeError):
-    """Raised when the operator asks for a live agent run before CLIs are wired."""
+    pass
+
+
+class HostInvokeError(RuntimeError):
+    pass
+
+
+def _cursor_argv(workspace: Path, prompt: str) -> list[str]:
+    return [
+        "agent",
+        "-p",
+        "--trust",
+        "--workspace",
+        str(workspace),
+        "--mode",
+        "ask",
+        "--output-format",
+        "text",
+        prompt,
+    ]
+
+
+_HOST_ARGV: dict[str, Callable[[Path, str], list[str]]] = {
+    "cursor": _cursor_argv,
+}
 
 
 def materialize_skill(skill_src: Path | None) -> Path:
@@ -141,8 +164,25 @@ def invoke(
         raise ValueError(f"unknown agent {agent!r}; choose from {sorted(HOST_SKILL_DIR)}")
     workspace = session_workspace or materialize_skill(skill_src)
     prompt = build_prompt(user_input)
-    raise HostNotWired(
-        f"live invoke for host {agent!r} is not wired yet. "
-        f"Workspace prepared at {workspace} with prompt length {len(prompt)}. "
-        "Use `check`, `grade`, or `--replay` until a host CLI is confirmed."
-    )
+    build_argv = _HOST_ARGV.get(agent)
+    if build_argv is None:
+        raise HostNotWired(
+            f"live invoke for host {agent!r} is not wired yet. "
+            f"Workspace prepared at {workspace} with prompt length {len(prompt)}. "
+            "Use `check` or `grade` until that host CLI is confirmed."
+        )
+    return InvokeResult(text=_capture_host(agent, build_argv(workspace, prompt)), workspace=workspace)
+
+
+def _capture_host(agent: str, argv: list[str]) -> str:
+    try:
+        proc = subprocess.run(argv, capture_output=True, text=True, check=False)
+    except FileNotFoundError as exc:
+        raise HostInvokeError(f"{agent} invoke failed: {argv[0]} not found") from exc
+    if proc.returncode != 0:
+        detail = (proc.stderr or proc.stdout).strip().splitlines()
+        tail = detail[-1] if detail else "no output"
+        raise HostInvokeError(f"{agent} invoke exited {proc.returncode}: {tail}")
+    if not proc.stdout.strip():
+        raise HostInvokeError(f"{agent} invoke returned empty text")
+    return proc.stdout

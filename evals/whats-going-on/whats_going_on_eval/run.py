@@ -7,7 +7,14 @@ from pathlib import Path
 
 import yaml
 
-from .agents import HostNotWired, build_prompt, host_load_problems, invoke, nested_leaf_rels
+from .agents import (
+    HostInvokeError,
+    HostNotWired,
+    build_prompt,
+    host_load_problems,
+    invoke,
+    nested_leaf_rels,
+)
 from .chain import load_chain
 from .drift import check_suite
 from .fixtures import load_suite
@@ -182,6 +189,9 @@ def cmd_run(args: argparse.Namespace) -> int:
             "Tip: `python -m whats_going_on_eval check` and schema grading work without a host.",
             file=sys.stderr,
         )
+        return 2
+    except HostInvokeError as exc:
+        print(str(exc), file=sys.stderr)
         return 2
 
     report = summarize(results, fixtures_by_id)
