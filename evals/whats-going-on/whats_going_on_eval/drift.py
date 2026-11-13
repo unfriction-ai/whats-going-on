@@ -104,13 +104,18 @@ def check_suite(
 
     contract_rel = CONTRACT_OWNER[mode]
     sentinel_rel = SENTINEL_OWNER[mode]
-    problems.extend(_contract_drift(readme, contract_rel, mount.get(contract_rel, "")))
+    for rel in (contract_rel, sentinel_rel):
+        if rel not in mount:
+            problems.append(DriftProblem("mount", f"{rel} is not on the derived mount"))
+    if contract_rel in mount:
+        problems.extend(_contract_drift(readme, contract_rel, mount[contract_rel]))
+    if sentinel_rel in mount:
+        problems.extend(_sentinel_sync(sentinel_rel, mount[sentinel_rel]))
     problems.extend(_enum_drift(readme))
     problems.extend(_seed_readme_drift(fixtures, readme))
     problems.extend(_gold_self_test(fixtures))
     problems.extend(_tripwire_vs_input(fixtures))
     problems.extend(_skill_contamination(fixtures, mount))
-    problems.extend(_sentinel_sync(sentinel_rel, mount.get(sentinel_rel, "")))
     problems.extend(_restatement_guard_self_test(RESTATEMENT_CASES_DIR))
     return problems
 

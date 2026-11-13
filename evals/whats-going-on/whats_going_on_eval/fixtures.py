@@ -9,7 +9,7 @@ from typing import Any, Literal
 
 import yaml
 
-from .parse import PREAMBLE_BUDGET, Response, parse_response
+from .parse import PREAMBLE_BUDGET, AtMostOne, Response, parse_response
 
 Kind = Literal["abstain", "classify"]
 Split = Literal["seed", "holdout"]
@@ -17,7 +17,6 @@ Split = Literal["seed", "holdout"]
 REQUIRED_FAMILIES = frozenset(
     {
         "clear_single",
-        "multiple_independent",
         "ordinary_or_fyi",
         "vague_dissatisfaction",
         "solution_without_problem",
@@ -42,7 +41,7 @@ class ExpectedUnresolved:
 class Expectation:
     kind: Kind
     statuses: tuple[str, ...]
-    problems: tuple[ExpectedProblem, ...]
+    problems: AtMostOne[ExpectedProblem]
     unresolved: tuple[ExpectedUnresolved, ...]
     asks: tuple[tuple[re.Pattern[str], ...], ...]
 
@@ -98,16 +97,12 @@ def derive_families(fixture_id: str, turns: tuple[Turn, ...]) -> frozenset[str]:
     abstain_turns = [t for t in turns if t.expect.kind == "abstain"]
 
     for turn in classify_turns:
-        n = len(turn.expect.problems)
-        if n == 1 and not turn.expect.unresolved:
-            families.add("clear_single")
-        if n >= 2:
-            families.add("multiple_independent")
-            families.add("compound")
-        if turn.expect.unresolved:
-            families.add("solution_without_problem")
         if turn.tripwires.method_not_problem:
             families.add("solution_without_problem")
+        if not turn.expect.unresolved:
+            families.add("clear_single")
+        elif not turn.tripwires.method_not_problem:
+            families.add("compound")
 
     for turn in abstain_turns:
         if "not_a_problem" in turn.expect.statuses and not turn.expect.unresolved:
@@ -176,25 +171,22 @@ def _parse_expectation(raw: dict[str, Any]) -> Expectation:
         )
 
     problems_raw = raw.get("problems")
-    if not isinstance(problems_raw, list) or not problems_raw:
-        raise ValueError("classify expect.problems must be non-empty")
-    problems: list[ExpectedProblem] = []
-    for i, item in enumerate(problems_raw):
-        if not isinstance(item, dict):
-            raise ValueError(f"problems[{i}] must be a mapping")
-        quads = item.get("quadrants")
-        if not isinstance(quads, list) or not quads:
-            raise ValueError(f"problems[{i}].quadrants must be non-empty")
-        problems.append(
-            ExpectedProblem(
-                anchors=_compile_anchor_list(item.get("anchor"), f"problems[{i}].anchor"),
-                quadrants=tuple(str(q) for q in quads),
-            )
-        )
+    if not isinstance(problems_raw, list) or len(problems_raw) != 1:
+        raise ValueError("classify expect.problems must hold exactly one primary problem")
+    item = problems_raw[0]
+    if not isinstance(item, dict):
+        raise ValueError("problems[0] must be a mapping")
+    quads = item.get("quadrants")
+    if not isinstance(quads, list) or not quads:
+        raise ValueError("problems[0].quadrants must be non-empty")
+    primary = ExpectedProblem(
+        anchors=_compile_anchor_list(item.get("anchor"), "problems[0].anchor"),
+        quadrants=tuple(str(q) for q in quads),
+    )
     return Expectation(
         kind="classify",
         statuses=tuple(str(s) for s in statuses),
-        problems=tuple(problems),
+        problems=(primary,),
         unresolved=tuple(unresolved),
         asks=(),
     )

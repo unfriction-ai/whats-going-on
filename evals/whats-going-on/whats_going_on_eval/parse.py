@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import re
 from dataclasses import dataclass
-from typing import Any, Literal
+from typing import Any, Literal, TypeVar
 
 import yaml
 
@@ -33,6 +33,9 @@ FENCE_RE = re.compile(r"```yaml\s*\n(.*?)```", re.DOTALL | re.IGNORECASE)
 VERDICT_KEYS = frozenset({"status", "problems", "unresolved", "stop"})
 HALT_KEYS = frozenset({"next_stage", "available", "stop"})
 
+T = TypeVar("T")
+AtMostOne = tuple[()] | tuple[T]
+
 
 @dataclass(frozen=True)
 class ClassifiedProblem:
@@ -41,6 +44,9 @@ class ClassifiedProblem:
     confidence: Confidence
     why: str
     next_method: str
+
+
+Problems = AtMostOne[ClassifiedProblem]
 
 
 @dataclass(frozen=True)
@@ -53,7 +59,7 @@ class Unresolved:
 @dataclass(frozen=True)
 class Verdict:
     status: Status
-    problems: tuple[ClassifiedProblem, ...]
+    problems: Problems
     unresolved: tuple[Unresolved, ...]
 
 
@@ -88,9 +94,7 @@ class ContractViolation:
     detail: str = ""
 
 
-def derive_status(
-    problems: tuple[ClassifiedProblem, ...], unresolved: tuple[Unresolved, ...]
-) -> Status:
+def derive_status(problems: Problems, unresolved: tuple[Unresolved, ...]) -> Status:
     has_p = len(problems) > 0
     has_u = len(unresolved) > 0
     if not has_p and not has_u:
@@ -181,13 +185,17 @@ def _validate_wire(raw: dict[str, Any], preamble: str) -> Outcome | ContractViol
         return ContractViolation("schema", "problems must be a list")
     if not isinstance(unresolved_raw, list):
         return ContractViolation("schema", "unresolved must be a list")
+    if len(problems_raw) > 1:
+        return ContractViolation(
+            "schema", f"problems holds at most one primary problem, got {len(problems_raw)}"
+        )
 
-    problems: list[ClassifiedProblem] = []
-    for i, item in enumerate(problems_raw):
-        parsed = _parse_problem(item, f"problems[{i}]")
-        if isinstance(parsed, ContractViolation):
-            return parsed
-        problems.append(parsed)
+    problems_t: Problems = ()
+    if problems_raw:
+        primary = _parse_problem(problems_raw[0], "problems[0]")
+        if isinstance(primary, ContractViolation):
+            return primary
+        problems_t = (primary,)
 
     unresolved: list[Unresolved] = []
     for i, item in enumerate(unresolved_raw):
@@ -196,7 +204,6 @@ def _validate_wire(raw: dict[str, Any], preamble: str) -> Outcome | ContractViol
             return parsed
         unresolved.append(parsed)
 
-    problems_t = tuple(problems)
     unresolved_t = tuple(unresolved)
     derived = derive_status(problems_t, unresolved_t)
     if claimed != derived:

@@ -2,7 +2,7 @@
 
 Tagline: Understand the situation before deciding what to solve.
 
-`/whats-going-on` examines an ask, message, or described situation. Slice 1 finds zero, one, or many problems in that input, decides whether each one is defined enough to classify, and maps each eligible problem onto a 2×2. It stops before diagnosis, brainstorming, or solutions.
+`/whats-going-on` examines an ask, message, or described situation. Slice 1 finds what needs resolving in that input, picks at most one primary problem, decides whether it is defined enough to classify, and maps it onto a 2×2. It stops before diagnosis, brainstorming, or solutions.
 
 Works with Cursor Agent Skills, Claude Code skills, and Codex skills. Same `SKILL.md` body. Install path differs by tool.
 
@@ -34,8 +34,8 @@ Do not classify a proposed method as the problem. Identify the question the work
 |---|---|---|
 | `not_a_problem` | No decision or problem to resolve (for example a pure FYI) | Say so and stop |
 | `needs_clarification` | Concern or symptom is present, but the problem is not defined enough | Abstain. Ask for what is missing |
-| `classified` | One or more problems are defined | State each problem and its quadrant |
-| `partial` | Some parts are defined, others are not | Classify the clear ones. Abstain on the rest |
+| `classified` | One primary problem is defined and nothing else is open | State the problem and its quadrant |
+| `partial` | One primary problem is defined, other concerns stay open | Classify the primary. List the rest in `unresolved` |
 
 Hard fail: inventing details to force a quadrant, or starting to solve while classifying.
 
@@ -75,7 +75,7 @@ Assess each extracted problem on its own. Failure to classify one must not block
 ## Invariants
 
 1. Identification before classification. Never force an undefined concern into the matrix.
-2. Independent classification. Multiple problems may land in different quadrants.
+2. One primary problem. Other concerns wait in `unresolved` until the primary is answered.
 3. Abstention is valid. Missing data to *solve* does not block classification. Missing data to *identify* does.
 4. Classification is a snapshot. The quadrant describes the current reasoning objective, not a permanent property of the situation.
 5. No solving. No root-cause hunt, issue trees, brainstorms, plans, or recommendations in this slice.
@@ -290,7 +290,7 @@ problems:
 stop: true
 ```
 
-### Case F. Compound ask (split)
+### Case F. Compound ask (one primary)
 
 **Input**
 
@@ -302,12 +302,12 @@ ways to stop this class of failure, ranked by how likely they are to work."
 
 **What to notice**
 
-Two problems in one sentence. "Why staging went down" is diagnosis. "How to stop this class of failure" starts as option generation. Treating them as one type lets a diagnosis fail to inform the ideas.
+Two questions in one sentence. "Why staging went down" is diagnosis. "How to stop this class of failure" is option generation, and it depends on the answer to the first. The why is the primary problem. The prevention ask waits in `unresolved` until the why is answered.
 
 **Expected result**
 
 ```yaml
-status: classified
+status: partial
 problems:
   - statement: "Why did staging go down last night?"
     classification:
@@ -316,13 +316,10 @@ problems:
     confidence: high
     why: "The ask wants an exact reason. Evidence should converge on what happened."
     next_method: "Evidence-based incident diagnosis. Finish this before prevention options."
-  - statement: "What realistic ways could prevent this class of failure, ranked by likelihood?"
-    classification:
-      nature: conceptual
-      direction: divergent
-    confidence: medium
-    why: "Prevention options are design and judgment. Ranking comes after options exist. Initially divergent."
-    next_method: "After the why is settled, explore prevention options, then rank. Do not invent options here."
+unresolved:
+  - observation: "The director also wants three realistic ways to stop this class of failure, ranked by likelihood"
+    reason: "Deferred until the primary problem is answered. Prevention options depend on why staging went down."
+    clarification: "Ask about prevention again once the cause of the outage is settled."
 stop: true
 ```
 
@@ -438,6 +435,6 @@ python -m whats_going_on_eval run --agent cursor --only case-a,case-f --repeat 1
 ```
 
 - Case A must abstain and ask for change, magnitude, and timeframe (or equivalent clarity).
-- Case F must return two problems with different types.
+- Case F must return the why as the one problem and defer the prevention ask to `unresolved`.
 - If the agent proposes mobile fixes or a prevention plan, slice 1 failed.
 - `check` needs no agent. `run` needs a wired host CLI (stubbed until confirmed).
