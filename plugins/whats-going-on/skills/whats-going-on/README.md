@@ -32,7 +32,7 @@ Do not classify a proposed method as the problem. Identify the question the work
 
 | Outcome | When | Behavior |
 |---|---|---|
-| `not_a_problem` | No decision or problem to resolve (for example a pure FYI) | Say so and stop |
+| `not_a_problem` | No decision or problem to resolve (for example a pure FYI or a fully specified rename) | Say so and stop |
 | `needs_clarification` | Concern or symptom is present, but the problem is not defined enough | Abstain. Ask for what is missing |
 | `classified` | One primary problem is defined and nothing else is open | State the problem and its quadrant |
 | `partial` | One primary problem is defined, other concerns stay open | Classify the primary. List the rest in `unresolved` |
