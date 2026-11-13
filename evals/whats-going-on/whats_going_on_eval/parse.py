@@ -1,4 +1,4 @@
-"""Boundary: raw agent text -> Verdict, or a ContractViolation."""
+"""Boundary: raw agent text -> Response | Halt, or a ContractViolation."""
 
 from __future__ import annotations
 
@@ -29,6 +29,9 @@ PREAMBLE_BUDGET = 400
 NO_ASK = "No ask is stated."
 
 FENCE_RE = re.compile(r"```yaml\s*\n(.*?)```", re.DOTALL | re.IGNORECASE)
+
+VERDICT_KEYS = frozenset({"status", "problems", "unresolved", "stop"})
+HALT_KEYS = frozenset({"next_stage", "available", "stop"})
 
 
 @dataclass(frozen=True)
@@ -64,6 +67,19 @@ class Restatement:
 class Response:
     preamble: str
     verdict: Verdict
+
+
+@dataclass(frozen=True)
+class Halt:
+    """Coordinator refusal when the next playbook file is not shipped."""
+
+    preamble: str
+    next_stage: str
+    available: Literal[False]
+    stop: Literal[True]
+
+
+Outcome = Response | Halt
 
 
 @dataclass(frozen=True)
@@ -104,7 +120,7 @@ def parse_restatement(preamble: str) -> Restatement | None:
     return Restatement(text=text, ask_stated=not no_ask)
 
 
-def parse_response(text: str) -> Response | ContractViolation:
+def parse_response(text: str) -> Outcome | ContractViolation:
     matches = list(FENCE_RE.finditer(text))
     if not matches:
         return ContractViolation("no_yaml_block")
@@ -136,9 +152,15 @@ def _nonblank(value: Any, path: str) -> str | ContractViolation:
     return value.strip()
 
 
-def _validate_wire(raw: dict[str, Any], preamble: str) -> Response | ContractViolation:
-    allowed = {"status", "problems", "unresolved", "stop"}
-    unknown = set(raw) - allowed
+def _validate_wire(raw: dict[str, Any], preamble: str) -> Outcome | ContractViolation:
+    keys = set(raw)
+    if "next_stage" in keys:
+        unknown_halt = keys - HALT_KEYS
+        if unknown_halt:
+            return ContractViolation("schema", f"unknown keys: {sorted(unknown_halt)}")
+        return _validate_halt(raw, preamble)
+
+    unknown = keys - VERDICT_KEYS
     if unknown:
         return ContractViolation("schema", f"unknown keys: {sorted(unknown)}")
 
@@ -185,6 +207,22 @@ def _validate_wire(raw: dict[str, Any], preamble: str) -> Response | ContractVio
     return Response(
         preamble=preamble,
         verdict=Verdict(status=derived, problems=problems_t, unresolved=unresolved_t),
+    )
+
+
+def _validate_halt(raw: dict[str, Any], preamble: str) -> Halt | ContractViolation:
+    if raw.get("stop") is not True:
+        return ContractViolation("schema", "stop must be literal true")
+    if raw.get("available") is not False:
+        return ContractViolation("schema", "available must be literal false")
+    next_stage = _nonblank(raw.get("next_stage"), "next_stage")
+    if isinstance(next_stage, ContractViolation):
+        return next_stage
+    return Halt(
+        preamble=preamble,
+        next_stage=next_stage,
+        available=False,
+        stop=True,
     )
 
 
