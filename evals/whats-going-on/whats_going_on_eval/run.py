@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import shutil
 import sys
 from pathlib import Path
 
@@ -165,23 +166,27 @@ def cmd_run(args: argparse.Namespace) -> int:
             for rep in range(1, args.repeat + 1):
                 responses: list[str] = []
                 workspace = None
-                for turn_i, turn in enumerate(fixture.turns):
-                    result = invoke(
-                        agent=args.agent,
-                        user_input=turn.input,
-                        skill_src=skill_src,
-                        session_workspace=workspace,
-                    )
-                    workspace = result.workspace
-                    write_transcript(
-                        run_id,
-                        fixture.id,
-                        rep,
-                        turn_i,
-                        prompt=build_prompt(turn.input),
-                        response=result.text,
-                    )
-                    responses.append(result.text)
+                try:
+                    for turn_i, turn in enumerate(fixture.turns):
+                        result = invoke(
+                            agent=args.agent,
+                            user_input=turn.input,
+                            skill_src=skill_src,
+                            session_workspace=workspace,
+                        )
+                        workspace = result.workspace
+                        write_transcript(
+                            run_id,
+                            fixture.id,
+                            rep,
+                            turn_i,
+                            prompt=build_prompt(turn.input),
+                            response=result.text,
+                        )
+                        responses.append(result.text)
+                finally:
+                    if workspace is not None:
+                        shutil.rmtree(workspace, ignore_errors=True)
                 results.append(grade_run(fixture, rep, responses))
     except HostNotWired as exc:
         print(str(exc), file=sys.stderr)

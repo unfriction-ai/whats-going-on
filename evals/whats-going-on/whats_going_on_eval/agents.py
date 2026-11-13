@@ -10,6 +10,7 @@ from pathlib import Path
 
 from .manifest import HOST_SKILL_DIR, INSTALL_SKILL_DIR, agent_mount
 
+INVOKE_TIMEOUT_S = 600
 
 @dataclass(frozen=True)
 class InvokeResult:
@@ -174,11 +175,33 @@ def invoke(
     return InvokeResult(text=_capture_host(agent, build_argv(workspace, prompt)), workspace=workspace)
 
 
+def scratch_home() -> Path:
+    """A HOME with no user skills or plugins. Only the login keychain links through, so the CLI stays signed in."""
+    home = Path(tempfile.mkdtemp(prefix="wgo-home-"))
+    keychains = Path.home() / "Library" / "Keychains"
+    if keychains.is_dir():
+        (home / "Library").mkdir()
+        (home / "Library" / "Keychains").symlink_to(keychains)
+    return home
+
+
 def _capture_host(agent: str, argv: list[str]) -> str:
+    home = scratch_home()
     try:
-        proc = subprocess.run(argv, capture_output=True, text=True, check=False)
+        proc = subprocess.run(
+            argv,
+            env={**os.environ, "HOME": str(home)},
+            capture_output=True,
+            text=True,
+            check=False,
+            timeout=INVOKE_TIMEOUT_S,
+        )
     except FileNotFoundError as exc:
         raise HostInvokeError(f"{agent} invoke failed: {argv[0]} not found") from exc
+    except subprocess.TimeoutExpired as exc:
+        raise HostInvokeError(f"{agent} invoke timed out after {INVOKE_TIMEOUT_S}s") from exc
+    finally:
+        shutil.rmtree(home, ignore_errors=True)
     if proc.returncode != 0:
         detail = (proc.stderr or proc.stdout).strip().splitlines()
         tail = detail[-1] if detail else "no output"
