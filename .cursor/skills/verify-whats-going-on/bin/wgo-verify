@@ -1,0 +1,279 @@
+#!/usr/bin/env bash
+# Harness for verifying whats-going-on. Invoke from anywhere; resolves repo root.
+set -euo pipefail
+
+SKILL_DIR="$(cd "$(dirname "$0")/.." && pwd)"
+# .cursor/skills/verify-whats-going-on → repo root is three levels up.
+REPO_ROOT="$(cd "$SKILL_DIR/../../.." && pwd)"
+EVAL_DIR="$REPO_ROOT/evals/whats-going-on"
+STATE_LINK="$SKILL_DIR/scratch/current"
+ARTIFACTS_ROOT="$SKILL_DIR/artifacts"
+
+die() { echo "wgo-verify: $*" >&2; exit 1; }
+
+require_state() {
+  [[ -L "$STATE_LINK" || -f "$STATE_LINK" ]] || die "no active run; run: $0 launch"
+  # shellcheck disable=SC1090
+  source "$STATE_LINK/env.sh"
+  [[ -n "${WGO_RUN_ID:-}" && -n "${WGO_SCRATCH:-}" ]] || die "corrupt state at $STATE_LINK"
+}
+
+cmd_launch() {
+  local run_id scratch venv
+  run_id="wgo-$(date -u +%Y%m%dT%H%M%SZ)-$$"
+  scratch="$SKILL_DIR/scratch/$run_id"
+  venv="$scratch/venv"
+  mkdir -p "$scratch/home" "$ARTIFACTS_ROOT/$run_id"
+  python3 -m venv "$venv"
+  # shellcheck disable=SC1091
+  source "$venv/bin/activate"
+  pip install -q -r "$EVAL_DIR/requirements.txt"
+  cat >"$scratch/env.sh" <<EOF
+export WGO_RUN_ID='$run_id'
+export WGO_SCRATCH='$scratch'
+export WGO_ARTIFACTS='$ARTIFACTS_ROOT/$run_id'
+export WGO_REPO='$REPO_ROOT'
+export WGO_EVAL='$EVAL_DIR'
+export WGO_VENV='$venv'
+export HOME='$scratch/home'
+export PATH='$venv/bin:'"\$PATH"
+EOF
+  ln -sfn "$scratch" "$STATE_LINK"
+  # Ready gate: eval suite must pass before any drive.
+  # shellcheck disable=SC1090
+  source "$scratch/env.sh"
+  (
+    cd "$EVAL_DIR"
+    python -m whats_going_on_eval check
+  ) | tee "$ARTIFACTS_ROOT/$run_id/launch-check.txt"
+  grep -q '^check OK' "$ARTIFACTS_ROOT/$run_id/launch-check.txt" \
+    || die "launch ready-gate failed: check did not print check OK"
+  echo "launch OK run_id=$run_id scratch=$scratch artifacts=$ARTIFACTS_ROOT/$run_id"
+}
+
+cmd_doctor() {
+  require_state
+  local out="$WGO_ARTIFACTS/doctor.txt"
+  {
+    echo "run_id=$WGO_RUN_ID"
+    echo "scratch=$WGO_SCRATCH"
+    echo "artifacts=$WGO_ARTIFACTS"
+    echo "repo=$WGO_REPO"
+    echo "HOME=$HOME"
+    echo "python=$(command -v python)"
+    python --version
+    test -f "$WGO_EVAL/whats_going_on_eval/__main__.py" && echo "eval_package=ok" || echo "eval_package=MISSING"
+    test -f "$WGO_REPO/skills/whats-going-on/SKILL.md" && echo "canonical_skill=ok" || echo "canonical_skill=MISSING"
+    # HOME must be the disposable scratch home, never the operator's real home.
+    case "$HOME" in
+      "$WGO_SCRATCH/home") echo "home_isolated=ok" ;;
+      *) echo "home_isolated=FAIL expected=$WGO_SCRATCH/home got=$HOME"; exit 1 ;;
+    esac
+    # Refuse to treat a shared real install as ours.
+    if [[ -e "${HOME}/.cursor/plugins/local/whats-going-on" ]]; then
+      echo "scratch_cursor_plugin=present"
+    else
+      echo "scratch_cursor_plugin=absent"
+    fi
+    (
+      cd "$WGO_EVAL"
+      python -m whats_going_on_eval check
+    )
+    bash "$WGO_REPO/scripts/assert-canonical-skill.sh"
+  } | tee "$out"
+  grep -q '^check OK' "$out" || die "doctor: eval check failed"
+  grep -q 'canonical skill ok' "$out" || die "doctor: assert-canonical-skill failed"
+  grep -q 'home_isolated=ok' "$out" || die "doctor: HOME not isolated"
+  echo "doctor OK"
+}
+
+cmd_drive() {
+  require_state
+  local feature="${1:-}"
+  [[ -n "$feature" ]] || die "usage: $0 drive <feature-id>"
+  local out_dir="$WGO_ARTIFACTS/$feature"
+  mkdir -p "$out_dir"
+  case "$feature" in
+    eval-suite-health)
+      (
+        cd "$WGO_EVAL"
+        python -m whats_going_on_eval check
+      ) | tee "$out_dir/check.txt"
+      grep -q '^check OK' "$out_dir/check.txt" || die "drive $feature failed"
+      echo "feature=$feature" >"$out_dir/proof.txt"
+      echo "entry=python -m whats_going_on_eval check" >>"$out_dir/proof.txt"
+      echo "observable=check OK with fixture and schema_cases counts" >>"$out_dir/proof.txt"
+      ;;
+    canonical-skill-integrity)
+      bash "$WGO_REPO/scripts/assert-canonical-skill.sh" | tee "$out_dir/assert.txt"
+      grep -q 'canonical skill ok' "$out_dir/assert.txt" || die "drive $feature failed"
+      # Prove evals are not referenced by host manifests only (skill prose may mention evals/).
+      local manifest
+      while IFS= read -r manifest; do
+        [[ -z "$manifest" ]] && continue
+        if grep -Iq 'evals/' "$manifest"; then
+          die "host manifests must not reference evals/: $manifest"
+        fi
+      done < <(
+        find "$WGO_REPO"/.cursor-plugin "$WGO_REPO"/.claude-plugin "$WGO_REPO"/plugins \
+          \( -name plugin.json -o -name marketplace.json \) -print 2>/dev/null || true
+      )
+      echo "feature=$feature" >"$out_dir/proof.txt"
+      echo "entry=scripts/assert-canonical-skill.sh" >>"$out_dir/proof.txt"
+      echo "observable=canonical skill ok; no evals/ in host manifests" >>"$out_dir/proof.txt"
+      ;;
+    local-host-install)
+      # Disposable HOME only. Never install into the operator's real home.
+      bash "$WGO_REPO/scripts/install-local.sh" --host all | tee "$out_dir/install.txt"
+      local cursor_dest="$HOME/.cursor/plugins/local/whats-going-on"
+      local claude_dest="$HOME/.claude/skills/whats-going-on"
+      local codex_dest="$HOME/.agents/skills/whats-going-on"
+      test -f "$cursor_dest/skills/whats-going-on/SKILL.md" || die "cursor install missing SKILL.md"
+      test ! -e "$cursor_dest/evals" || die "cursor install leaked evals/"
+      test -f "$claude_dest/SKILL.md" || die "claude install missing SKILL.md"
+      test ! -e "$claude_dest/evals" || die "claude install leaked evals/"
+      test -f "$codex_dest/SKILL.md" || die "codex install missing SKILL.md"
+      test ! -e "$codex_dest/evals" || die "codex install leaked evals/"
+      {
+        echo "cursor=$cursor_dest"
+        ls -la "$cursor_dest/skills/whats-going-on/SKILL.md"
+        echo "claude=$claude_dest"
+        ls -la "$claude_dest/SKILL.md"
+        echo "codex=$codex_dest"
+        ls -la "$codex_dest/SKILL.md"
+        echo "HOME=$HOME"
+      } | tee "$out_dir/installed-tree.txt"
+      echo "feature=$feature" >"$out_dir/proof.txt"
+      echo "entry=scripts/install-local.sh --host all (HOME=\$WGO_SCRATCH/home)" >>"$out_dir/proof.txt"
+      echo "observable=SKILL.md present on cursor/claude/codex paths; evals/ absent" >>"$out_dir/proof.txt"
+      ;;
+    abstain-vague-ask|compound-classification)
+      python - "$feature" "$out_dir" "$WGO_EVAL" <<'PY'
+import json, sys
+from pathlib import Path
+
+feature, out_dir, eval_dir = sys.argv[1], Path(sys.argv[2]), Path(sys.argv[3])
+sys.path.insert(0, str(eval_dir))
+from whats_going_on_eval.fixtures import load_suite
+from whats_going_on_eval.grade import grade_gold, describe_hard_fail
+from whats_going_on_eval.manifest import FIXTURES_DIR
+
+fixture_id = "case-a" if feature == "abstain-vague-ask" else "case-f"
+fixtures = {f.id: f for f in load_suite(FIXTURES_DIR)}
+fixture = fixtures[fixture_id]
+results = grade_gold(fixture)
+hard = [describe_hard_fail(h) for t in results for h in t.hard_fails]
+payload = {
+    "feature": feature,
+    "fixture_id": fixture_id,
+    "user_input": fixture.turns[0].input,
+    "gold_status": fixture.turns[0].gold.verdict.status,
+    "problem_count": len(fixture.turns[0].gold.verdict.problems),
+    "unresolved_count": len(fixture.turns[0].gold.verdict.unresolved),
+    "scores": [t.score for t in results],
+    "hard_fails": hard,
+    "note": (
+        "This drive always proves the fixture gold path. Cursor live run is "
+        "wired when the agent CLI is on PATH; proof.txt records live_run status. "
+        f"Also: python -m whats_going_on_eval run --agent cursor --only {fixture_id} --repeat 1"
+    ),
+}
+(out_dir / "gold-grade.json").write_text(json.dumps(payload, indent=2) + "\n")
+(out_dir / "prompt.txt").write_text(
+    f"/whats-going-on\n\n{fixture.turns[0].input.strip()}\n"
+)
+(out_dir / "gold-response.txt").write_text(fixture.turns[0].gold_text.strip() + "\n")
+if hard or any(s < 1.0 for s in payload["scores"]):
+    raise SystemExit(f"gold grade failed for {fixture_id}: {payload}")
+print(json.dumps(payload, indent=2))
+PY
+      echo "feature=$feature" >"$out_dir/proof.txt"
+      echo "entry=/whats-going-on + fixture gold grade ($feature)" >>"$out_dir/proof.txt"
+      echo "observable=gold scores 1.0; see gold-grade.json and prompt.txt" >>"$out_dir/proof.txt"
+      # Document live path status for this feature's fixture.
+      local only_id="case-a"
+      [[ "$feature" == "compound-classification" ]] && only_id="case-f"
+      if (
+        cd "$WGO_EVAL"
+        python -m whats_going_on_eval run --agent cursor --only "$only_id" --repeat 1
+      ) >"$out_dir/live-run.txt" 2>&1; then
+        echo "live_run=ok" >>"$out_dir/proof.txt"
+      else
+        if grep -q 'HostNotWired\|not wired' "$out_dir/live-run.txt"; then
+          echo "live_run=stubbed_HostNotWired" >>"$out_dir/proof.txt"
+        elif grep -Eqi 'Authentication required|CURSOR_API_KEY|agent login' "$out_dir/live-run.txt"; then
+          echo "live_run=unreachable_missing_auth" >>"$out_dir/proof.txt"
+          echo "prerequisite=agent login or CURSOR_API_KEY" >>"$out_dir/proof.txt"
+        elif grep -Eqi 'not found|No such file|command not found' "$out_dir/live-run.txt"; then
+          echo "live_run=unreachable_missing_cli" >>"$out_dir/proof.txt"
+          echo "prerequisite=cursor agent CLI on PATH" >>"$out_dir/proof.txt"
+        else
+          cat "$out_dir/live-run.txt" >&2
+          die "live run failed for an unexpected reason"
+        fi
+      fi
+      ;;
+    *)
+      die "unknown feature-id: $feature (see features/README.md)"
+      ;;
+  esac
+  echo "drive OK feature=$feature artifacts=$out_dir"
+}
+
+cmd_cleanup() {
+  if [[ ! -L "$STATE_LINK" && ! -f "$STATE_LINK" ]]; then
+    echo "cleanup: nothing active"
+    return 0
+  fi
+  # shellcheck disable=SC1090
+  source "$STATE_LINK/env.sh"
+  local scratch="$WGO_SCRATCH"
+  local artifacts="$WGO_ARTIFACTS"
+  rm -f "$STATE_LINK"
+  # Kill only what we started: no long-lived server. Remove scratch only.
+  rm -rf "$scratch"
+  # Evidence must survive.
+  [[ -d "$artifacts" ]] || die "cleanup ate artifacts at $artifacts"
+  echo "cleanup OK removed=$scratch kept=$artifacts"
+}
+
+cmd_status() {
+  if [[ -L "$STATE_LINK" || -f "$STATE_LINK" ]]; then
+    # shellcheck disable=SC1090
+    source "$STATE_LINK/env.sh"
+    echo "active run_id=$WGO_RUN_ID scratch=$WGO_SCRATCH artifacts=$WGO_ARTIFACTS"
+  else
+    echo "no active run"
+  fi
+}
+
+usage() {
+  cat <<EOF
+Usage: wgo-verify <launch|doctor|drive|cleanup|status> [args]
+
+  launch              Create isolated scratch (venv + disposable HOME), run ready-gate
+  doctor              Read-only health of the active verification instance
+  drive <feature-id>  Drive one mapped feature; write proof under artifacts/
+  cleanup             Remove scratch for the active run; keep artifacts/
+  status              Show active run pointers
+
+Feature ids: eval-suite-health, canonical-skill-integrity, local-host-install,
+             abstain-vague-ask, compound-classification
+EOF
+}
+
+main() {
+  local cmd="${1:-}"
+  shift || true
+  case "$cmd" in
+    launch) cmd_launch "$@" ;;
+    doctor) cmd_doctor "$@" ;;
+    drive) cmd_drive "$@" ;;
+    cleanup) cmd_cleanup "$@" ;;
+    status) cmd_status "$@" ;;
+    -h|--help|help|"") usage ;;
+    *) die "unknown command: $cmd" ;;
+  esac
+}
+
+main "$@"
