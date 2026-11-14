@@ -22,5 +22,9 @@ turns:
         - observation: "VP wants a Kubernetes migration plan"
           reason: "A proposed platform move is not yet a defined problem. No pain, goal, or decision criteria are stated."
           clarification: "What problem is Kubernetes meant to solve, and what decision does the plan need to support?"
+      applied:
+        - name: principle-dont-invent-problems
+          at: unresolved[0]
+          changed: "Kept the requested migration unresolved instead of supplying the problem it would solve."
       stop: true
       ```

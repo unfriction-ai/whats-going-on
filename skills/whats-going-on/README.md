@@ -104,10 +104,15 @@ unresolved:
     reason: "Why this is not yet a defined problem"
     clarification: "What to ask next"
 
+applied:
+  - name: principle-<name>
+    at: status | problems[0] | problems[0].classification | problems[0].confidence | unresolved[<i>]
+    changed: "The choice the principle changed, in one line"
+
 stop: true
 ```
 
-`problems` holds at most one item, the primary. An empty `problems` list is valid when status is `needs_clarification` or `not_a_problem`. Always emit `unresolved`. Write `[]` when it is empty.
+`problems` holds at most one item, the primary. An empty `problems` list is valid when status is `needs_clarification` or `not_a_problem`. Always emit `unresolved`. Write `[]` when it is empty. Always emit `applied`. Write `[]` when no principle decided a value.
 
 ## Install
 
@@ -162,6 +167,10 @@ unresolved:
   - observation: "Mobile is in a rough place; eng has competing theories"
     reason: "No measurable change, magnitude, or timeframe. Competing theories are not yet a defined question."
     clarification: "What changed, by how much, and since when? What decision are you trying to make?"
+applied:
+  - name: principle-dont-invent-problems
+    at: unresolved[0]
+    changed: "Kept the concern unresolved instead of naming a metric or cause the input never gives."
 stop: true
 ```
 
@@ -192,6 +201,7 @@ problems:
     why: "Latency estimation needs quantitative data. The objective is one figure for a defined capacity decision."
     next_method: "Estimate from production telemetry and load assumptions. Do not open an architecture redesign workshop."
 unresolved: []
+applied: []
 stop: true
 ```
 
@@ -224,6 +234,7 @@ problems:
     why: "The ask is about a collaboration process. The lead wants a small set of concrete changes this sprint, not open exploration."
     next_method: "Generate and narrow handoff changes toward one or two fixes. Do not propose the fixes in this slice."
 unresolved: []
+applied: []
 stop: true
 ```
 
@@ -254,6 +265,7 @@ problems:
     why: "Culture and norms are conceptual. The ask invites many possible moves. No short list of options is fixed yet."
     next_method: "Broad exploration of approaches before any narrowing. Do not brainstorm the list in this slice."
 unresolved: []
+applied: []
 stop: true
 ```
 
@@ -284,6 +296,7 @@ problems:
     why: "Clutter reduction is a design and priority call. The ask already requires settling on a small set of changes by a deadline."
     next_method: "Compare candidate UI changes and narrow to one or two. Do not pick them in this slice."
 unresolved: []
+applied: []
 stop: true
 ```
 
@@ -317,6 +330,13 @@ unresolved:
   - observation: "The director also wants three realistic ways to stop this class of failure, ranked by likelihood"
     reason: "Deferred until the primary problem is answered. Prevention options depend on why staging went down."
     clarification: "Ask about prevention again once the cause of the outage is settled."
+applied:
+  - name: principle-read-the-room
+    at: problems[0]
+    changed: "Picked the why as primary because the prevention options depend on its answer."
+  - name: principle-read-the-room
+    at: unresolved[0]
+    changed: "Deferred the prevention ask instead of classifying it now."
 stop: true
 ```
 
@@ -347,6 +367,7 @@ problems:
     why: "The conflict is strategy and customer impact. They need decision criteria, not another size spreadsheet."
     next_method: "Clarify decision criteria and trade-offs among services. Do not expand the LOC spreadsheet in this slice."
 unresolved: []
+applied: []
 stop: true
 ```
 
@@ -383,6 +404,13 @@ unresolved:
   - observation: "Ops wants a two-day architecture workshop on resilient request paths"
     reason: "That is a proposed approach, not a defined problem. Redesign may be wrong if the pool config is the cause."
     clarification: "What decision must this week's work settle? Confirm root cause first, or commit to redesign regardless?"
+applied:
+  - name: principle-read-the-room
+    at: problems[0]
+    changed: "Put the timeout question first because whether to redesign depends on its answer."
+  - name: principle-dont-invent-problems
+    at: unresolved[0]
+    changed: "Kept the workshop request unresolved instead of treating a proposed approach as a problem."
 stop: true
 ```
 
@@ -400,6 +428,7 @@ FYI, the Friday deploy window moved to Saturday 10:00 UTC.
 status: not_a_problem
 problems: []
 unresolved: []
+applied: []
 stop: true
 ```
 

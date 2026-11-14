@@ -32,5 +32,12 @@ turns:
         - observation: "The director also wants three realistic ways to stop this class of failure, ranked by likelihood"
           reason: "Deferred until the primary problem is answered. Prevention options depend on why staging went down."
           clarification: "Ask about prevention again once the cause of the outage is settled."
+      applied:
+        - name: principle-read-the-room
+          at: problems[0]
+          changed: "Picked the why as primary because the prevention options depend on its answer."
+        - name: principle-read-the-room
+          at: unresolved[0]
+          changed: "Deferred the prevention ask instead of classifying it now."
       stop: true
       ```

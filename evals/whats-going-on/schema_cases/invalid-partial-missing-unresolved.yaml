@@ -1,4 +1,5 @@
 expect_ok: false
+expect_kind: status_mismatch
 body: |
   status: partial
   problems:
@@ -8,4 +9,5 @@ body: |
       why: "Several measurable explanations remain open."
       next_method: "Gather facts on pool config."
   unresolved: []
+  applied: []
   stop: true

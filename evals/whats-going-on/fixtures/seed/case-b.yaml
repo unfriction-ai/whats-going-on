@@ -28,5 +28,6 @@ turns:
           why: "Latency estimation needs quantitative data. The objective is one figure for a defined capacity decision."
           next_method: "Estimate from production telemetry and load assumptions. Do not open an architecture redesign workshop."
       unresolved: []
+      applied: []
       stop: true
       ```

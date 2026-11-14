@@ -1,4 +1,5 @@
 expect_ok: false
+expect_kind: schema
 body: |
   status: classified
   problems:
@@ -7,4 +8,5 @@ body: |
       confidence: high
       why: "Latency estimation needs quantitative data."
       next_method: "Estimate from production telemetry."
+  applied: []
   stop: true
