@@ -197,6 +197,7 @@ problems:
     why: "A measured change with a timeframe."
     next_method: "Compare telemetry before and after the change."
 unresolved: []
+applied: []
 stop: true
 ```"""
     if not preamble.strip():

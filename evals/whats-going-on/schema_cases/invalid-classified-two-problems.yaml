@@ -1,4 +1,5 @@
 expect_ok: false
+expect_kind: schema
 body: |
   status: classified
   problems:
@@ -13,4 +14,5 @@ body: |
       why: "Prevention approaches are design and judgment."
       next_method: "Explore approaches before narrowing."
   unresolved: []
+  applied: []
   stop: true

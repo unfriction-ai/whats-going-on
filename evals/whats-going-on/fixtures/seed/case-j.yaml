@@ -20,6 +20,10 @@ turns:
         - observation: "Mobile is in a rough place"
           reason: "No measurable change, magnitude, or timeframe."
           clarification: "What changed, by how much, and since when?"
+      applied:
+        - name: principle-dont-invent-problems
+          at: unresolved[0]
+          changed: "Kept the concern unresolved instead of naming a metric the input never gives."
       stop: true
       ```
   - input: "Crash-free sessions dropped 8% in four weeks. Why?"
@@ -45,6 +49,7 @@ turns:
           why: "A measured drop with a timeframe. Data should converge on what changed."
           next_method: "Evidence-based diagnosis from crash telemetry and release history."
       unresolved: []
+      applied: []
       stop: true
       ```
   - input: "What product or eng initiatives could recover crash-free sessions?"
@@ -70,6 +75,10 @@ turns:
           why: "Initiatives are design and judgment calls. The ask opens many options."
           next_method: "Broad exploration of initiatives before narrowing. Do not list them in this slice."
       unresolved: []
+      applied:
+        - name: principle-read-the-room
+          at: problems[0].classification
+          changed: "Classified the ask for initiatives as it stands now, not as the later choice among them."
       stop: true
       ```
   - input: "Which of these three recovery initiatives should we fund?"
@@ -95,5 +104,9 @@ turns:
           why: "A funding choice among a fixed set is a judgment call that must settle on one."
           next_method: "Set decision criteria and compare the three. Do not pick one in this slice."
       unresolved: []
+      applied:
+        - name: principle-read-the-room
+          at: problems[0].classification
+          changed: "Classified the choice among three initiatives as it stands now, not as the earlier open search."
       stop: true
       ```

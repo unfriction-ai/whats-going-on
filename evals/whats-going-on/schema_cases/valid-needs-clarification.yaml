@@ -7,4 +7,8 @@ body: |
     - observation: "Mobile is in a rough place"
       reason: "No measurable change."
       clarification: "What changed, by how much, and since when?"
+  applied:
+    - name: principle-dont-invent-problems
+      at: unresolved[0]
+      changed: "Kept the concern unresolved instead of naming a metric the input never gives."
   stop: true

@@ -35,7 +35,7 @@ from .manifest import (
     read_mount,
     skill_view_hash,
 )
-from .parse import Halt, Response, parse_response
+from .parse import ContractViolation, Halt, Response, describe_violation, parse_response
 from .runs import (
     new_run_id,
     read_transcript,
@@ -113,6 +113,13 @@ def _check_schema_cases() -> list[str]:
                 detail = parsed.kind
             problems.append(
                 f"schema_cases/{path.name}: expect_ok={doc['expect_ok']} got {detail}"
+            )
+        elif (
+            isinstance(parsed, ContractViolation)
+            and doc.get("expect_kind", parsed.kind) != parsed.kind
+        ):
+            problems.append(
+                f"schema_cases/{path.name}: expect_kind {doc['expect_kind']} got {describe_violation(parsed)}"
             )
         elif ok and want_halt and "next_stage" in doc:
             assert isinstance(parsed, Halt)

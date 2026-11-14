@@ -332,7 +332,7 @@ def _sentinel_sync(owner_rel: str, owner: str) -> list[DriftProblem]:
 def _guard_turn(user_input: str) -> Turn:
     text = user_input.strip() or "Noted."
     gold = parse_response(
-        "```yaml\nstatus: not_a_problem\nproblems: []\nunresolved: []\nstop: true\n```"
+        "```yaml\nstatus: not_a_problem\nproblems: []\nunresolved: []\napplied: []\nstop: true\n```"
     )
     if not isinstance(gold, Response):
         raise RuntimeError("guard gold failed to parse")
@@ -360,7 +360,7 @@ def _restatement_guard_self_test(cases_dir: Path) -> list[DriftProblem]:
     missing = sorted(_REQUIRED_RESTATEMENT_CASES - {path.name for path in paths})
     if missing:
         problems.append(DriftProblem("restatement_guard", f"missing cases: {missing}"))
-    body = "status: not_a_problem\nproblems: []\nunresolved: []\nstop: true\n"
+    body = "status: not_a_problem\nproblems: []\nunresolved: []\napplied: []\nstop: true\n"
     for path in paths:
         doc = yaml.safe_load(path.read_text())
         if not isinstance(doc, dict) or "preamble" not in doc or "expect_fail" not in doc:

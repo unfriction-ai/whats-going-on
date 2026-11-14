@@ -12,4 +12,11 @@ body: |
     - observation: "Ops wants a two-day architecture workshop"
       reason: "That is a proposed approach, not a defined problem."
       clarification: "What decision must this week's work settle?"
+  applied:
+    - name: principle-read-the-room
+      at: problems[0]
+      changed: "Put the timeout question first because whether to redesign depends on its answer."
+    - name: principle-dont-invent-problems
+      at: unresolved[0]
+      changed: "Kept the workshop request unresolved instead of treating a proposed approach as a problem."
   stop: true

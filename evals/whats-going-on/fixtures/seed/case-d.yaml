@@ -28,5 +28,6 @@ turns:
           why: "Culture and norms are conceptual. The ask invites many possible moves. No short list of options is fixed yet."
           next_method: "Broad exploration of approaches before any narrowing. Do not brainstorm the list in this slice."
       unresolved: []
+      applied: []
       stop: true
       ```

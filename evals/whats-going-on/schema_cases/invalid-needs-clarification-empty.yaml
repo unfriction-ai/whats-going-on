@@ -1,6 +1,8 @@
 expect_ok: false
+expect_kind: status_mismatch
 body: |
   status: needs_clarification
   problems: []
   unresolved: []
+  applied: []
   stop: true

@@ -3,8 +3,12 @@ from __future__ import annotations
 import re
 from dataclasses import dataclass
 from pathlib import Path
+from typing import Literal, get_args
 
 import yaml
+
+WireKind = Literal["status", "problem", "classification", "confidence", "unresolved"]
+WIRE_KINDS: tuple[WireKind, ...] = get_args(WireKind)
 
 _SECTION_RE = re.compile(
     r"^## Principles\s*\n(?P<body>(?:.*\n)*?)(?=^## |\Z)",
@@ -20,7 +24,7 @@ _FRONTMATTER_RE = re.compile(r"^---\s*\n(?P<body>.*?)\n---\s*\n", re.DOTALL)
 class Principle:
     name: str
     description: str
-    governs: tuple[str, ...]
+    governs: frozenset[WireKind]
 
 
 @dataclass(frozen=True)
@@ -152,12 +156,12 @@ def _load_leaf(
     if (
         not isinstance(governs, list)
         or not governs
-        or not all(isinstance(item, str) and item.strip() for item in governs)
+        or not all(item in WIRE_KINDS for item in governs)
     ):
         problems.append(
             PrincipleLint(
                 "principle_frontmatter",
-                f"{name}/SKILL.md governs must be a non-empty list of strings",
+                f"{name}/SKILL.md governs must be a non-empty list drawn from {list(WIRE_KINDS)}",
             )
         )
         governs = None
@@ -167,7 +171,7 @@ def _load_leaf(
         Principle(
             name=name,
             description=description.strip(),
-            governs=tuple(item.strip() for item in governs),
+            governs=frozenset(governs),
         ),
         (),
     )
