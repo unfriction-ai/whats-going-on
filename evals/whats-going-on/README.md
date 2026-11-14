@@ -1,6 +1,6 @@
 # whats-going-on evals
 
-Measures agent behavior under `skills/whats-going-on/`. This tree is a sibling of the skill directory. It is never installed with the skill. Measured runs mount the coordinator `SKILL.md`, each shipped playbook, and the leaf skills those playbooks name. `check` derives that mount from the coordinator's `## Chain`. `README.md` and `design/` stay off the mount.
+Measures agent behavior under `skills/whats-going-on/`. This tree is a sibling of the skill directory. It is never installed with the skill. Measured runs mount the coordinator `SKILL.md`, each principle the coordinator index names, each shipped playbook, and the leaf skills those playbooks name. `check` derives that mount from the coordinator's `## Chain` and `## Principles`. `README.md` and `design/` stay off the mount.
 
 Requires Python 3.11+ and PyYAML.
 

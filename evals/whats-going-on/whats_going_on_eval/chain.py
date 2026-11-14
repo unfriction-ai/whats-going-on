@@ -7,6 +7,8 @@ from typing import Literal
 
 import yaml
 
+from .principles import Principle, lint_principles, load_principles, principle_names
+
 CHAIN_SECTION_RE = re.compile(
     r"^## Chain\s*\n(?P<body>(?:.*\n)*?)(?=^## |\Z)",
     re.MULTILINE,
@@ -85,9 +87,14 @@ def load_chain(skill_dir: Path) -> Chain:
     return Chain(skill_dir=skill_dir, mode="playbooks", stages=tuple(stages))
 
 
-def derive_mount(chain: Chain) -> tuple[str, ...]:
+def derive_mount(chain: Chain, principles: tuple[Principle, ...]) -> tuple[str, ...]:
     paths: list[str] = ["SKILL.md"]
     seen = {"SKILL.md"}
+    for principle in principles:
+        rel = f"{principle.name}/SKILL.md"
+        if rel not in seen:
+            paths.append(rel)
+            seen.add(rel)
     for stage in chain.stages:
         if not isinstance(stage, ShippedStage):
             continue
@@ -113,10 +120,13 @@ def lint_chain(chain: Chain) -> list[ChainProblem]:
     if not chain.stages:
         return [ChainProblem("empty_chain", "chain has no stages")]
 
+    principle_problems = [
+        ChainProblem(item.kind, item.detail) for item in lint_principles(skill_dir)
+    ]
     if chain.mode == "monolith":
-        return _lint_monolith(chain)
+        return principle_problems + _lint_monolith(chain)
 
-    return _lint_playbooks(chain)
+    return principle_problems + _lint_playbooks(chain)
 
 
 def _lint_monolith(chain: Chain) -> list[ChainProblem]:
@@ -133,10 +143,12 @@ def _lint_monolith(chain: Chain) -> list[ChainProblem]:
             )
         )
         return problems
-    mount = derive_mount(chain)
-    if mount != ("SKILL.md",):
+    principles = load_principles(chain.skill_dir)
+    mount = derive_mount(chain, principles)
+    expected = ("SKILL.md", *(f"{item.name}/SKILL.md" for item in principles))
+    if mount != expected:
         problems.append(
-            ChainProblem("mount", f"monolith mount must be ('SKILL.md',), got {mount}")
+            ChainProblem("mount", f"monolith mount must be {expected}, got {mount}")
         )
     return problems
 
@@ -219,11 +231,11 @@ def _lint_playbooks(chain: Chain) -> list[ChainProblem]:
         problems.append(
             ChainProblem(
                 "orphan_leaf",
-                f"leaf directory {orphan!r} is not named by any shipped playbook",
+                f"leaf directory {orphan!r} is not named by a shipped playbook or the principles index",
             )
         )
 
-    mount = derive_mount(chain)
+    mount = derive_mount(chain, load_principles(skill_dir))
     if "README.md" in mount:
         problems.append(ChainProblem("mount", "README.md must not be on the derived mount"))
 
@@ -240,7 +252,7 @@ def named_skills(chain: Chain) -> frozenset[str]:
 
 
 def _orphan_leaf_dirs(chain: Chain) -> list[str]:
-    named = named_skills(chain)
+    named = named_skills(chain) | set(principle_names(chain.skill_dir))
     reserved = {
         "playbooks",
         "design",

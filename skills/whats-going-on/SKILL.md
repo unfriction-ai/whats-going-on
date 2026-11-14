@@ -34,11 +34,20 @@ Select one stage, run its playbook, emit its Output, stop.
 
 The latest result is the last fenced `yaml` block you emitted that has a `status` key. A block with a `status` key comes from define-the-problem. Continue carries its one primary problem forward. New material restarts at define-the-problem. Prior classifications do not advance on their own.
 
+## Principles
+
+Read each principle below before any playbook step. The file is `<name>/SKILL.md` next to this file. Apply a principle only after reading it.
+
+- principle-dont-invent-problems — deciding whether a concern is a problem, whether to classify it, or how sure to be.
+- principle-read-the-room — deciding which problem comes next, and classifying it as it stands now.
+- principle-dont-solve-yet — deciding to stop at identification instead of diagnosing or recommending.
+
 ## Run
 
-1. Look for `playbooks/<stage>.md` next to this file. If it is missing, follow Halt and stop.
-2. Read the playbook. Read each skill its `skills` list names at `<skill>/SKILL.md` next to this file.
-3. Work through the playbook steps silently. Emit only the playbook's Output.
+1. Read each principle named above.
+2. Look for `playbooks/<stage>.md` next to this file. If it is missing, follow Halt and stop.
+3. Read the playbook. Read each skill its `skills` list names at `<skill>/SKILL.md` next to this file.
+4. Work through the playbook steps silently. Emit only the playbook's Output.
 
 ## Halt
 
