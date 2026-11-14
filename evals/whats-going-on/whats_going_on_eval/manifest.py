@@ -6,6 +6,7 @@ import hashlib
 from pathlib import Path
 
 from .chain import derive_mount, lint_chain, load_chain, named_skills
+from .principles import load_principles, principle_names
 
 SUITE_VERSION = 1
 
@@ -44,7 +45,7 @@ RUBRIC_PATH = EVAL_DIR / "rubric.md"
 
 def agent_mount(skill_dir: Path | None = None) -> tuple[str, ...]:
     root = skill_dir or SKILL_DIR
-    mount = derive_mount(load_chain(root))
+    mount = derive_mount(load_chain(root), load_principles(root))
     if "README.md" in mount:
         raise RuntimeError("README.md must not be in the derived mount")
     return mount
@@ -74,7 +75,9 @@ def hash_skill_source(skill_src: Path | None) -> str:
 
 def assert_skill_tree_clean(skill_dir: Path | None = None) -> None:
     root = skill_dir or SKILL_DIR
-    allowed = SKILL_ROOT_ALLOWED | named_skills(load_chain(root))
+    allowed = (
+        SKILL_ROOT_ALLOWED | named_skills(load_chain(root)) | set(principle_names(root))
+    )
     unexpected: list[str] = []
     for path in root.iterdir():
         name = path.name
