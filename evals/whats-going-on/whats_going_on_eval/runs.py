@@ -33,6 +33,17 @@ def write_manifest(run_id: str, payload: dict[str, Any], skill_src: Path | None)
     return path
 
 
+def _transcript_path(run_id: str, fixture_id: str, repetition: int, turn: int) -> Path:
+    return run_dir(run_id) / "transcripts" / f"{fixture_id}__r{repetition}__t{turn}.json"
+
+
+def read_transcript(run_id: str, fixture_id: str, repetition: int, turn: int) -> str | None:
+    path = _transcript_path(run_id, fixture_id, repetition, turn)
+    if not path.exists():
+        return None
+    return json.loads(path.read_text())["response"]
+
+
 def write_transcript(
     run_id: str,
     fixture_id: str,
@@ -42,7 +53,7 @@ def write_transcript(
     prompt: str,
     response: str,
 ) -> Path:
-    path = run_dir(run_id) / "transcripts" / f"{fixture_id}__r{repetition}__t{turn}.json"
+    path = _transcript_path(run_id, fixture_id, repetition, turn)
     path.parent.mkdir(parents=True, exist_ok=True)
     if path.exists():
         return path  # idempotent: do not overwrite

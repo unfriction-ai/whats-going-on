@@ -13,5 +13,6 @@ List one candidate per distinct question in the input and the separation.
 - Split compound asks. "Why X, and how to stop X" is two candidates.
 - Never merge two questions into one candidate.
 - The same outage can yield "why did it fail?" and "what could prevent it from happening again?". Those are two candidates.
+- A fully specified task leaves nothing to understand or decide, so it is not a candidate. "Rename payments-api to checkout-api" names the old and new names. It yields no candidate.
 
 Write only the candidates. Do not judge whether each one is defined.
