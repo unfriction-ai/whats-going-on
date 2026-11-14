@@ -9,11 +9,11 @@ disable-model-invocation: true
 
 # Classify 2x2
 
-Take only the primary problem, a Defined row. Never classify an Unresolved row.
+Take only the primary problem, a Defined row.
 
 - **Nature.** Settles with data → `analytical`. Turns on ideas, judgment, or ways of working → `conceptual`.
 - **Direction.** The ask *now* narrows to one answer or one or two fixes → `convergent`. Leaves many answers open → `divergent`.
 
-Classify the current question only. Do not advance it to a later stage.
+Classify the current question per `principle-read-the-room`.
 
 Write `nature` and `direction` inside `classification`. Write `confidence` (`high`, `medium`, or `low`), `why` (evidence for both dimensions), and `next_method` (the kind of reasoning to use next, not its result) beside `classification` on the problem item, never inside it. Do not rewrite the statement.

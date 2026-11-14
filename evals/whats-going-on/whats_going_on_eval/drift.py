@@ -13,9 +13,11 @@ from .fixtures import REQUIRED_FAMILIES, Expectation, Fixture, Tripwires, Turn, 
 from .grade import _restatement_fails, grade_gold, rubric_keys_match_doc
 from .manifest import (
     RESTATEMENT_CASES_DIR,
+    SKILL_DIR,
     assert_chain_ok,
     assert_skill_tree_clean,
 )
+from .principles import load_principles, principle_names
 from .parse import (
     CONFIDENCES,
     DIRECTIONS,
@@ -41,6 +43,14 @@ SENTINEL_OWNER: dict[ChainMode, str] = {
 }
 
 CASE_HEADER_RE = re.compile(r"### Case ([A-J])\.")
+
+README_PRINCIPLES_RE = re.compile(
+    r"^## Principles\s*\n(?P<body>(?:.*\n)*?)(?=^## |\Z)",
+    re.MULTILINE,
+)
+README_PRINCIPLE_ROW_RE = re.compile(
+    r"^\| `(principle-[a-z0-9-]+)` \|.*\| (?P<governs>[^|]+) \|$"
+)
 
 _STATUS_WORD_RE = re.compile(
     r"\b(not_a_problem|needs_clarification|classified|partial|abstain)\b"
@@ -112,6 +122,7 @@ def check_suite(
     if sentinel_rel in mount:
         problems.extend(_sentinel_sync(sentinel_rel, mount[sentinel_rel]))
     problems.extend(_enum_drift(readme))
+    problems.extend(_principles_drift(readme))
     problems.extend(_seed_readme_drift(fixtures, readme))
     problems.extend(_gold_self_test(fixtures))
     problems.extend(_tripwire_vs_input(fixtures))
@@ -154,6 +165,37 @@ def _enum_drift(readme: str) -> list[DriftProblem]:
                 out.append(
                     DriftProblem("enum_drift", f"README contract missing {name} value {value}")
                 )
+    return out
+
+
+def _principles_drift(readme: str) -> list[DriftProblem]:
+    section = README_PRINCIPLES_RE.search(readme)
+    if section is None:
+        return [DriftProblem("principles_drift", "README missing ## Principles table")]
+    rows: dict[str, frozenset[str]] = {}
+    for line in section.group("body").splitlines():
+        row = README_PRINCIPLE_ROW_RE.match(line)
+        if row:
+            rows[row.group(1)] = frozenset(re.findall(r"`([a-z]+)`", row.group("governs")))
+    out: list[DriftProblem] = []
+    index = principle_names(SKILL_DIR)
+    if tuple(rows) != index:
+        out.append(
+            DriftProblem(
+                "principles_drift",
+                f"README principles {list(rows)} differ from the index {list(index)}",
+            )
+        )
+    for principle in load_principles(SKILL_DIR):
+        governs = rows.get(principle.name)
+        if governs is not None and governs != principle.governs:
+            out.append(
+                DriftProblem(
+                    "principles_drift",
+                    f"README governs for {principle.name} is {sorted(governs)}, "
+                    f"leaf says {sorted(principle.governs)}",
+                )
+            )
     return out
 
 
