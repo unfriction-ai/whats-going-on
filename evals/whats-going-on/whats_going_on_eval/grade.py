@@ -168,6 +168,7 @@ def _hard_fails(turn: Turn, response: Response, text: str) -> list[HardFail]:
         "why": " ".join(p.why for p in verdict.problems),
         "next_method": " ".join(p.next_method for p in verdict.problems),
         "clarification": " ".join(u.clarification for u in verdict.unresolved),
+        "changed": " ".join(a.changed for a in verdict.applied),
     }
     leak_pats = list(GLOBAL_SOLVE_LEAK) + list(turn.tripwires.solve_leak)
     for field, content in prose_fields.items():

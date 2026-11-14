@@ -47,7 +47,31 @@ Read each principle below before any playbook step. The file is `<name>/SKILL.md
 1. Read each principle named above.
 2. Look for `playbooks/<stage>.md` next to this file. If it is missing, follow Halt and stop.
 3. Read the playbook. Read each skill its `skills` list names at `<skill>/SKILL.md` next to this file.
-4. Work through the playbook steps silently. Emit only the playbook's Output.
+4. Work through the playbook steps silently. Emit only the playbook's Output, closed by the Output envelope.
+
+## Output envelope
+
+Every playbook Output `yaml` block ends with `applied`, then `stop: true`. List each principle that decided a value you emit. Cite nothing you did not apply. Write `applied: []` when no principle decided a value.
+
+```yaml
+applied:
+  - name: principle-dont-invent-problems
+    at: unresolved[0]
+    changed: "Kept the concern unresolved instead of naming a metric the input never gives."
+stop: true
+```
+
+`name` is a principle from the index. `at` is the path of the value it decided, and the path sets the kind of that value:
+
+| `at` | kind |
+|---|---|
+| `status` | `status` |
+| `problems[0]` | `problem` |
+| `problems[0].classification` | `classification` |
+| `problems[0].confidence` | `confidence` |
+| `unresolved[<i>]` | `unresolved` |
+
+Point only at a row you emitted. Cite a principle only at a kind its `governs` list names. `changed` says in one line of at most 200 characters what the principle made you choose. It does not diagnose or recommend.
 
 ## Halt
 
@@ -59,7 +83,7 @@ available: false
 stop: true
 ```
 
-Give no diagnosis, options, or recommendations.
+Give no diagnosis, options, or recommendations. A Halt block has no `applied` key.
 
 ## Never
 

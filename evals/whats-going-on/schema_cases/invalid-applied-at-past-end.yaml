@@ -1,0 +1,19 @@
+expect_ok: false
+expect_kind: principle_at
+body: |
+  status: partial
+  problems:
+    - statement: "Are checkout API timeouts explained by the lowered connection-pool max?"
+      classification: { nature: analytical, direction: divergent }
+      confidence: medium
+      why: "Several measurable explanations remain open."
+      next_method: "Gather facts on pool config before any workshop."
+  unresolved:
+    - observation: "Ops wants a two-day architecture workshop"
+      reason: "That is a proposed approach, not a defined problem."
+      clarification: "What decision must this week's work settle?"
+  applied:
+    - name: principle-dont-invent-problems
+      at: unresolved[9]
+      changed: "Kept the workshop request unresolved."
+  stop: true

@@ -26,5 +26,9 @@ turns:
         - observation: "Mobile is in a rough place; eng has competing theories"
           reason: "No measurable change, magnitude, or timeframe. Competing theories are not yet a defined question."
           clarification: "What changed, by how much, and since when? What decision are you trying to make?"
+      applied:
+        - name: principle-dont-invent-problems
+          at: unresolved[0]
+          changed: "Kept the concern unresolved instead of naming a metric or cause the input never gives."
       stop: true
       ```

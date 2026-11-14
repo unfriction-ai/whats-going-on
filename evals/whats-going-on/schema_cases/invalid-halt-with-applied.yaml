@@ -1,0 +1,10 @@
+expect_ok: false
+expect_kind: schema
+wire: halt
+body: |
+  ```yaml
+  next_stage: structure-the-problem
+  available: false
+  applied: []
+  stop: true
+  ```

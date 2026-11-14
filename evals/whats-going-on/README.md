@@ -48,7 +48,7 @@ Hard fails gate the run. Score is informational. The report splits seed and hold
 |---|---|
 | `fixtures/seed/` | README cases A–J |
 | `fixtures/holdout/` | Never quoted in README or SKILL.md |
-| `schema_cases/` | Valid and invalid wire documents for status derivation |
+| `schema_cases/` | Valid and invalid wire documents. `expect_kind` pins the violation an invalid case must raise |
 | `rubric.md` | Weights. Criterion names must equal grader keys |
 | `judge.md` | Evidence axis only |
 | `reports/` | Run artifacts (gitignored) |

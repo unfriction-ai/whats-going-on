@@ -4,9 +4,13 @@ from __future__ import annotations
 
 import re
 from dataclasses import dataclass
+from functools import cache
 from typing import Any, Literal, TypeVar
 
 import yaml
+
+from .manifest import SKILL_DIR
+from .principles import WireKind, load_principles
 
 NATURES = ("analytical", "conceptual")
 DIRECTIONS = ("convergent", "divergent")
@@ -30,8 +34,15 @@ NO_ASK = "No ask is stated."
 
 FENCE_RE = re.compile(r"```yaml\s*\n(.*?)```", re.DOTALL | re.IGNORECASE)
 
-VERDICT_KEYS = frozenset({"status", "problems", "unresolved", "stop"})
+VERDICT_KEYS = frozenset({"status", "problems", "unresolved", "applied", "stop"})
 HALT_KEYS = frozenset({"next_stage", "available", "stop"})
+
+CHANGED_BUDGET = 200
+
+_ROW_AT_RE = re.compile(
+    r"(?P<field>problems|unresolved)\[(?P<index>0|[1-9][0-9]*)\]"
+    r"(?:\.(?P<sub>classification|confidence))?"
+)
 
 T = TypeVar("T")
 AtMostOne = tuple[()] | tuple[T]
@@ -57,10 +68,19 @@ class Unresolved:
 
 
 @dataclass(frozen=True)
+class Applied:
+    name: str
+    at: str
+    kind: WireKind
+    changed: str
+
+
+@dataclass(frozen=True)
 class Verdict:
     status: Status
     problems: Problems
     unresolved: tuple[Unresolved, ...]
+    applied: tuple[Applied, ...]
 
 
 @dataclass(frozen=True)
@@ -211,10 +231,78 @@ def _validate_wire(raw: dict[str, Any], preamble: str) -> Outcome | ContractViol
             "status_mismatch", f"claimed={claimed} derived={derived}"
         )
 
+    if "applied" not in raw:
+        return ContractViolation("schema", "applied is required")
+    applied = _parse_applied(raw["applied"], problems_t, unresolved_t)
+    if isinstance(applied, ContractViolation):
+        return applied
+
     return Response(
         preamble=preamble,
-        verdict=Verdict(status=derived, problems=problems_t, unresolved=unresolved_t),
+        verdict=Verdict(
+            status=derived, problems=problems_t, unresolved=unresolved_t, applied=applied
+        ),
     )
+
+
+@cache
+def _governs_by_name() -> dict[str, frozenset[WireKind]]:
+    return {p.name: p.governs for p in load_principles(SKILL_DIR)}
+
+
+def _resolve_at(
+    at: str, problems: Problems, unresolved: tuple[Unresolved, ...]
+) -> WireKind | None:
+    if at == "status":
+        return "status"
+    match = _ROW_AT_RE.fullmatch(at)
+    if not match:
+        return None
+    rows = problems if match["field"] == "problems" else unresolved
+    if int(match["index"]) >= len(rows):
+        return None
+    sub = match["sub"]
+    if match["field"] == "unresolved":
+        return None if sub else "unresolved"
+    return sub or "problem"
+
+
+def _parse_applied(
+    raw: Any, problems: Problems, unresolved: tuple[Unresolved, ...]
+) -> tuple[Applied, ...] | ContractViolation:
+    if not isinstance(raw, list):
+        return ContractViolation("schema", "applied must be a list")
+    governs_by_name = _governs_by_name()
+    out: list[Applied] = []
+    for i, item in enumerate(raw):
+        path = f"applied[{i}]"
+        if not isinstance(item, dict):
+            return ContractViolation("schema", f"{path} must be a mapping")
+        if set(item) != {"name", "at", "changed"}:
+            return ContractViolation("schema", f"{path} keys must be name, at, changed")
+        values: dict[str, str] = {}
+        for key in ("name", "at", "changed"):
+            value = _nonblank(item[key], f"{path}.{key}")
+            if isinstance(value, ContractViolation):
+                return value
+            values[key] = value
+        name, at, changed = values["name"], values["at"], values["changed"]
+        governs = governs_by_name.get(name)
+        if governs is None:
+            return ContractViolation("principle_unknown", f"{path}.name {name!r}")
+        kind = _resolve_at(at, problems, unresolved)
+        if kind is None:
+            return ContractViolation("principle_at", f"{path}.at {at!r} does not resolve")
+        if kind not in governs:
+            return ContractViolation(
+                "principle_governs", f"{path}: {name} does not govern {kind} at {at!r}"
+            )
+        if len(changed) > CHANGED_BUDGET:
+            return ContractViolation(
+                "principle_changed", f"{path}.changed is {len(changed)} chars, max {CHANGED_BUDGET}"
+            )
+        out.append(Applied(name=name, at=at, kind=kind, changed=changed))
+    return tuple(out)
 
 
 def _validate_halt(raw: dict[str, Any], preamble: str) -> Halt | ContractViolation:

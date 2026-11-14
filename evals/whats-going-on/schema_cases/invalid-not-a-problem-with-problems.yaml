@@ -1,4 +1,5 @@
 expect_ok: false
+expect_kind: status_mismatch
 body: |
   status: not_a_problem
   problems:
@@ -8,4 +9,5 @@ body: |
       why: "Asks for a cause."
       next_method: "Diagnose from logs."
   unresolved: []
+  applied: []
   stop: true

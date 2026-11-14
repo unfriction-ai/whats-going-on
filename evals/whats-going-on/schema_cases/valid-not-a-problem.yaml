@@ -4,4 +4,5 @@ body: |
   status: not_a_problem
   problems: []
   unresolved: []
+  applied: []
   stop: true

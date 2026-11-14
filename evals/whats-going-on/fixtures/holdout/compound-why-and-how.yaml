@@ -29,5 +29,12 @@ turns:
         - observation: "The on-call lead also asks how to stop the nightly billing batch from failing again"
           reason: "Deferred until the primary problem is answered. Prevention approaches depend on why the batch failed."
           clarification: "Ask about prevention again once the cause of the batch failure is settled."
+      applied:
+        - name: principle-read-the-room
+          at: problems[0]
+          changed: "Picked the why as primary because the prevention question depends on its answer."
+        - name: principle-read-the-room
+          at: unresolved[0]
+          changed: "Deferred the prevention question instead of classifying it now."
       stop: true
       ```

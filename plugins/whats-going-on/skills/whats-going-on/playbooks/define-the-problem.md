@@ -61,10 +61,15 @@ unresolved:
     reason: "Why this is not yet a defined problem"
     clarification: "What to ask next"
 
+applied:
+  - name: principle-<name>
+    at: status | problems[0] | problems[0].classification | problems[0].confidence | unresolved[<i>]
+    changed: "The choice the principle changed, in one line"
+
 stop: true
 ```
 
-`problems` holds at most one item, the primary. An empty `problems` list is valid when status is `needs_clarification` or `not_a_problem`. Always emit `unresolved`. Write `[]` when it is empty.
+`problems` holds at most one item, the primary. An empty `problems` list is valid when status is `needs_clarification` or `not_a_problem`. Always emit `unresolved`. Write `[]` when it is empty. Always emit `applied`. Write `[]` when no principle decided a value.
 
 ## Never
 
