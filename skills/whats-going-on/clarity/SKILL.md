@@ -15,6 +15,8 @@ For each candidate, ask: can you state what needs resolving using only facts in 
 
 Missing data to *solve* does not block Defined. Missing data to *identify* does.
 
+A requested method (a plan, a migration, a workshop) is Unresolved when the input never says what problem it solves. Its `clarification` asks what the method is meant to solve. "Move everything to Kubernetes" names a method, not a problem.
+
 "Things feel off" is a symptom, so it is Unresolved. "Error rate rose 12% since Tuesday. Why?" is Defined.
 
 Never invent facts, metrics, or causes to make a candidate Defined.
