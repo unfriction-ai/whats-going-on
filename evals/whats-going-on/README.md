@@ -15,21 +15,22 @@ python -m whats_going_on_eval check
 ## Commands
 
 ```bash
-# No agent. Drift, gold self-test, schema_cases, and nested-leaf load.
+# No agent. Drift, gold self-test, schema_cases (including applied), principles table, nested-leaf load.
 python -m whats_going_on_eval check
 
-# README quick check (needs a wired host CLI).
+# README quick check (Cursor agent CLI + auth).
 python -m whats_going_on_eval run --agent cursor --only case-a,case-f --repeat 1
 
-# Release-style run with repeats and optional evidence judge.
-python -m whats_going_on_eval run --agent claude --repeat 3 --judge
+# Release-style Cursor run with repeats.
+python -m whats_going_on_eval run --agent cursor --repeat 3
+
+# Re-grade stored transcripts after a harness fix (no new host invoke).
+python -m whats_going_on_eval run --agent cursor --resume <runId>
+python -m whats_going_on_eval grade <runId>
 
 # Older skill revision or no-skill baseline.
-python -m whats_going_on_eval run --agent claude --skill /tmp/wgo-old/skills/whats-going-on
-python -m whats_going_on_eval run --agent claude --skill none
-
-# Re-grade stored transcripts after a harness fix.
-python -m whats_going_on_eval grade <runId>
+python -m whats_going_on_eval run --agent cursor --skill /tmp/wgo-old/skills/whats-going-on
+python -m whats_going_on_eval run --agent cursor --skill none
 
 # Compare stored runs. Does not invoke a host. Live A/B needs a wired host.
 python -m whats_going_on_eval invariance <baseRun> <treatRun> --noise <baseRun2>
@@ -40,7 +41,9 @@ python -m whats_going_on_eval compare <runA> <runB> --blind
 
 Exit 0: no hard fails. Exit 1: hard fail. Exit 2: harness or drift error.
 
-Hard fails gate the run. Score is informational. The report splits seed and holdout.
+Hard fails gate the run. Score is informational. The report splits seed and holdout. Verdict YAML must include `applied` (use `[]` when empty). Halt blocks must not include `applied`.
+
+`--judge` is accepted on the run manifest. It does not call a live evidence judge yet.
 
 ## Layout
 
@@ -59,6 +62,6 @@ Copy the nearest file under `fixtures/holdout/`. Do not store a `family` field. 
 
 ## Host wiring
 
-`run` prepares a temp workspace with the derived mount only. `run --agent cursor` invokes the Cursor agent CLI in that workspace and grades its stdout. Claude and Codex still stop before a live invoke. `check` and `grade` work without a host.
+`run` prepares a temp workspace with the derived mount only. `run --agent cursor` invokes the Cursor agent CLI in that workspace under a scratch `HOME` (login keychain linked) with a 600s timeout, then grades stdout. Claude and Codex still stop before a live invoke (`HostNotWired`). `check` and `grade` work without a host.
 
 `check` copies that mount into a temp workspace for each host. It also runs `scripts/install-local.sh --host all` with `HOME` set to a temp directory. `check` fails when a nested leaf is missing from the workspace or from the install. `README.md` and `design/` stay off the workspace. The install still contains them, because they ship in the package and stay off the mount.

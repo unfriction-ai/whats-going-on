@@ -8,7 +8,7 @@ This directory is the maintained source for verifying user- and operator-facing 
 - Run `wgo-verify doctor` and require `home_isolated=ok`, `check OK`, and `canonical skill ok`.
 - Never drive an install under the operator's real `$HOME`. Concurrent runs each get their own `scratch/<run_id>/`.
 - Canonical skill body: `skills/whats-going-on/`. Eval suite: `evals/whats-going-on/` (never installed with the skill).
-- Cursor live `run` is wired when the `agent` CLI is on `PATH`. Classification features always prove the fixture gold path; they record live status as `ok`, `unreachable_missing_cli`, or `stubbed_HostNotWired` for hosts that still lack an argv builder.
+- Cursor live `run` is wired when the `agent` CLI is on `PATH` and authenticated. Classification features always prove the fixture gold path; they record live status as `ok`, `unreachable_missing_cli`, `unreachable_missing_auth`, or `stubbed_HostNotWired` for hosts that still lack an argv builder.
 
 ## Driving conventions
 
