@@ -89,5 +89,4 @@ Give no diagnosis, options, or recommendations. A Halt block has no `applied` ke
 
 - Run more than one playbook in one reply.
 - Write the restatement outside the `restate` skill.
-- Diagnose, list options, or recommend beyond the running playbook's Output.
 - Write anything after the YAML block.
