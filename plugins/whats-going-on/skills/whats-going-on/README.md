@@ -1,14 +1,14 @@
-# How to use whats-going-on (slice 1)
+# How to use whats-going-on (stage 1)
 
 Tagline: Understand the situation before deciding what to solve.
 
-`/whats-going-on` examines an ask, message, or described situation. Slice 1 finds what needs resolving in that input, picks at most one primary problem, decides whether it is defined enough to classify, and maps it onto a 2×2. It stops before diagnosis, brainstorming, or solutions.
+`/whats-going-on` examines an ask, message, or described situation. Stage 1 (`define-the-problem`) finds what needs resolving in that input, picks at most one primary problem, decides whether it is defined enough to classify, and maps it onto a 2×2. It cites principles under `applied` when they decided a value. It stops before diagnosis, brainstorming, or solutions.
 
 Works with Cursor Agent Skills, Claude Code skills, and Codex skills. Same `SKILL.md` body. Install path differs by tool.
 
-Slice 1 capability name: problem mapping. Method: analytical or conceptual, crossed with convergent or divergent.
+Stage 1 capability name: problem mapping. Method: analytical or conceptual, crossed with convergent or divergent. Stages 2–7 are named on the coordinator chain and Halt until their playbooks exist.
 
-## What slice 1 does
+## What stage 1 does
 
 Paste a bug, email, Slack thread, GitHub comment, incident report, link plus context, or plain text. The agent does not assume the paste contains a problem. It inspects first.
 
@@ -39,7 +39,9 @@ Do not classify a proposed method as the problem. Identify the question the work
 
 Hard fail: inventing details to force a quadrant, or starting to solve while classifying.
 
-## Slice 1 flow
+## Stage 1 flow
+
+Before Extract, the playbook runs `ask`, `restate` (exactly two sentences), and `separate`. The diagram starts after that setup.
 
 ```mermaid
 stateDiagram-v2
@@ -142,7 +144,7 @@ If you pass a link the agent cannot open, classify from the pasted context and s
 
 ## Worked cases
 
-Each case shows the input, what the skill should notice, and the expected slice 1 result. Scenarios are original. They are not copied from a training course.
+Each case shows the input, what the skill should notice, and the expected stage 1 result. Scenarios are original. They are not copied from a training course.
 
 ### Case A. Vague concern (abstain)
 
@@ -434,7 +436,7 @@ stop: true
 
 ### Case J. Same situation, successive asks (snapshot, not lifecycle)
 
-Slice 1 does not advance a problem through stages on its own. Each invocation classifies the current question.
+Stage 1 does not advance a problem through stages on its own. Each invocation classifies the current question.
 
 | Invocation | Ask | Result |
 |---|---|---|
@@ -445,10 +447,10 @@ Slice 1 does not advance a problem through stages on its own. Each invocation cl
 
 More information alone does not flip divergent to convergent. Changing the question does.
 
-## What this slice is not
+## What stage 1 is not
 
 - Not root-cause analysis, issue trees, leverage scoring, or recommendations.
-- Not a full problem-solving workflow. Later slices can consume these labels.
+- Not a full problem-solving workflow. Later stages Halt until their playbooks ship.
 - Not a permanent tag on a situation. Re-run when the ask changes.
 
 ## Quick check
@@ -463,5 +465,6 @@ python -m whats_going_on_eval run --agent cursor --only case-a,case-f --repeat 1
 
 - Case A must abstain and ask for change, magnitude, and timeframe (or equivalent clarity).
 - Case F must return the why as the one problem and defer the prevention ask to `unresolved`.
-- If the agent proposes mobile fixes or a prevention plan, slice 1 failed.
-- `check` needs no agent. `run --agent cursor` invokes the Cursor CLI. Claude and Codex are not wired yet.
+- If the agent proposes mobile fixes or a prevention plan, stage 1 failed.
+- `check` needs no agent. `run --agent cursor` invokes the Cursor `agent` CLI. That path needs `agent` on `PATH` and `agent login` or `CURSOR_API_KEY`. Claude and Codex are not wired yet.
+- Maintainer alternative. `.cursor/skills/verify-whats-going-on/bin/wgo-verify` launches an isolated HOME and drives the same gates and fixtures.
