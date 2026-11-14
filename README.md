@@ -1,6 +1,8 @@
 # whats-going-on
 
-Slice 1 coding-agent skill. Maps an unstructured ask onto a 2×2 (analytical or conceptual × convergent or divergent), abstains when a problem is not defined, and stops before diagnosis or solutions.
+Stage 1 coding-agent skill. It inspects a pasted ask, restates it in two sentences, picks at most one primary problem, classifies that problem on a 2×2 (analytical or conceptual × convergent or divergent), or abstains when the problem is not defined. It cites principles under `applied` when they decided a value, and it stops before diagnosis or solutions.
+
+Later stages on the coordinator chain Halt until their playbooks exist.
 
 ## Install
 
@@ -52,6 +54,20 @@ pip install -r requirements.txt
 cd ../..
 bash scripts/pr-gates.sh
 ```
+
+Cursor live runs need the `agent` CLI on `PATH` and `agent login` or `CURSOR_API_KEY`. Claude and Codex are not wired yet.
+
+## Verify
+
+Maintainer harness for install, suite health, Case A, and Case F:
+
+```bash
+.cursor/skills/verify-whats-going-on/bin/wgo-verify launch
+.cursor/skills/verify-whats-going-on/bin/wgo-verify doctor
+.cursor/skills/verify-whats-going-on/bin/wgo-verify drive eval-suite-health
+```
+
+Feature map. `.cursor/skills/verify-whats-going-on/features/README.md`.
 
 ## License
 

@@ -16,21 +16,18 @@ Grafts from candidate 2 ([Restate design candidate B](e770fd01-9e74-42b6-a89e-64
 
 Rejected from C2: typed `ask` YAML key, `actual_ask` iff classified/partial coupling, deleting the preamble restatement slot.
 
-Rejected as a dependency: upstream `in-your-own-words` (one sentence, assumes a problem, invents goals, not on `AGENT_MOUNT`, `disable-model-invocation: true`). Keep the idea. Credit it in `grounding.md`.
+Rejected as a dependency: upstream `in-your-own-words` (one sentence, assumes a problem, invents goals, not on the derived mount, `disable-model-invocation: true`). Keep the idea. Credit it in `grounding.md`.
 
 Rejected: a separate keyword/mode that gates the step (two ways to do one task).
 
 ## Usage
 
-Same invoke: `/whats-going-on` plus paste. Exactly two restatement sentences, then the existing YAML. No new wire keys.
+Same invoke: `/whats-going-on` plus paste. Exactly two restatement sentences, then the YAML. No typed `ask` key.
 
 ## Shape
 
-See `/tmp/arena-iyow/candidate-1/sketch.md` with the grafts above. Wire allowlist stays `{status, problems, unresolved, stop}`.
+`ask` and `restate` are stage leaves under the coordinator. The wire for a stage-1 verdict is `{status, problems, unresolved, applied, stop}`. Halt blocks use `{next_stage, available, stop}` and must not include `applied`.
 
-## Next implementation step
+## Shipped
 
-1. Thread `--skill` into `skill_view_hash` / run ids.
-2. Require fixture `restatement:` and compose gold via one helper.
-3. Add parse/grade/drift restatement guards and `restatement_cases/`.
-4. Edit `SKILL.md` (and plugin mirror) last, after gold still scores 1.0.
+#8 required the two-sentence restatement, fixture `restatement:` fields, parse/grade/drift guards, and `restatement_cases/`. Later PRs kept that contract when the skill split into playbooks and when `applied` joined the wire (#11, #17).

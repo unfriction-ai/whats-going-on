@@ -1,6 +1,6 @@
 # Split a compound ask
 
-Split a compound ask is the Case F user journey: one paste with two questions yields one primary problem (classified) and the dependent ask deferred under `unresolved`. The skill stops before diagnosis or prevention plans.
+Split a compound ask is the Case F user journey: one paste with two questions yields one primary problem under status `partial` and the dependent ask deferred under `unresolved`. The skill stops before diagnosis or prevention plans.
 
 ## Sub-features
 
