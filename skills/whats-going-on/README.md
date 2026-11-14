@@ -63,15 +63,15 @@ stateDiagram-v2
     NeedsClarification --> [*]
 ```
 
-Sharpen one primary problem, the one that must be answered first. Leave every other concern in `unresolved` until that primary is answered.
+## Principles
 
-## Invariants
+Each judgment rule has one owner, a `principle-*` leaf the coordinator names in its `## Principles` index. Stage skills keep the mechanics and point at the owner. When a principle decides a value in the reply, the YAML cites it under `applied`.
 
-1. Identification before classification. Never force an undefined concern into the matrix.
-2. One primary problem. Other concerns wait in `unresolved` until the primary is answered.
-3. Abstention is valid. Missing data to *solve* does not block classification. Missing data to *identify* does.
-4. Classification is a snapshot. The quadrant describes the current reasoning objective, not a permanent property of the situation.
-5. No solving. No root-cause hunt, issue trees, brainstorms, plans, or recommendations in this slice.
+| Principle | Rule | Governs |
+|---|---|---|
+| `principle-dont-invent-problems` | Identify before you classify. Missing data to *solve* does not block a problem. Missing data to *identify* does, so abstain. Never invent facts, metrics, or causes. | `problem`, `unresolved`, `classification` |
+| `principle-read-the-room` | One primary problem, the one the others wait on. The rest wait in `unresolved`. The quadrant is a snapshot of the current reasoning objective. | `problem`, `unresolved`, `classification` |
+| `principle-dont-solve-yet` | No root-cause hunt, issue trees, brainstorms, plans, or recommendations. `next_method` names a kind of reasoning, not its result. | `problem`, `unresolved` |
 
 ## The restatement
 
@@ -83,7 +83,7 @@ The second sentence says what is going on. Use only facts from the input. When t
 
 The restatement reports. It does not name a problem, a cause, a quadrant, or a fix. Those belong in the YAML. When the input defines no problem, a short restatement is the right one.
 
-When the two sentences disagree with the primary or with `unresolved`, discard them and restate again. Do not edit the sentences in place. Do not add a problem so that they match.
+When the two sentences disagree with the primary or with `unresolved`, discard them and restate again. Do not edit the sentences in place.
 
 ## Output contract
 

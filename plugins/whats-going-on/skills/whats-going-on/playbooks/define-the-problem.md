@@ -7,7 +7,7 @@ skills: [ask, restate, separate, extract, clarity, classify-2x2]
 
 # Define the problem
 
-Find what needs resolving in the input. Sharpen one primary problem. Classify it only if it is defined. Then stop. Do not diagnose or solve.
+Find what needs resolving in the input. Sharpen one primary problem. Classify it only if it is defined. Then stop.
 
 ## Steps
 
@@ -23,9 +23,9 @@ Run each step in order. Each step writes one note. Work silently. Keep the notes
 | 6 | Primary (this playbook) | Defined rows | primary, deferred rows |
 | 7 | `classify-2x2` | primary | classification |
 
-Step 6. Of the Defined rows, pick the one that must be answered first. A question the others depend on goes first, such as a why before a how to prevent. Turn each other Defined row into an Unresolved row. Its `observation` is the question as asked. Its `reason` says it is deferred until the primary problem is answered. Its `clarification` says when to ask it again. With no Defined rows, there is no primary and step 7 does not run.
+Step 6. Of the Defined rows, pick the primary per `principle-read-the-room`. Turn each other Defined row into an Unresolved row. Its `observation` is the question as asked. Its `reason` says it is deferred until the primary problem is answered. Its `clarification` says when to ask it again. With no Defined rows, there is no primary and step 7 does not run.
 
-Repair. If the restatement disagrees with the primary or the Unresolved rows, discard it and run `restate` again. Never edit the sentences in place. Never add a problem to make them match.
+Repair. If the restatement disagrees with the primary or the Unresolved rows, discard it and run `restate` again. Never edit the sentences in place.
 
 ## Status
 
@@ -74,6 +74,4 @@ stop: true
 ## Never
 
 - Put a second item in `problems`.
-- Invent facts, metrics, or causes to make a candidate defined.
-- Diagnose, list options, brainstorm, plan, or recommend. `next_method` names a kind of reasoning, not its result.
 - Write anything after the YAML block.
