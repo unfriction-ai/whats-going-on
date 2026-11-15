@@ -19,6 +19,7 @@ turns:
     gold: |
       ```yaml
       status: classified
+      main_question: "What p99 latency estimates for the checkout API should inform the Q1 hardware budget?"
       problems:
         - statement: "What p99 latency estimates for the checkout API should inform the Q1 hardware budget?"
           classification:

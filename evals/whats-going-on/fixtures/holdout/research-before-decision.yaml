@@ -1,0 +1,37 @@
+turns:
+  - input: |
+      From the head of growth:
+      "Before we decide whether to keep the free tier, can someone pull free-to-paid conversion by
+      signup cohort for the last twelve months? Finance wants our call on the free tier by the end of
+      the quarter."
+    restatement: "The head of growth asks someone to pull free-to-paid conversion by signup cohort for the last twelve months before deciding whether to keep the free tier. Finance wants the free-tier call by the end of the quarter."
+    expect:
+      kind: classify
+      statuses: [classified]
+      problems:
+        - anchor: ["free tier", "keep"]
+          quadrants: [analytical-convergent, conceptual-convergent]
+      unresolved: []
+    tripwires:
+      invented: ["churn", "\\d+ ?%"]
+      methodNotProblem: ["pull|cohort|conversion"]
+      solveLeak: ["should (keep|drop|remove|sunset) the free tier", "conversion (is|was) (low|high|weak|strong)"]
+    gold: |
+      ```yaml
+      status: classified
+      main_question: "Should we keep the free tier?"
+      problems:
+        - statement: "Should we keep the free tier?"
+          classification:
+            nature: analytical
+            direction: convergent
+          confidence: medium
+          why: "The head of growth expects free-to-paid conversion data to inform the call. Finance wants one answer by the end of the quarter."
+          next_method: "Read free-to-paid conversion by signup cohort against the free-tier decision. The requested pull serves this decision. It is not a separate problem."
+      unresolved: []
+      applied:
+        - name: principle-read-the-room
+          at: problems[0]
+          changed: "Picked the free-tier decision as primary because the conversion pull only informs it."
+      stop: true
+      ```

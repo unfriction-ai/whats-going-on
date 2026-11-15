@@ -23,7 +23,7 @@ Run each step in order. Each step writes one note. Work silently. Keep the notes
 | 6 | Primary (this playbook) | Defined rows | primary, deferred rows |
 | 7 | `classify-2x2` | primary | classification |
 
-Step 6. Of the Defined rows, pick the primary per `principle-read-the-room`. Turn each other Defined row into an Unresolved row. Its `observation` is the question as asked. Its `reason` says it is deferred until the primary problem is answered. Its `clarification` says when to ask it again. With no Defined rows, there is no primary and step 7 does not run.
+Step 6. Of the Defined rows, pick the primary per `principle-read-the-room`. Turn each other Defined row into an Unresolved row. Its `observation` is the question as asked. Its `reason` says it is deferred until the primary problem is answered. Its `clarification` says when to ask it again. The primary's statement is the main question, the one to answer first. With no Defined rows, there is no primary, the main question is `null`, and step 7 does not run.
 
 Repair. If the restatement disagrees with the primary or the Unresolved rows, discard it and run `restate` again. Never edit the sentences in place.
 
@@ -47,6 +47,8 @@ Render the primary and its classification as the one `problems` item. Render eve
 ```yaml
 status: classified | partial | needs_clarification | not_a_problem
 
+main_question: "The primary's statement, word for word" | null
+
 problems:
   - statement: "Clear statement of what needs resolving"
     classification:
@@ -69,9 +71,10 @@ applied:
 stop: true
 ```
 
-`problems` holds at most one item, the primary. An empty `problems` list is valid when status is `needs_clarification` or `not_a_problem`. Always emit `unresolved`. Write `[]` when it is empty. Always emit `applied`. Write `[]` when no principle decided a value.
+`problems` holds at most one item, the primary. An empty `problems` list is valid when status is `needs_clarification` or `not_a_problem`. Always emit `main_question`. Copy the primary's `statement` into it exactly. Write `null` when `problems` is empty. Always emit `unresolved`. Write `[]` when it is empty. Always emit `applied`. Write `[]` when no principle decided a value.
 
 ## Never
 
 - Put a second item in `problems`.
+- Reword the primary's statement in `main_question`, or name a question there that `problems` does not hold.
 - Write anything after the YAML block.

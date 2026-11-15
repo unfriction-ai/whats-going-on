@@ -17,6 +17,7 @@ turns:
     gold: |
       ```yaml
       status: partial
+      main_question: "Why did the nightly billing batch fail?"
       problems:
         - statement: "Why did the nightly billing batch fail?"
           classification:

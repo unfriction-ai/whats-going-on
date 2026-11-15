@@ -34,7 +34,9 @@ NO_ASK = "No ask is stated."
 
 FENCE_RE = re.compile(r"```yaml\s*\n(.*?)```", re.DOTALL | re.IGNORECASE)
 
-VERDICT_KEYS = frozenset({"status", "problems", "unresolved", "applied", "stop"})
+VERDICT_KEYS = frozenset(
+    {"status", "main_question", "problems", "unresolved", "applied", "stop"}
+)
 HALT_KEYS = frozenset({"next_stage", "available", "stop"})
 
 CHANGED_BUDGET = 200
@@ -78,6 +80,7 @@ class Applied:
 @dataclass(frozen=True)
 class Verdict:
     status: Status
+    main_question: str | None
     problems: Problems
     unresolved: tuple[Unresolved, ...]
     applied: tuple[Applied, ...]
@@ -231,6 +234,10 @@ def _validate_wire(raw: dict[str, Any], preamble: str) -> Outcome | ContractViol
             "status_mismatch", f"claimed={claimed} derived={derived}"
         )
 
+    main_question = _parse_main_question(raw, problems_t)
+    if isinstance(main_question, ContractViolation):
+        return main_question
+
     if "applied" not in raw:
         return ContractViolation("schema", "applied is required")
     applied = _parse_applied(raw["applied"], problems_t, unresolved_t)
@@ -240,9 +247,31 @@ def _validate_wire(raw: dict[str, Any], preamble: str) -> Outcome | ContractViol
     return Response(
         preamble=preamble,
         verdict=Verdict(
-            status=derived, problems=problems_t, unresolved=unresolved_t, applied=applied
+            status=derived,
+            main_question=main_question,
+            problems=problems_t,
+            unresolved=unresolved_t,
+            applied=applied,
         ),
     )
+
+
+def _parse_main_question(raw: dict[str, Any], problems: Problems) -> str | None | ContractViolation:
+    if "main_question" not in raw:
+        return ContractViolation("schema", "main_question is required")
+    value = raw["main_question"]
+    if value is None:
+        main_question = None
+    else:
+        main_question = _nonblank(value, "main_question")
+        if isinstance(main_question, ContractViolation):
+            return main_question
+    expected = problems[0].statement if problems else None
+    if main_question != expected:
+        return ContractViolation(
+            "main_question_mismatch", f"main_question={main_question!r} primary={expected!r}"
+        )
+    return main_question
 
 
 @cache

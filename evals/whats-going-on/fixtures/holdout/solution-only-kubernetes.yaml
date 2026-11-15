@@ -17,6 +17,7 @@ turns:
     gold: |
       ```yaml
       status: needs_clarification
+      main_question: null
       problems: []
       unresolved:
         - observation: "VP wants a Kubernetes migration plan"
