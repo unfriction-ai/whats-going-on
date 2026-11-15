@@ -12,21 +12,23 @@ disable-model-invocation: true
 
 ## Rule
 
-Sharpen one primary problem, the one the others wait on. A question the others depend on goes first, such as a why before a how to prevent. Every other concern waits in `unresolved` until the primary is answered.
+Sharpen one primary problem, the one the others wait on. A question the others depend on goes first, such as a why before a how to prevent, or a go or no-go before how to present the thing. Every other concern waits in `unresolved` until the primary is answered.
+
+Research that informs a decision is not a question the decision waits on. When the input asks for data, a report, or an analysis before a named decision, the decision is the primary. The research belongs in its `next_method`, not in `problems` or `unresolved`.
 
 Classify that problem as it stands now. The quadrant names the current reasoning objective, not a permanent property of the situation. Do not advance it to a later stage. More information alone does not flip a quadrant. A changed question does.
 
 ## When
 
-Each time two or more rows are Defined, and each time you classify the primary.
+Each time two or more rows are Defined, each time the input asks for data before a named decision, and each time you classify the primary.
 
 ## Cite or omit
 
-Cite at `problems[0]` when this rule chose the primary over another Defined row. Cite at `unresolved[<i>]` when it deferred a Defined row behind the primary. Cite at `problems[0].classification` when it held the quadrant to the current ask instead of a later one. Omit it when only one row was ever Defined and its quadrant was plain.
+Cite at `problems[0]` when this rule chose the primary over another Defined row, or chose a decision over the research meant to inform it. Cite at `unresolved[<i>]` when it deferred a Defined row behind the primary. Cite at `problems[0].classification` when it held the quadrant to the current ask instead of a later one. Omit it when only one row was ever Defined, no research-before-decision pattern appears, and its quadrant was plain.
 
 ## Failure signature
 
-Two items appear in `problems`. The primary is the easiest question to answer instead of the one the others depend on. A why is classified as the convergent fix that would follow it.
+Two items appear in `problems`. The primary is the easiest question to answer instead of the one the others depend on. A requested data pull is the primary, or the only problem, while the decision it informs is still open in the input. A why is classified as the convergent fix that would follow it.
 
 ## Distinct from
 
