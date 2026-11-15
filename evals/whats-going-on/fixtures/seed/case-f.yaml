@@ -20,6 +20,7 @@ turns:
     gold: |
       ```yaml
       status: partial
+      main_question: "Why did staging go down last night?"
       problems:
         - statement: "Why did staging go down last night?"
           classification:

@@ -19,6 +19,7 @@ turns:
     gold: |
       ```yaml
       status: classified
+      main_question: "Which one or two admin-console UI changes should we make before the enterprise demo to reduce overwhelm?"
       problems:
         - statement: "Which one or two admin-console UI changes should we make before the enterprise demo to reduce overwhelm?"
           classification:

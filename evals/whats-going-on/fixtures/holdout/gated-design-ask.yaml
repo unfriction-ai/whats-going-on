@@ -1,0 +1,44 @@
+turns:
+  - input: |
+      From a product manager in #mobile-launch:
+      "Can design mock up how we'd feature offline mode on the pricing page? Leadership still has to
+      decide on Friday whether offline mode ships in the March release at all. Sales wants it for the
+      Northwind renewal, and support says the help docs aren't ready."
+    restatement: "A product manager asks design to mock up how offline mode would be featured on the pricing page. Leadership decides on Friday whether offline mode ships in the March release, with sales wanting it for the Northwind renewal and support saying the help docs are not ready."
+    expect:
+      kind: classify
+      statuses: [partial]
+      problems:
+        - anchor: ["^(?!.*pricing)", "offline", "ship|launch|march|release"]
+          quadrants: [conceptual-convergent]
+      unresolved:
+        - anchor: ["pricing", "offline|feature|mock"]
+    tripwires:
+      invented: ["revenue", "\\$\\d"]
+      methodNotProblem: []
+      solveLeak: ["should ship", "should not ship", "hold (it|offline mode) (back|until)"]
+    gold: |
+      ```yaml
+      status: partial
+      main_question: "Should offline mode ship in the March release?"
+      problems:
+        - statement: "Should offline mode ship in the March release?"
+          classification:
+            nature: conceptual
+            direction: convergent
+          confidence: medium
+          why: "Leadership must settle one go or no-go call by Friday. It weighs the Northwind renewal against help docs that are not ready, which is judgment, not a measurement."
+          next_method: "Weigh the stated trade-offs for the Friday go or no-go call. Settle this before any pricing-page design."
+      unresolved:
+        - observation: "The product manager asks design to mock up how offline mode would be featured on the pricing page"
+          reason: "Deferred until the primary problem is answered. How to feature offline mode depends on whether it ships in March."
+          clarification: "Ask about the pricing-page treatment again once the March launch decision is made."
+      applied:
+        - name: principle-read-the-room
+          at: problems[0]
+          changed: "Picked the launch decision as primary because the pricing-page design depends on it."
+        - name: principle-read-the-room
+          at: unresolved[0]
+          changed: "Deferred the pricing-page mockup instead of classifying it now."
+      stop: true
+      ```

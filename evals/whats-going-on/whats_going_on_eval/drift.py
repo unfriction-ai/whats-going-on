@@ -24,6 +24,7 @@ from .parse import (
     NATURES,
     NO_ASK,
     STATUSES,
+    VERDICT_KEYS,
     Response,
     parse_response,
 )
@@ -32,6 +33,7 @@ CONTRACT_RE = re.compile(
     r"```yaml\n(status: classified \| partial \| needs_clarification \| not_a_problem\n.*?)```",
     re.DOTALL,
 )
+CONTRACT_KEY_RE = re.compile(r"^([a-z_]+):", re.MULTILINE)
 
 CONTRACT_OWNER: dict[ChainMode, str] = {
     "monolith": "SKILL.md",
@@ -148,6 +150,15 @@ def _contract_drift(readme: str, owner_rel: str, owner: str) -> list[DriftProble
         out.append(
             DriftProblem("contract_drift", f"README and {owner_rel} contract blocks differ")
         )
+    if s is not None:
+        keys = frozenset(CONTRACT_KEY_RE.findall(s))
+        if keys != VERDICT_KEYS:
+            out.append(
+                DriftProblem(
+                    "contract_drift",
+                    f"{owner_rel} contract keys {sorted(keys)} != parser keys {sorted(VERDICT_KEYS)}",
+                )
+            )
     return out
 
 
@@ -374,7 +385,7 @@ def _sentinel_sync(owner_rel: str, owner: str) -> list[DriftProblem]:
 def _guard_turn(user_input: str) -> Turn:
     text = user_input.strip() or "Noted."
     gold = parse_response(
-        "```yaml\nstatus: not_a_problem\nproblems: []\nunresolved: []\napplied: []\nstop: true\n```"
+        "```yaml\nstatus: not_a_problem\nmain_question: null\nproblems: []\nunresolved: []\napplied: []\nstop: true\n```"
     )
     if not isinstance(gold, Response):
         raise RuntimeError("guard gold failed to parse")
@@ -402,7 +413,7 @@ def _restatement_guard_self_test(cases_dir: Path) -> list[DriftProblem]:
     missing = sorted(_REQUIRED_RESTATEMENT_CASES - {path.name for path in paths})
     if missing:
         problems.append(DriftProblem("restatement_guard", f"missing cases: {missing}"))
-    body = "status: not_a_problem\nproblems: []\nunresolved: []\napplied: []\nstop: true\n"
+    body = "status: not_a_problem\nmain_question: null\nproblems: []\nunresolved: []\napplied: []\nstop: true\n"
     for path in paths:
         doc = yaml.safe_load(path.read_text())
         if not isinstance(doc, dict) or "preamble" not in doc or "expect_fail" not in doc:

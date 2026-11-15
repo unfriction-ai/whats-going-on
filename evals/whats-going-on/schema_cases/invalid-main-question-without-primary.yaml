@@ -1,0 +1,12 @@
+expect_ok: false
+expect_kind: main_question_mismatch
+body: |
+  status: needs_clarification
+  main_question: "What changed on mobile, by how much, and since when?"
+  problems: []
+  unresolved:
+    - observation: "Mobile is in a rough place"
+      reason: "No measurable change."
+      clarification: "What changed, by how much, and since when?"
+  applied: []
+  stop: true

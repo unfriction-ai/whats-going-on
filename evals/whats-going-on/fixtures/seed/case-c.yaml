@@ -19,6 +19,7 @@ turns:
     gold: |
       ```yaml
       status: classified
+      main_question: "Which one or two handoff changes should Design and Eng adopt so tickets stop bouncing for missing acceptance criteria?"
       problems:
         - statement: "Which one or two handoff changes should Design and Eng adopt so tickets stop bouncing for missing acceptance criteria?"
           classification:

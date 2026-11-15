@@ -21,6 +21,7 @@ turns:
     gold: |
       ```yaml
       status: needs_clarification
+      main_question: null
       problems: []
       unresolved:
         - observation: "Mobile is in a rough place; eng has competing theories"

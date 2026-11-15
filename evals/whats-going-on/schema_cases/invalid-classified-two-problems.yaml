@@ -2,6 +2,7 @@ expect_ok: false
 expect_kind: schema
 body: |
   status: classified
+  main_question: "Why did checkout latency rise?"
   problems:
     - statement: "Why did checkout latency rise?"
       classification: { nature: analytical, direction: convergent }

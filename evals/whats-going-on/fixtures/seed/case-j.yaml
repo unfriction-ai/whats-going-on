@@ -15,6 +15,7 @@ turns:
     gold: |
       ```yaml
       status: needs_clarification
+      main_question: null
       problems: []
       unresolved:
         - observation: "Mobile is in a rough place"
@@ -42,6 +43,7 @@ turns:
     gold: |
       ```yaml
       status: classified
+      main_question: "Why did crash-free sessions drop 8% over four weeks?"
       problems:
         - statement: "Why did crash-free sessions drop 8% over four weeks?"
           classification: { nature: analytical, direction: convergent }
@@ -68,6 +70,7 @@ turns:
     gold: |
       ```yaml
       status: classified
+      main_question: "What product or eng initiatives could recover crash-free sessions?"
       problems:
         - statement: "What product or eng initiatives could recover crash-free sessions?"
           classification: { nature: conceptual, direction: divergent }
@@ -97,6 +100,7 @@ turns:
     gold: |
       ```yaml
       status: classified
+      main_question: "Which of the three recovery initiatives should we fund?"
       problems:
         - statement: "Which of the three recovery initiatives should we fund?"
           classification: { nature: conceptual, direction: convergent }

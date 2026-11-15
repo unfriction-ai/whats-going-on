@@ -14,6 +14,7 @@ turns:
     gold: |
       ```yaml
       status: not_a_problem
+      main_question: null
       problems: []
       unresolved: []
       applied: []
