@@ -19,6 +19,7 @@ turns:
     gold: |
       ```yaml
       status: classified
+      main_question: "What approaches could build a healthy on-call culture on the platform squad over the next year?"
       problems:
         - statement: "What approaches could build a healthy on-call culture on the platform squad over the next year?"
           classification:

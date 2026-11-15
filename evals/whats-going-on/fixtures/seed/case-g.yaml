@@ -19,6 +19,7 @@ turns:
     gold: |
       ```yaml
       status: classified
+      main_question: "How should the directors decide which services to sunset first?"
       problems:
         - statement: "How should the directors decide which services to sunset first?"
           classification:

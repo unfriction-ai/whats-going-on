@@ -188,6 +188,7 @@ def invariance_payload(report: InvarianceReport) -> dict[str, object]:
 def _classified_text(preamble: str) -> str:
     body = """```yaml
 status: classified
+main_question: "Why did checkout latency rise?"
 problems:
   - statement: "Why did checkout latency rise?"
     classification:

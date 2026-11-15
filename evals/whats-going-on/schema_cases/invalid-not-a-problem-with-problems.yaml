@@ -2,6 +2,7 @@ expect_ok: false
 expect_kind: status_mismatch
 body: |
   status: not_a_problem
+  main_question: "Why did staging go down?"
   problems:
     - statement: "Why did staging go down?"
       classification: { nature: analytical, direction: convergent }

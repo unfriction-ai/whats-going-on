@@ -2,7 +2,7 @@
 
 Tagline: Understand the situation before deciding what to solve.
 
-`/whats-going-on` examines an ask, message, or described situation. Stage 1 (`define-the-problem`) finds what needs resolving in that input, picks at most one primary problem, decides whether it is defined enough to classify, and maps it onto a 2×2. It cites principles under `applied` when they decided a value. It stops before diagnosis, brainstorming, or solutions.
+`/whats-going-on` examines an ask, message, or described situation. Stage 1 (`define-the-problem`) finds what needs resolving in that input, picks at most one primary problem, names it as the `main_question` to answer first, decides whether it is defined enough to classify, and maps it onto a 2×2. It cites principles under `applied` when they decided a value. It stops before diagnosis, brainstorming, or solutions.
 
 Works with Cursor Agent Skills, Claude Code skills, and Codex skills. Same `SKILL.md` body. Install path differs by tool.
 
@@ -92,6 +92,8 @@ When the two sentences disagree with the primary or with `unresolved`, discard t
 ```yaml
 status: classified | partial | needs_clarification | not_a_problem
 
+main_question: "The primary's statement, word for word" | null
+
 problems:
   - statement: "Clear statement of what needs resolving"
     classification:
@@ -114,7 +116,7 @@ applied:
 stop: true
 ```
 
-`problems` holds at most one item, the primary. An empty `problems` list is valid when status is `needs_clarification` or `not_a_problem`. Always emit `unresolved`. Write `[]` when it is empty. Always emit `applied`. Write `[]` when no principle decided a value.
+`problems` holds at most one item, the primary. An empty `problems` list is valid when status is `needs_clarification` or `not_a_problem`. Always emit `main_question`. Copy the primary's `statement` into it exactly. Write `null` when `problems` is empty. Always emit `unresolved`. Write `[]` when it is empty. Always emit `applied`. Write `[]` when no principle decided a value.
 
 ## Install
 
@@ -164,6 +166,7 @@ Can you help me figure out where we should even look first?"
 
 ```yaml
 status: needs_clarification
+main_question: null
 problems: []
 unresolved:
   - observation: "Mobile is in a rough place; eng has competing theories"
@@ -194,6 +197,7 @@ One estimate for one review. Data does the work. One answer.
 
 ```yaml
 status: classified
+main_question: "What p99 latency estimates for the checkout API should inform the Q1 hardware budget?"
 problems:
   - statement: "What p99 latency estimates for the checkout API should inform the Q1 hardware budget?"
     classification:
@@ -227,6 +231,7 @@ The topic is a way of working, not a number. "One or two handoff changes" alread
 
 ```yaml
 status: classified
+main_question: "Which one or two handoff changes should Design and Eng adopt so tickets stop bouncing for missing acceptance criteria?"
 problems:
   - statement: "Which one or two handoff changes should Design and Eng adopt so tickets stop bouncing for missing acceptance criteria?"
     classification:
@@ -258,6 +263,7 @@ Culture and norms are conceptual. "How do we" over a year leaves many approaches
 
 ```yaml
 status: classified
+main_question: "What approaches could build a healthy on-call culture on the platform squad over the next year?"
 problems:
   - statement: "What approaches could build a healthy on-call culture on the platform squad over the next year?"
     classification:
@@ -289,6 +295,7 @@ Simplifying an interface is design judgment, not a dataset. "Settle on one or tw
 
 ```yaml
 status: classified
+main_question: "Which one or two admin-console UI changes should we make before the enterprise demo to reduce overwhelm?"
 problems:
   - statement: "Which one or two admin-console UI changes should we make before the enterprise demo to reduce overwhelm?"
     classification:
@@ -320,6 +327,7 @@ Two questions in one sentence. "Why staging went down" is diagnosis. "How to sto
 
 ```yaml
 status: partial
+main_question: "Why did staging go down last night?"
 problems:
   - statement: "Why did staging go down last night?"
     classification:
@@ -360,6 +368,7 @@ The proposed deliverable (LOC spreadsheet) is not the problem. The unresolved qu
 
 ```yaml
 status: classified
+main_question: "How should the directors decide which services to sunset first?"
 problems:
   - statement: "How should the directors decide which services to sunset first?"
     classification:
@@ -394,6 +403,7 @@ Timeouts are a symptom. The workshop is a proposed method. A recent pool-size ch
 
 ```yaml
 status: partial
+main_question: "Are checkout API timeouts explained by the lowered connection-pool max, or by something else measurable?"
 problems:
   - statement: "Are checkout API timeouts explained by the lowered connection-pool max, or by something else measurable?"
     classification:
@@ -428,6 +438,7 @@ FYI, the Friday deploy window moved to Saturday 10:00 UTC.
 
 ```yaml
 status: not_a_problem
+main_question: null
 problems: []
 unresolved: []
 applied: []

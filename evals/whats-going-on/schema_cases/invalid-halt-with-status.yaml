@@ -6,5 +6,6 @@ body: |
   next_stage: structure-the-problem
   available: false
   status: classified
+  main_question: null
   stop: true
   ```

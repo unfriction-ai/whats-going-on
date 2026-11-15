@@ -21,6 +21,7 @@ turns:
     gold: |
       ```yaml
       status: partial
+      main_question: "Are checkout API timeouts explained by the lowered connection-pool max, or by something else measurable?"
       problems:
         - statement: "Are checkout API timeouts explained by the lowered connection-pool max, or by something else measurable?"
           classification:
