@@ -72,7 +72,7 @@ Each judgment rule has one owner, a `principle-*` leaf the coordinator names in 
 | Principle | Rule | Governs |
 |---|---|---|
 | `principle-dont-invent-problems` | Identify before you classify. Missing data to *solve* does not block a problem. Missing data to *identify* does, so abstain. Never invent facts, metrics, or causes. | `problem`, `unresolved`, `classification` |
-| `principle-read-the-room` | One primary problem, the one the others wait on. The rest wait in `unresolved`. The quadrant is a snapshot of the current reasoning objective. | `problem`, `unresolved`, `classification` |
+| `principle-read-the-room` | One primary problem, the one the others wait on. The rest wait in `unresolved`. Research that informs a decision is that decision's `next_method`, not the primary. The quadrant is a snapshot of the current reasoning objective. | `problem`, `unresolved`, `classification` |
 | `principle-dont-solve-yet` | No root-cause hunt, issue trees, brainstorms, plans, or recommendations. `next_method` names a kind of reasoning, not its result. | `problem`, `unresolved` |
 
 ## The restatement
