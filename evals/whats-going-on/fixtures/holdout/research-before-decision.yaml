@@ -7,7 +7,7 @@ turns:
     restatement: "The head of growth asks someone to pull free-to-paid conversion by signup cohort for the last twelve months before deciding whether to keep the free tier. Finance wants the free-tier call by the end of the quarter."
     expect:
       kind: classify
-      statuses: [classified]
+      statuses: [partial]
       problems:
         - anchor: ["free tier", "keep"]
           quadrants: [analytical-convergent, conceptual-convergent]
@@ -21,7 +21,7 @@ turns:
       solveLeak: ["should (keep|drop|remove|sunset) the free tier", "conversion (is|was) (low|high|weak|strong)"]
     gold: |
       ```yaml
-      status: classified
+      status: partial
       main_question: "Should we keep the free tier?"
       problems:
         - statement: "Should we keep the free tier?"
@@ -33,7 +33,11 @@ turns:
           next_method: "Read free-to-paid conversion by signup cohort against the free-tier decision. The requested pull serves this decision. It is not a separate problem."
       smart_question: "Should we keep the free tier, with Finance expecting the call by the end of the quarter?"
       smart_gaps: []
-      unresolved: []
+      worksheet: {}
+      unresolved:
+        - observation: 'The worksheet has no context or constraints yet.'
+          reason: 'Context and constraints is the next open worksheet area.'
+          clarification: 'Context and constraints: Around "Should we keep the free tier, with Finance expecting the call by the end of the quarter?", what background or pressures shape how you solve it, and what cannot change?'
       applied:
         - name: principle-read-the-room
           at: problems[0]

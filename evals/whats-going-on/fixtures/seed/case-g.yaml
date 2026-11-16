@@ -33,7 +33,11 @@ turns:
           next_method: "Clarify decision criteria and trade-offs among services. Do not expand the LOC spreadsheet in this slice."
       smart_question: "How should the two directors decide which services to sunset first, weighing product strategy and customer impact?"
       smart_gaps: [time_bound]
+      worksheet: {}
       unresolved:
+        - observation: 'The worksheet has no context or constraints yet.'
+          reason: 'Context and constraints is the next open worksheet area.'
+          clarification: 'Context and constraints: Around "How should the two directors decide which services to sunset first, weighing product strategy and customer impact?", what background or pressures shape how you solve it, and what cannot change?'
         - observation: "The input gives no date for the sunset decision"
           reason: "SMART time_bound is missing. The input gives no date by which the answer is needed."
           clarification: "Ask yourself: By when does it need to be solved?"

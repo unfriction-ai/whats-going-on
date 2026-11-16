@@ -1,19 +1,17 @@
-"""Worksheet registry and assessment.
-
-Areas, skips, the stop streak, and the hand-back line come from the leaf.
-Cells, stop_for, and assess encode the walk. Fence parsing comes later.
-"""
+"""Worksheet registry, assessment, and the `worksheet` wire key."""
 
 from __future__ import annotations
 
 import re
+from collections.abc import Mapping
 from dataclasses import dataclass
 from functools import cache
 from pathlib import Path
-from typing import Literal, assert_never, get_args
+from typing import Any, Literal, assert_never, get_args
 
 from .manifest import SKILL_DIR
 from .smart import ASK_YOURSELF, NoPrimary, Proposed, SmartProposal, Withheld
+from .wire import ContractViolation, Unresolved
 
 AreaId = Literal["context_constraints", "success_criteria", "stakeholders", "scope_sources"]
 AREAS: tuple[AreaId, ...] = get_args(AreaId)
@@ -318,3 +316,109 @@ def assess(proposal: SmartProposal, cells: tuple[Cell, ...]) -> WorksheetAssessm
                     assert_never(unreachable)
         case _ as unreachable:
             assert_never(unreachable)
+
+
+def ask_row(assessment: WorksheetAssessment) -> str | None:
+    """The clarification of the one row that asks the operator for the sheet, if any."""
+    match assessment:
+        case Asking():
+            return assessment.probe
+        case HandedBack():
+            return assessment.hand_back_line
+        case NotStarted() | Complete():
+            return None
+        case _ as unreachable:
+            assert_never(unreachable)
+
+
+@cache
+def _probe_patterns() -> tuple[re.Pattern[str], ...]:
+    slot = re.escape(QUESTION_SLOT)
+    return tuple(
+        re.compile(re.escape(area.probe_template).replace(slot, ".+"), re.DOTALL)
+        for area in load_registry().areas
+    )
+
+
+def _asks_sheet(clarification: str) -> bool:
+    if clarification == load_registry().hand_back_line:
+        return True
+    return any(pattern.fullmatch(clarification) for pattern in _probe_patterns())
+
+
+def parse_worksheet(
+    raw: Mapping[str, Any], proposal: SmartProposal, unresolved: tuple[Unresolved, ...]
+) -> WorksheetAssessment | ContractViolation:
+    if "worksheet" not in raw:
+        return ContractViolation("worksheet_schema", "worksheet is required")
+    value = raw["worksheet"]
+    if not isinstance(proposal, Proposed):
+        if value is not None:
+            return ContractViolation(
+                "worksheet_without_question", "no proposed smart_question, so worksheet is null"
+            )
+        return _check_ask_rows(NotStarted(), unresolved, 0)
+    if value is None:
+        return ContractViolation(
+            "worksheet_null_with_question", "smart_question is proposed, so worksheet is a mapping"
+        )
+    if not isinstance(value, dict):
+        return ContractViolation("worksheet_schema", "worksheet must be null or a mapping")
+    keys = tuple(value)
+    if keys != AREAS[: len(keys)]:
+        return ContractViolation(
+            "worksheet_order", f"worksheet areas {list(keys)} are not a prefix of {list(AREAS)}"
+        )
+    cells: list[Cell] = []
+    for area, item in value.items():
+        cell = _parse_cell(area, item)
+        if isinstance(cell, ContractViolation):
+            return cell
+        cells.append(cell)
+    return _check_ask_rows(assess(proposal, tuple(cells)), unresolved, len(proposal.gaps))
+
+
+def _parse_cell(area: AreaId, item: Any) -> Cell | ContractViolation:
+    path = f"worksheet.{area}"
+    if not isinstance(item, dict) or set(item) != {"status", "text"}:
+        return ContractViolation("worksheet_schema", f"{path} must be {{status, text}}")
+    status, text = item["status"], item["text"]
+    try:
+        if status == "filled":
+            if not isinstance(text, str):
+                return ContractViolation("worksheet_schema", f"{path}.text must be a string")
+            return Filled(area, text.strip())
+        if status in SKIP_STATUSES:
+            if text is not None:
+                return ContractViolation("worksheet_schema", f"{path}.text must be null on a skip")
+            return Skipped(area, status)
+    except ValueError as exc:
+        return ContractViolation("worksheet_schema", str(exc))
+    return ContractViolation(
+        "worksheet_schema", f"{path}.status must be filled or one of {list(SKIP_STATUSES)}"
+    )
+
+
+def _check_ask_rows(
+    assessment: WorksheetAssessment, unresolved: tuple[Unresolved, ...], gap_count: int
+) -> WorksheetAssessment | ContractViolation:
+    asks = [i for i, row in enumerate(unresolved) if _asks_sheet(row.clarification)]
+    want = ask_row(assessment)
+    state = type(assessment).__name__
+    if want is None:
+        if asks:
+            return ContractViolation(
+                "worksheet_probe_rows", f"unresolved[{asks[0]}] asks for the sheet while {state}"
+            )
+        return assessment
+    if len(asks) != 1 or unresolved[asks[0]].clarification != want:
+        return ContractViolation(
+            "worksheet_probe_rows", f"{state} needs one row asking {want!r}, got rows {asks}"
+        )
+    place = len(unresolved) - gap_count - 1
+    if asks[0] != place:
+        return ContractViolation(
+            "worksheet_probe_place",
+            f"unresolved[{asks[0]}] asks for the sheet, want unresolved[{place}] before the gap rows",
+        )
+    return assessment

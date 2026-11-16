@@ -11,9 +11,13 @@ body: |
       next_method: "Gather facts on pool config before any workshop."
   smart_question: "Should ops run a two-day architecture workshop?"
   smart_gaps: []
+  worksheet: {}
   unresolved:
     - observation: "Ops wants a two-day architecture workshop"
       reason: "That is a proposed approach, not a defined problem."
       clarification: "What decision must this week's work settle?"
+    - observation: 'The worksheet has no context or constraints yet.'
+      reason: 'Context and constraints is the next open worksheet area.'
+      clarification: 'Context and constraints: Around "Should ops run a two-day architecture workshop?", what background or pressures shape how you solve it, and what cannot change?'
   applied: []
   stop: true

@@ -33,6 +33,7 @@ turns:
           next_method: "Gather public evidence on the price change and keep explanations open. Do not plan a response in this slice."
       smart_question: null
       smart_gaps: [measurable, actionable, relevant, time_bound]
+      worksheet: null
       unresolved:
         - observation: "The ask does not say what knowing their aim would look like"
           reason: "SMART measurable is missing. The input gives no sign of done."

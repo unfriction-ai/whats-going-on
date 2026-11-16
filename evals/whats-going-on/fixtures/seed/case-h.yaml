@@ -35,10 +35,14 @@ turns:
           next_method: "Gather facts on pool config, error rates, and timing before any architecture workshop."
       smart_question: "Are this morning's checkout API timeouts across three regions explained by yesterday's lowered connection-pool max, or by something else measurable, before Ops commits to this week's workshop?"
       smart_gaps: []
+      worksheet: {}
       unresolved:
         - observation: "Ops wants a two-day architecture workshop on resilient request paths"
           reason: "That is a proposed approach, not a defined problem. Redesign may be wrong if the pool config is the cause."
           clarification: "What decision must this week's work settle? Confirm root cause first, or commit to redesign regardless?"
+        - observation: 'The worksheet has no context or constraints yet.'
+          reason: 'Context and constraints is the next open worksheet area.'
+          clarification: 'Context and constraints: Around "Are this morning''s checkout API timeouts across three regions explained by yesterday''s lowered connection-pool max, or by something else measurable, before Ops commits to this week''s workshop?", what background or pressures shape how you solve it, and what cannot change?'
       applied:
         - name: principle-read-the-room
           at: problems[0]

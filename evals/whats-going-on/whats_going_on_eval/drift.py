@@ -27,6 +27,7 @@ from .manifest import (
 )
 from .principles import load_principles, principle_names
 from .smart import load_cards, parse_cards
+from .worksheet import AREAS
 from .parse import (
     CONFIDENCES,
     DIRECTIONS,
@@ -167,6 +168,14 @@ def _contract_drift(readme: str, owner_rel: str, owner: str) -> list[DriftProble
                 DriftProblem(
                     "contract_drift",
                     f"{owner_rel} contract keys {sorted(keys)} != parser keys {sorted(VERDICT_KEYS)}",
+                )
+            )
+    for label, block in (("README", r), (owner_rel, s)):
+        named = [area for area in AREAS if block is not None and area in block]
+        if named:
+            out.append(
+                DriftProblem(
+                    "contract_drift", f"{label} contract names worksheet areas {named}, want <id>"
                 )
             )
     return out
@@ -420,7 +429,7 @@ def _sentinel_sync(owner_rel: str, owner: str) -> list[DriftProblem]:
 
 _GUARD_BODY = (
     "status: not_a_problem\nmain_question: null\nproblems: []\n"
-    "smart_question: null\nsmart_gaps: []\nunresolved: []\napplied: []\nstop: true\n"
+    "smart_question: null\nsmart_gaps: []\nworksheet: null\nunresolved: []\napplied: []\nstop: true\n"
 )
 
 

@@ -32,6 +32,7 @@ from .manifest import (
     RUBRIC_PATH,
     SCHEMA_CASES_DIR,
     SKILL_DIR,
+    SUITE_VERSION,
     agent_mount,
     read_mount,
     skill_view_hash,
@@ -97,6 +98,7 @@ def cmd_check() -> int:
         print(f"  worksheet_assess: {exc}")
         return 2
     print("check OK")
+    print(f"  suite_version: {SUITE_VERSION}")
     print(f"  fixtures: {len(fixtures)}  skill_view: {skill_view_hash(SKILL_DIR)}")
     print(f"  families: {', '.join(families)}")
     print(f"  schema_cases: {_schema_case_count()} ok")

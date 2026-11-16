@@ -6,6 +6,7 @@ body: |
   problems: []
   smart_question: null
   smart_gaps: []
+  worksheet: null
   unresolved: []
   applied: []
   stop: true
