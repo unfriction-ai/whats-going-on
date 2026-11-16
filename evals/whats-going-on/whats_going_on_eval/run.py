@@ -37,6 +37,7 @@ from .manifest import (
 )
 from .parse import Halt, Response, describe_violation, parse_response
 from .wire import ContractViolation
+from .worksheet import load_registry
 from .runs import (
     new_run_id,
     read_transcript,
@@ -71,11 +72,20 @@ def cmd_check() -> int:
 
     families = sorted({fam for f in fixtures for fam in f.families})
     leaves = nested_leaf_rels(agent_mount(SKILL_DIR))
+    try:
+        registry = load_registry(SKILL_DIR)
+    except ValueError as exc:
+        print("check FAILED")
+        print(f"  worksheet_registry: {exc}")
+        return 2
     print("check OK")
     print(f"  fixtures: {len(fixtures)}  skill_view: {skill_view_hash(SKILL_DIR)}")
     print(f"  families: {', '.join(families)}")
     print(f"  schema_cases: {_schema_case_count()} ok")
     print(f"  nested_leaves: {', '.join(Path(rel).parent.as_posix() for rel in leaves)}")
+    print(
+        f"  worksheet_areas: {', '.join(area.id for area in registry.areas)}"
+    )
     return 0
 
 

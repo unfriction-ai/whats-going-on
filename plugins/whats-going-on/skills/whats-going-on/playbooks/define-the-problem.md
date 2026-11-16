@@ -2,7 +2,7 @@
 stage: define-the-problem
 consumes: none
 produces: problem_map
-skills: [ask, restate, separate, extract, clarity, smart, classify-2x2]
+skills: [ask, restate, separate, extract, clarity, smart, classify-2x2, worksheet]
 ---
 
 # Define the problem
