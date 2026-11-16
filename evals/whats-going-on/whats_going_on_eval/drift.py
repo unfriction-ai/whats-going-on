@@ -28,7 +28,7 @@ from .manifest import (
 )
 from .principles import load_principles, principle_names
 from .smart import load_cards, parse_cards
-from .worksheet import AREAS
+from .worksheet import AREAS, QUESTION_SLOT, load_registry
 from .parse import (
     CONFIDENCES,
     DIRECTIONS,
@@ -518,11 +518,27 @@ def _restatement_guard_self_test(cases_dir: Path) -> list[DriftProblem]:
     return problems
 
 
+def _strip_probe_scaffold(text: str) -> str:
+    """Keep only the question from each pasted worksheet probe line.
+
+    The operator pastes probes the skill emitted, so their template text is not contamination.
+    """
+    scaffolds = [area.probe_template.split(QUESTION_SLOT) for area in load_registry().areas]
+    lines: list[str] = []
+    for line in text.splitlines():
+        for head, tail in scaffolds:
+            if len(line) > len(head) + len(tail) and line.startswith(head) and line.endswith(tail):
+                line = line[len(head) : len(line) - len(tail)]
+                break
+        lines.append(line)
+    return "\n".join(lines)
+
+
 def _skill_contamination(fixtures: list[Fixture], mount: dict[str, str]) -> list[DriftProblem]:
     out: list[DriftProblem] = []
     for fixture in fixtures:
         for turn in fixture.turns:
-            chunk = turn.input.strip()
+            chunk = _strip_probe_scaffold(turn.input.strip())
             if len(chunk) < 40:
                 continue
             for rel, text in mount.items():
