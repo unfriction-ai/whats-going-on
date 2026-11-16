@@ -168,14 +168,14 @@ turns:
       Android checkout conversion fell from 3.1% to 2.4% since the last release. Why?
 
       Answers to the Ask-yourself questions:
-      The mobile lead decides whether to roll back the release. We need the cause before the May 6 release train.
+      The mobile lead decides whether to roll back the release. We need an answer before the May 6 release train.
 
       Context and constraints: Around "Why did Android checkout conversion fall from 3.1% to 2.4% since the last release?", what background or pressures shape how you solve it, and what cannot change?
       I don't know
 
       Success criteria: For "Why did Android checkout conversion fall from 3.1% to 2.4% since the last release?", what has to be true for the answer to count as success, and what would make it fail?
       Not yet
-    restatement: "Someone asks why Android checkout conversion fell, with the cause needed before the May 6 release train. It went from 3.1% to 2.4% since the last release, and the mobile lead decides whether to roll back the release."
+    restatement: "Someone asks why Android checkout conversion fell, with an answer needed before the May 6 release train. It went from 3.1% to 2.4% since the last release, and the mobile lead decides whether to roll back the release."
     expect:
       kind: classify
       statuses: [partial]
@@ -207,7 +207,7 @@ turns:
           confidence: high
           why: "A measured drop tied to a release. Data should converge on what changed."
           next_method: "Evidence-based diagnosis from checkout funnel data and the release diff."
-      smart_question: "Why did Android checkout conversion fall from 3.1% to 2.4% since the last release, with the cause needed by the mobile lead before the May 6 release train?"
+      smart_question: "Why did Android checkout conversion fall from 3.1% to 2.4% since the last release, with an answer needed by the mobile lead before the May 6 release train?"
       smart_gaps: []
       worksheet:
         context_constraints:
@@ -219,7 +219,7 @@ turns:
       unresolved:
         - observation: 'The worksheet has no stakeholders yet.'
           reason: 'Stakeholders is the next open worksheet area.'
-          clarification: 'Stakeholders: Who can make or block the decision behind "Why did Android checkout conversion fall from 3.1% to 2.4% since the last release, with the cause needed by the mobile lead before the May 6 release train?", and who must agree? Say "I am the decider" if that is you.'
+          clarification: 'Stakeholders: Who can make or block the decision behind "Why did Android checkout conversion fall from 3.1% to 2.4% since the last release, with an answer needed by the mobile lead before the May 6 release train?", and who must agree? Say "I am the decider" if that is you.'
       applied: []
       stop: true
       ```
