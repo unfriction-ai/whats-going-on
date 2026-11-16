@@ -4,6 +4,7 @@ import argparse
 import json
 import shutil
 import sys
+from collections.abc import Callable
 from pathlib import Path
 
 import yaml
@@ -36,8 +37,19 @@ from .manifest import (
     skill_view_hash,
 )
 from .parse import Halt, Response, describe_violation, parse_response
+from .smart import NoPrimary, Proposed, Withheld
 from .wire import ContractViolation
-from .worksheet import load_registry
+from .worksheet import (
+    Asking,
+    Complete,
+    Filled,
+    HandedBack,
+    NotStarted,
+    Skipped,
+    assess,
+    load_registry,
+    stop_for,
+)
 from .runs import (
     new_run_id,
     read_transcript,
@@ -78,15 +90,94 @@ def cmd_check() -> int:
         print("check FAILED")
         print(f"  worksheet_registry: {exc}")
         return 2
+    try:
+        _worksheet_assess_self_check()
+    except ValueError as exc:
+        print("check FAILED")
+        print(f"  worksheet_assess: {exc}")
+        return 2
     print("check OK")
     print(f"  fixtures: {len(fixtures)}  skill_view: {skill_view_hash(SKILL_DIR)}")
     print(f"  families: {', '.join(families)}")
     print(f"  schema_cases: {_schema_case_count()} ok")
     print(f"  nested_leaves: {', '.join(Path(rel).parent.as_posix() for rel in leaves)}")
-    print(
-        f"  worksheet_areas: {', '.join(area.id for area in registry.areas)}"
-    )
+    print(f"  worksheet_areas: {', '.join(area.id for area in registry.areas)}")
+    print("  worksheet_assess: ok")
     return 0
+
+
+def _must_reject(label: str, build: Callable[[], object]) -> None:
+    try:
+        build()
+    except ValueError:
+        return
+    raise ValueError(label)
+
+
+def _worksheet_assess_self_check() -> None:
+    registry = load_registry()
+    unknown_says = next(skip.says for skip in registry.skips if skip.status == "unknown")
+    question = "Why did crash-free sessions drop?"
+    asking_cells = (
+        Skipped("context_constraints", "unknown"),
+        Skipped("success_criteria", "not_yet"),
+    )
+    complete_cells = (
+        Filled("context_constraints", "Review freezes in ten days."),
+        Filled("success_criteria", "We know the cause."),
+        Skipped("stakeholders", "i_am_decider"),
+        Skipped("scope_sources", "unknown"),
+    )
+    if stop_for(asking_cells, False) != "asking":
+        raise ValueError("stop_for with gaps closed should stay asking")
+    if stop_for(asking_cells, True) != "handed_back":
+        raise ValueError("stop_for with an open gap and a skip streak should hand back")
+    if stop_for(complete_cells, True) != "complete":
+        raise ValueError("stop_for on a full sheet should be complete")
+    if not isinstance(assess(NoPrimary(), ()), NotStarted):
+        raise ValueError("assess(NoPrimary, ()) should be NotStarted")
+    if not isinstance(assess(Withheld(gaps=("specific",)), ()), NotStarted):
+        raise ValueError("assess(Withheld, ()) should be NotStarted")
+    _must_reject(
+        "assess(Withheld, cells) should reject cells",
+        lambda: assess(Withheld(gaps=("specific",)), asking_cells),
+    )
+    _must_reject(
+        "Filled should reject blank text",
+        lambda: Filled("context_constraints", "   "),
+    )
+    _must_reject(
+        "Filled should reject a skip phrase",
+        lambda: Filled("context_constraints", unknown_says),
+    )
+    folded = f"  {unknown_says.swapcase().replace(' ', '   ')}  "
+    _must_reject(
+        "Filled should reject a normalized skip phrase",
+        lambda: Filled("success_criteria", folded),
+    )
+    _must_reject(
+        "Skipped should reject i_am_decider off stakeholders",
+        lambda: Skipped("context_constraints", "i_am_decider"),
+    )
+    _must_reject(
+        "Asking should reject a non-prefix",
+        lambda: Asking((Skipped("success_criteria", "unknown"),), question, False),
+    )
+    started = assess(Proposed(question, ("relevant",)), ())
+    if not isinstance(started, Asking) or started.next_area != "context_constraints":
+        raise ValueError("an empty sheet should ask context_constraints")
+    if question not in started.probe:
+        raise ValueError("Asking probe should quote the question")
+    asking = assess(Proposed(question, ()), asking_cells)
+    if not isinstance(asking, Asking) or asking.next_area != "stakeholders":
+        raise ValueError("closed gaps should keep asking after a skip streak")
+    handed = assess(Proposed(question, ("relevant",)), asking_cells)
+    if not isinstance(handed, HandedBack):
+        raise ValueError("open gaps should hand the sheet back")
+    if handed.hand_back_line != registry.hand_back_line:
+        raise ValueError("HandedBack hand_back_line drifted from the registry")
+    if not isinstance(assess(Proposed(question, ("relevant",)), complete_cells), Complete):
+        raise ValueError("a full sheet stays complete while gaps are open")
 
 
 def _schema_case_count() -> int:
