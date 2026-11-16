@@ -9,13 +9,13 @@ from typing import Literal
 from .fixtures import Expectation, ExpectedProblem, Fixture, Turn, _gold_response_text
 from .parse import (
     ClassifiedProblem,
-    ContractViolation,
     Halt,
     Response,
     Verdict,
     parse_response,
     parse_restatement,
 )
+from .wire import ContractViolation
 
 RUBRIC: dict[str, float] = {
     "detection": 0.25,

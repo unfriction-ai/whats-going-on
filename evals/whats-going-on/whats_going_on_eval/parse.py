@@ -11,6 +11,7 @@ import yaml
 
 from .manifest import SKILL_DIR
 from .principles import WireKind, load_principles
+from .wire import ContractViolation, Unresolved
 
 NATURES = ("analytical", "conceptual")
 DIRECTIONS = ("convergent", "divergent")
@@ -63,13 +64,6 @@ Problems = AtMostOne[ClassifiedProblem]
 
 
 @dataclass(frozen=True)
-class Unresolved:
-    observation: str
-    reason: str
-    clarification: str
-
-
-@dataclass(frozen=True)
 class Applied:
     name: str
     at: str
@@ -109,12 +103,6 @@ class Halt:
 
 
 Outcome = Response | Halt
-
-
-@dataclass(frozen=True)
-class ContractViolation:
-    kind: str
-    detail: str = ""
 
 
 def derive_status(problems: Problems, unresolved: tuple[Unresolved, ...]) -> Status:

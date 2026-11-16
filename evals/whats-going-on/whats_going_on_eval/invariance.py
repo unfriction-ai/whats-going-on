@@ -8,12 +8,12 @@ from typing import Literal
 from .manifest import REPORTS_DIR
 from .parse import (
     NO_ASK,
-    ContractViolation,
     Quadrant,
     Status,
     Verdict,
     parse_response,
 )
+from .wire import ContractViolation
 
 CONTRACT_FAIL: Literal["contract_fail"] = "contract_fail"
 TurnKey = tuple[str, int]
