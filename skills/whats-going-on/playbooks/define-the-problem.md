@@ -65,6 +65,8 @@ smart_question: "The primary, carrying each met SMART letter's facts" | null
 
 smart_gaps: [specific | measurable | actionable | relevant | time_bound]
 
+worksheet: null | { <id>: { status: filled | unknown | not_yet | i_am_decider, text: "The reply, verbatim" | null } }
+
 unresolved:
   - observation: "What was said"
     reason: "Why this is not yet a defined problem"

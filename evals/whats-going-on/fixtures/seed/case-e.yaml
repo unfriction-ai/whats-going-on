@@ -7,7 +7,7 @@ turns:
     restatement: "Someone asks to settle on one or two UI changes to cut the clutter before the demo on the 20th. Enterprise trial users say the admin console is overwhelming."
     expect:
       kind: classify
-      statuses: [classified]
+      statuses: [partial]
       problems:
         - anchor: ["admin|UI|console", "clutter|overwhelm"]
           quadrants: [conceptual-convergent]
@@ -21,7 +21,7 @@ turns:
       solveLeak: ["remove the", "collapse the nav", "we should redesign"]
     gold: |
       ```yaml
-      status: classified
+      status: partial
       main_question: "Which one or two admin-console UI changes should we make before the enterprise demo to reduce overwhelm?"
       problems:
         - statement: "Which one or two admin-console UI changes should we make before the enterprise demo to reduce overwhelm?"
@@ -33,7 +33,11 @@ turns:
           next_method: "Compare candidate UI changes and narrow to one or two. Do not pick them in this slice."
       smart_question: "Which one or two admin-console UI changes should we settle on before the enterprise demo on the 20th to cut the clutter trial users report?"
       smart_gaps: []
-      unresolved: []
+      worksheet: {}
+      unresolved:
+        - observation: 'The worksheet has no context or constraints yet.'
+          reason: 'Context and constraints is the next open worksheet area.'
+          clarification: 'Context and constraints: Around "Which one or two admin-console UI changes should we settle on before the enterprise demo on the 20th to cut the clutter trial users report?", what background or pressures shape how you solve it, and what cannot change?'
       applied: []
       stop: true
       ```

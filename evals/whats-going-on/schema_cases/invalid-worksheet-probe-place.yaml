@@ -1,0 +1,26 @@
+expect_ok: false
+expect_kind: worksheet_probe_place
+body: |
+  status: partial
+  main_question: "What approaches could build a healthy on-call culture on the platform squad over the next year?"
+  problems:
+    - statement: "What approaches could build a healthy on-call culture on the platform squad over the next year?"
+      classification: { nature: conceptual, direction: divergent }
+      confidence: high
+      why: "Culture and norms are conceptual. The ask invites many possible moves."
+      next_method: "Broad exploration of approaches before any narrowing."
+  smart_question: "What approaches could build a healthy on-call culture on the platform squad over the next year?"
+  smart_gaps: [relevant]
+  worksheet: {}
+  unresolved:
+    - observation: 'The worksheet has no context and constraints yet.'
+      reason: 'Context and constraints is the next open worksheet area.'
+      clarification: 'Context and constraints: Around "What approaches could build a healthy on-call culture on the platform squad over the next year?", what background or pressures shape how you solve it, and what cannot change?'
+    - observation: 'The teammate also asks how to staff the rotation'
+      reason: 'Deferred until the primary problem is answered.'
+      clarification: 'Ask about staffing again once the culture question is settled.'
+    - observation: 'The ask does not say who decides on on-call changes'
+      reason: 'SMART relevant is missing. The input names no decider or stake.'
+      clarification: 'Ask yourself: Does it matter to the people who will decide?'
+  applied: []
+  stop: true

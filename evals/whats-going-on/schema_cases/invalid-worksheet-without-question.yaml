@@ -1,0 +1,20 @@
+expect_ok: false
+expect_kind: worksheet_without_question
+body: |
+  status: partial
+  main_question: "What approaches could build a healthy on-call culture on the platform squad over the next year?"
+  problems:
+    - statement: "What approaches could build a healthy on-call culture on the platform squad over the next year?"
+      classification: { nature: conceptual, direction: divergent }
+      confidence: high
+      why: "Culture and norms are conceptual. The ask invites many possible moves."
+      next_method: "Broad exploration of approaches before any narrowing."
+  smart_question: null
+  smart_gaps: [actionable]
+  worksheet: {}
+  unresolved:
+    - observation: 'The ask names nothing we would do with the answer'
+      reason: 'SMART actionable is missing.'
+      clarification: 'Ask yourself: Does it point to something we can do?'
+  applied: []
+  stop: true

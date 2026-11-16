@@ -1,0 +1,21 @@
+expect_ok: false
+expect_kind: worksheet_schema
+body: |
+  status: partial
+  main_question: "What approaches could build a healthy on-call culture on the platform squad over the next year?"
+  problems:
+    - statement: "What approaches could build a healthy on-call culture on the platform squad over the next year?"
+      classification: { nature: conceptual, direction: divergent }
+      confidence: high
+      why: "Culture and norms are conceptual. The ask invites many possible moves."
+      next_method: "Broad exploration of approaches before any narrowing."
+  smart_question: "What approaches could build a healthy on-call culture on the platform squad over the next year?"
+  smart_gaps: []
+  worksheet:
+    context_constraints: { status: filled, text: "I don't know" }
+  unresolved:
+    - observation: 'The worksheet has no success criteria yet.'
+      reason: 'Success criteria is the next open worksheet area.'
+      clarification: 'Success criteria: For "What approaches could build a healthy on-call culture on the platform squad over the next year?", what has to be true for the answer to count as success, and what would make it fail?'
+  applied: []
+  stop: true

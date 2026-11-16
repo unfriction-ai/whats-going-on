@@ -19,6 +19,7 @@ turns:
       problems: []
       smart_question: null
       smart_gaps: []
+      worksheet: null
       unresolved:
         - observation: "Mobile is in a rough place"
           reason: "No measurable change, magnitude, or timeframe."
@@ -57,7 +58,11 @@ turns:
           next_method: "Evidence-based diagnosis from crash telemetry and release history."
       smart_question: "Why did crash-free sessions drop 8% over four weeks?"
       smart_gaps: [relevant, time_bound]
+      worksheet: {}
       unresolved:
+        - observation: 'The worksheet has no context or constraints yet.'
+          reason: 'Context and constraints is the next open worksheet area.'
+          clarification: 'Context and constraints: Around "Why did crash-free sessions drop 8% over four weeks?", what background or pressures shape how you solve it, and what cannot change?'
         - observation: "The ask names no one who will act on the cause"
           reason: "SMART relevant is missing. The input names no decider or stake."
           clarification: "Ask yourself: Does it matter to the people who will decide?"
@@ -95,7 +100,11 @@ turns:
           next_method: "Broad exploration of initiatives before narrowing. Do not list them in this slice."
       smart_question: "What product or eng initiatives could recover crash-free sessions?"
       smart_gaps: [relevant, time_bound]
+      worksheet: {}
       unresolved:
+        - observation: 'The worksheet has no context or constraints yet.'
+          reason: 'Context and constraints is the next open worksheet area.'
+          clarification: 'Context and constraints: Around "What product or eng initiatives could recover crash-free sessions?", what background or pressures shape how you solve it, and what cannot change?'
         - observation: "The ask names no one who will choose among the initiatives"
           reason: "SMART relevant is missing. The input names no decider or stake."
           clarification: "Ask yourself: Does it matter to the people who will decide?"
@@ -136,7 +145,11 @@ turns:
           next_method: "Set decision criteria and compare the three. Do not pick one in this slice."
       smart_question: "Which of the three recovery initiatives should we fund?"
       smart_gaps: [time_bound]
+      worksheet: {}
       unresolved:
+        - observation: 'The worksheet has no context or constraints yet.'
+          reason: 'Context and constraints is the next open worksheet area.'
+          clarification: 'Context and constraints: Around "Which of the three recovery initiatives should we fund?", what background or pressures shape how you solve it, and what cannot change?'
         - observation: "The ask gives no date for the funding call"
           reason: "SMART time_bound is missing. The input gives no date by which the answer is needed."
           clarification: "Ask yourself: By when does it need to be solved?"

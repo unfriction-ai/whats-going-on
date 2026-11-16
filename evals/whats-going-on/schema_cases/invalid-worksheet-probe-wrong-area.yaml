@@ -1,0 +1,21 @@
+expect_ok: false
+expect_kind: worksheet_probe_rows
+body: |
+  status: partial
+  main_question: "What approaches could build a healthy on-call culture on the platform squad over the next year?"
+  problems:
+    - statement: "What approaches could build a healthy on-call culture on the platform squad over the next year?"
+      classification: { nature: conceptual, direction: divergent }
+      confidence: high
+      why: "Culture and norms are conceptual. The ask invites many possible moves."
+      next_method: "Broad exploration of approaches before any narrowing."
+  smart_question: "What approaches could build a healthy on-call culture on the platform squad over the next year?"
+  smart_gaps: []
+  worksheet:
+    context_constraints: { status: filled, text: "Three new people joined after a messy on-call week." }
+  unresolved:
+    - observation: 'The worksheet has no stakeholders yet.'
+      reason: 'Stakeholders is the next open worksheet area.'
+      clarification: 'Stakeholders: Who can make or block the decision behind "What approaches could build a healthy on-call culture on the platform squad over the next year?", and who must agree? Say "I am the decider" if that is you.'
+  applied: []
+  stop: true

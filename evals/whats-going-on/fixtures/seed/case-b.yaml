@@ -7,7 +7,7 @@ turns:
     restatement: "An engineering manager asks for p99 latency estimates for the checkout API before Friday's capacity review. Those estimates are for the Q1 hardware budget."
     expect:
       kind: classify
-      statuses: [classified]
+      statuses: [partial]
       problems:
         - anchor: ["p99|latency", "checkout"]
           quadrants: [analytical-convergent]
@@ -21,7 +21,7 @@ turns:
       solveLeak: ["\\dms\\b", "estimate(d)? (is|of) \\d"]
     gold: |
       ```yaml
-      status: classified
+      status: partial
       main_question: "What p99 latency estimates for the checkout API should inform the Q1 hardware budget?"
       problems:
         - statement: "What p99 latency estimates for the checkout API should inform the Q1 hardware budget?"
@@ -33,7 +33,11 @@ turns:
           next_method: "Estimate from production telemetry and load assumptions. Do not open an architecture redesign workshop."
       smart_question: "What p99 latency estimates for the checkout API should inform the Q1 hardware budget at Friday's capacity review?"
       smart_gaps: []
-      unresolved: []
+      worksheet: {}
+      unresolved:
+        - observation: 'The worksheet has no context or constraints yet.'
+          reason: 'Context and constraints is the next open worksheet area.'
+          clarification: 'Context and constraints: Around "What p99 latency estimates for the checkout API should inform the Q1 hardware budget at Friday''s capacity review?", what background or pressures shape how you solve it, and what cannot change?'
       applied: []
       stop: true
       ```

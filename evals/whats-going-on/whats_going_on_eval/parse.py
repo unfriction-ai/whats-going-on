@@ -11,8 +11,9 @@ import yaml
 
 from .manifest import SKILL_DIR
 from .principles import WireKind, load_principles
-from .smart import SmartProposal, parse_smart
+from .smart import SmartProposal, parse_smart, partition_unresolved
 from .wire import ContractViolation, Unresolved
+from .worksheet import WorksheetAssessment, ask_row, parse_worksheet
 
 NATURES = ("analytical", "conceptual")
 DIRECTIONS = ("convergent", "divergent")
@@ -43,6 +44,7 @@ VERDICT_KEYS = frozenset(
         "problems",
         "smart_question",
         "smart_gaps",
+        "worksheet",
         "unresolved",
         "applied",
         "stop",
@@ -87,8 +89,16 @@ class Verdict:
     main_question: str | None
     problems: Problems
     smart: SmartProposal
+    worksheet: WorksheetAssessment
     unresolved: tuple[Unresolved, ...]
     applied: tuple[Applied, ...]
+
+    @property
+    def concerns(self) -> tuple[Unresolved, ...]:
+        """Unresolved rows that are not SMART gap rows or the worksheet ask row."""
+        ask = ask_row(self.worksheet)
+        concerns, _gap_rows = partition_unresolved(self.unresolved)
+        return tuple(row for row in concerns if row.clarification != ask)
 
 
 @dataclass(frozen=True)
@@ -241,9 +251,13 @@ def _validate_wire(raw: dict[str, Any], preamble: str) -> Outcome | ContractViol
     if isinstance(smart, ContractViolation):
         return smart
 
+    sheet = parse_worksheet(raw, smart, unresolved_t)
+    if isinstance(sheet, ContractViolation):
+        return sheet
+
     if "applied" not in raw:
         return ContractViolation("schema", "applied is required")
-    applied = _parse_applied(raw["applied"], problems_t, unresolved_t)
+    applied = _parse_applied(raw["applied"], problems_t, unresolved_t, ask_row(sheet))
     if isinstance(applied, ContractViolation):
         return applied
 
@@ -254,6 +268,7 @@ def _validate_wire(raw: dict[str, Any], preamble: str) -> Outcome | ContractViol
             main_question=main_question,
             problems=problems_t,
             smart=smart,
+            worksheet=sheet,
             unresolved=unresolved_t,
             applied=applied,
         ),
@@ -284,7 +299,7 @@ def _governs_by_name() -> dict[str, frozenset[WireKind]]:
 
 
 def _resolve_at(
-    at: str, problems: Problems, unresolved: tuple[Unresolved, ...]
+    at: str, problems: Problems, unresolved: tuple[Unresolved, ...], sheet_ask: str | None
 ) -> WireKind | None:
     if at == "status":
         return "status"
@@ -298,12 +313,14 @@ def _resolve_at(
         return None
     sub = match["sub"]
     if match["field"] == "unresolved":
-        return None if sub else "unresolved"
+        if sub or unresolved[int(match["index"])].clarification == sheet_ask:
+            return None
+        return "unresolved"
     return sub or "problem"
 
 
 def _parse_applied(
-    raw: Any, problems: Problems, unresolved: tuple[Unresolved, ...]
+    raw: Any, problems: Problems, unresolved: tuple[Unresolved, ...], sheet_ask: str | None
 ) -> tuple[Applied, ...] | ContractViolation:
     if not isinstance(raw, list):
         return ContractViolation("schema", "applied must be a list")
@@ -325,7 +342,7 @@ def _parse_applied(
         governs = governs_by_name.get(name)
         if governs is None:
             return ContractViolation("principle_unknown", f"{path}.name {name!r}")
-        kind = _resolve_at(at, problems, unresolved)
+        kind = _resolve_at(at, problems, unresolved, sheet_ask)
         if kind is None:
             return ContractViolation("principle_at", f"{path}.at {at!r} does not resolve")
         if kind not in governs:

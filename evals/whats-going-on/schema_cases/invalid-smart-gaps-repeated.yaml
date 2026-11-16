@@ -11,7 +11,11 @@ body: |
       next_method: "Broad exploration of approaches before any narrowing."
   smart_question: "What approaches could build a healthy on-call culture on the platform squad over the next year?"
   smart_gaps: [measurable, measurable]
+  worksheet: {}
   unresolved:
+    - observation: 'The worksheet has no context or constraints yet.'
+      reason: 'Context and constraints is the next open worksheet area.'
+      clarification: 'Context and constraints: Around "What approaches could build a healthy on-call culture on the platform squad over the next year?", what background or pressures shape how you solve it, and what cannot change?'
     - observation: "The ask says healthy but not what healthy looks like"
       reason: "SMART measurable is missing. The input gives no sign of done."
       clarification: "Ask yourself: How will we know it is solved?"

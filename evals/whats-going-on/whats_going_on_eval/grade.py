@@ -15,7 +15,7 @@ from .parse import (
     parse_response,
     parse_restatement,
 )
-from .smart import NoPrimary, Proposed, Withheld, partition_unresolved
+from .smart import NoPrimary, Proposed, Withheld
 from .wire import ContractViolation
 
 RUBRIC: dict[str, float] = {
@@ -266,7 +266,7 @@ def _abstention_score(expect: Expectation, verdict: Verdict) -> float:
 
 
 def _classify_abstention(expect: Expectation, verdict: Verdict) -> float:
-    concerns, _gap_rows = partition_unresolved(verdict.unresolved)
+    concerns = verdict.concerns
     if not expect.unresolved:
         if not concerns:
             return 1.0

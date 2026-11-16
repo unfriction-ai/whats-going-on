@@ -11,10 +11,14 @@ body: |
       next_method: "Gather facts on pool config before any workshop."
   smart_question: "Are checkout API timeouts explained by the lowered connection-pool max?"
   smart_gaps: []
+  worksheet: {}
   unresolved:
     - observation: "Ops wants a two-day architecture workshop"
       reason: "That is a proposed approach, not a defined problem."
       clarification: "What decision must this week's work settle?"
+    - observation: 'The worksheet has no context or constraints yet.'
+      reason: 'Context and constraints is the next open worksheet area.'
+      clarification: 'Context and constraints: Around "Are checkout API timeouts explained by the lowered connection-pool max?", what background or pressures shape how you solve it, and what cannot change?'
   applied:
     - name: principle-read-the-room
       at: problems[0]
