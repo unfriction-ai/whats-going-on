@@ -9,6 +9,7 @@ body: |
       confidence: high
       why: "Culture and norms are conceptual. The ask invites many possible moves."
       next_method: "Broad exploration of approaches before any narrowing."
+  challenge: null
   unresolved:
     - observation: "The ask says healthy but not what healthy looks like"
       reason: "SMART measurable is missing. The input gives no sign of done."

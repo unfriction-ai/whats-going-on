@@ -24,12 +24,15 @@ Run each step in order. Each step writes one note. Work silently. Keep the notes
 | 7 | `smart` | input, primary | SMART question, gap rows |
 | 8 | `classify-2x2` | primary | classification |
 | 9 | `worksheet` | input, `smart_question` | cells, one ask row |
+| 10 | `challenge` | worksheet | `challenge` null or clear |
 
-Step 6. Of the Defined rows, pick the primary per `principle-read-the-room`. Turn each other Defined row into an Unresolved row. Its `observation` is the question as asked. Its `reason` says it is deferred until the primary problem is answered. Its `clarification` says when to ask it again. The primary's statement is the main question, the one to answer first. With no Defined rows, there is no primary, the main question is `null`, and steps 7, 8, and 9 do not run.
+Step 6. Of the Defined rows, pick the primary per `principle-read-the-room`. Turn each other Defined row into an Unresolved row. Its `observation` is the question as asked. Its `reason` says it is deferred until the primary problem is answered. Its `clarification` says when to ask it again. The primary's statement is the main question, the one to answer first. With no Defined rows, there is no primary, the main question is `null`, and steps 7, 8, 9, and 10 do not run.
 
 Step 7. Propose one SMART question for the primary per `principle-make-it-smart`. Each open letter adds a gap row after the deferred rows. Step 8 classifies the primary, not the SMART question.
 
 Step 9. When `smart_question` is a proposed string, fill the worksheet from the paste per `worksheet`. Seed the walk from that question. Ask one open area on this turn. Re-derive every cell from the paste. Never invent cell text. When `smart_question` is null, leave `worksheet` null.
+
+Step 10. When the worksheet is complete, emit `challenge` with `round: clear`, empty `findings`, and `reply: null`. Otherwise emit `challenge: null`.
 
 Repair. If the restatement disagrees with the primary or the Unresolved rows, discard it and run `restate` again. Never edit the sentences in place.
 
@@ -70,6 +73,8 @@ smart_gaps: [specific | measurable | actionable | relevant | time_bound]
 
 worksheet: null | { <id>: { status: filled | unknown | not_yet | i_am_decider, text: "The reply, verbatim" | null } }
 
+challenge: null | { round: clear, findings: {}, reply: null }
+
 unresolved:
   - observation: "What was said"
     reason: "Why this is not yet a defined problem"
@@ -83,7 +88,7 @@ applied:
 stop: true
 ```
 
-`problems` holds at most one item, the primary. An empty `problems` list is valid when status is `needs_clarification` or `not_a_problem`. Always emit `main_question`. Copy the primary's `statement` into it exactly. Write `null` when `problems` is empty. Always emit `smart_question` and `smart_gaps`. Write `null` and `[]` when there is no primary. Always emit `unresolved`. Put concerns first, then the worksheet ask row, then gap rows. Write `[]` when it is empty. Always emit `applied`. Write `[]` when no principle decided a value.
+`problems` holds at most one item, the primary. An empty `problems` list is valid when status is `needs_clarification` or `not_a_problem`. Always emit `main_question`. Copy the primary's `statement` into it exactly. Write `null` when `problems` is empty. Always emit `smart_question` and `smart_gaps`. Write `null` and `[]` when there is no primary. Always emit `unresolved`. Put concerns first, then the worksheet ask row, then gap rows. Write `[]` when it is empty. Always emit `challenge`. Write `null` unless the worksheet is complete. When the worksheet is complete, write `round: clear`, empty `findings`, and `reply: null`. Always emit `applied`. Write `[]` when no principle decided a value.
 
 ## Never
 

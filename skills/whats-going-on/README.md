@@ -132,6 +132,8 @@ smart_gaps: [specific | measurable | actionable | relevant | time_bound]
 
 worksheet: null | { <id>: { status: filled | unknown | not_yet | i_am_decider, text: "The reply, verbatim" | null } }
 
+challenge: null | { round: clear, findings: {}, reply: null }
+
 unresolved:
   - observation: "What was said"
     reason: "Why this is not yet a defined problem"
@@ -145,7 +147,7 @@ applied:
 stop: true
 ```
 
-`problems` holds at most one item, the primary. An empty `problems` list is valid when status is `needs_clarification` or `not_a_problem`. Always emit `main_question`. Copy the primary's `statement` into it exactly. Write `null` when `problems` is empty. Always emit `smart_question` and `smart_gaps`. Write `null` and `[]` when there is no primary. Always emit `unresolved`. Put concerns first, then the worksheet ask row, then gap rows. Write `[]` when it is empty. Always emit `applied`. Write `[]` when no principle decided a value.
+`problems` holds at most one item, the primary. An empty `problems` list is valid when status is `needs_clarification` or `not_a_problem`. Always emit `main_question`. Copy the primary's `statement` into it exactly. Write `null` when `problems` is empty. Always emit `smart_question` and `smart_gaps`. Write `null` and `[]` when there is no primary. Always emit `unresolved`. Put concerns first, then the worksheet ask row, then gap rows. Write `[]` when it is empty. Always emit `challenge`. Write `null` unless the worksheet is complete. When the worksheet is complete, write `round: clear`, empty `findings`, and `reply: null`. Always emit `applied`. Write `[]` when no principle decided a value.
 
 ## Install
 
@@ -200,6 +202,7 @@ problems: []
 smart_question: null
 smart_gaps: []
 worksheet: null
+challenge: null
 unresolved:
   - observation: "Mobile is in a rough place; eng has competing theories"
     reason: "No measurable change, magnitude, or timeframe. Competing theories are not yet a defined question."
@@ -241,6 +244,7 @@ problems:
 smart_question: "What p99 latency estimates for the checkout API should inform the Q1 hardware budget at Friday's capacity review?"
 smart_gaps: []
 worksheet: {}
+challenge: null
 unresolved:
   - observation: 'The worksheet has no context or constraints yet.'
     reason: 'Context and constraints is the next open worksheet area.'
@@ -281,6 +285,7 @@ problems:
 smart_question: "Which one or two handoff changes should Design and Eng lock this sprint so tickets stop bouncing for missing acceptance criteria?"
 smart_gaps: []
 worksheet: {}
+challenge: null
 unresolved:
   - observation: 'The worksheet has no context or constraints yet.'
     reason: 'Context and constraints is the next open worksheet area.'
@@ -319,6 +324,7 @@ problems:
 smart_question: "What approaches could build a healthy on-call culture on the platform squad over the next year?"
 smart_gaps: [measurable, relevant]
 worksheet: {}
+challenge: null
 unresolved:
   - observation: 'The worksheet has no context or constraints yet.'
     reason: 'Context and constraints is the next open worksheet area.'
@@ -369,6 +375,7 @@ problems:
 smart_question: "Which one or two admin-console UI changes should we settle on before the enterprise demo on the 20th to cut the clutter trial users report?"
 smart_gaps: []
 worksheet: {}
+challenge: null
 unresolved:
   - observation: 'The worksheet has no context or constraints yet.'
     reason: 'Context and constraints is the next open worksheet area.'
@@ -407,6 +414,7 @@ problems:
 smart_question: "Why exactly did staging go down last night?"
 smart_gaps: [time_bound]
 worksheet: {}
+challenge: null
 unresolved:
   - observation: "The director also wants three realistic ways to stop this class of failure, ranked by likelihood"
     reason: "Deferred until the primary problem is answered. Prevention options depend on why staging went down."
@@ -457,6 +465,7 @@ problems:
 smart_question: "How should the two directors decide which services to sunset first, weighing product strategy and customer impact?"
 smart_gaps: [time_bound]
 worksheet: {}
+challenge: null
 unresolved:
   - observation: 'The worksheet has no context or constraints yet.'
     reason: 'Context and constraints is the next open worksheet area.'
@@ -501,6 +510,7 @@ problems:
 smart_question: "Are this morning's checkout API timeouts across three regions explained by yesterday's lowered connection-pool max, or by something else measurable, before Ops commits to this week's workshop?"
 smart_gaps: []
 worksheet: {}
+challenge: null
 unresolved:
   - observation: "Ops wants a two-day architecture workshop on resilient request paths"
     reason: "That is a proposed approach, not a defined problem. Redesign may be wrong if the pool config is the cause."
@@ -535,6 +545,7 @@ problems: []
 smart_question: null
 smart_gaps: []
 worksheet: null
+challenge: null
 unresolved: []
 applied: []
 stop: true
@@ -583,6 +594,7 @@ problems:
 smart_question: null
 smart_gaps: [measurable, actionable, relevant, time_bound]
 worksheet: null
+challenge: null
 unresolved:
   - observation: "The ask does not say what knowing their aim would look like"
     reason: "SMART measurable is missing. The input gives no sign of done."
@@ -636,6 +648,7 @@ problems:
 smart_question: "What approaches could the platform lead adopt so nobody on the platform squad carries more than one week of pages a month within the next year?"
 smart_gaps: []
 worksheet: {}
+challenge: null
 unresolved:
   - observation: 'The worksheet has no context or constraints yet.'
     reason: 'Context and constraints is the next open worksheet area.'

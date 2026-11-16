@@ -12,6 +12,7 @@ body: |
   smart_question: "Are checkout API timeouts explained by the lowered connection-pool max?"
   smart_gaps: []
   worksheet: {}
+  challenge: null
   unresolved:
     - observation: "Ops wants a two-day architecture workshop"
       reason: "That is a proposed approach, not a defined problem."

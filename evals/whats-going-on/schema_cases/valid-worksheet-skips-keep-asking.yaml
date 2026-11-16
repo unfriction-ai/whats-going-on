@@ -15,6 +15,7 @@ body: |
     context_constraints: { status: filled, text: "Three new people joined after a messy on-call week." }
     success_criteria: { status: unknown, text: null }
     stakeholders: { status: not_yet, text: null }
+  challenge: null
   unresolved:
     - observation: 'The worksheet has no scope and sources yet.'
       reason: 'Scope and sources is the next open worksheet area.'

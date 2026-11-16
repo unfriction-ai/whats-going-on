@@ -34,6 +34,7 @@ turns:
       smart_question: "Why did Android checkout conversion fall from 3.1% to 2.4% since the last release?"
       smart_gaps: [relevant, time_bound]
       worksheet: {}
+      challenge: null
       unresolved:
         - observation: 'The worksheet has no context or constraints yet.'
           reason: 'Context and constraints is the next open worksheet area.'
@@ -89,6 +90,7 @@ turns:
         context_constraints:
           status: unknown
           text: null
+      challenge: null
       unresolved:
         - observation: 'The worksheet has no success criteria yet.'
           reason: 'Success criteria is the next open worksheet area.'
@@ -151,6 +153,7 @@ turns:
         success_criteria:
           status: not_yet
           text: null
+      challenge: null
       unresolved:
         - observation: 'Two worksheet areas in a row were skipped while SMART letters are open.'
           reason: 'The worksheet stops after two skips in a row when smart_gaps is not empty.'
@@ -216,6 +219,7 @@ turns:
         success_criteria:
           status: not_yet
           text: null
+      challenge: null
       unresolved:
         - observation: 'The worksheet has no stakeholders yet.'
           reason: 'Stakeholders is the next open worksheet area.'

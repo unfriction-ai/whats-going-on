@@ -37,6 +37,7 @@ turns:
       smart_question: "Should we keep the free tier, with Finance expecting the call by the end of the quarter?"
       smart_gaps: []
       worksheet: {}
+      challenge: null
       unresolved:
         - observation: 'The worksheet has no context or constraints yet.'
           reason: 'Context and constraints is the next open worksheet area.'

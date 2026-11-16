@@ -12,6 +12,7 @@ body: |
   smart_question: "Are checkout API timeouts explained by the lowered connection-pool max?"
   smart_gaps: []
   worksheet: {}
+  challenge: null
   unresolved: []
   applied: []
   stop: true

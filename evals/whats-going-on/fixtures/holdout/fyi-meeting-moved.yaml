@@ -19,6 +19,7 @@ turns:
       smart_question: null
       smart_gaps: []
       worksheet: null
+      challenge: null
       unresolved: []
       applied: []
       stop: true

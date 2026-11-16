@@ -12,5 +12,6 @@ body: |
   smart_question: "What p99 latency estimates for the checkout API should inform the Q1 hardware budget?"
   smart_gaps: []
   worksheet: {}
+  challenge: null
   applied: []
   stop: true

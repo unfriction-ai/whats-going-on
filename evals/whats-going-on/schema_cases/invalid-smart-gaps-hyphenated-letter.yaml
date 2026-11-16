@@ -12,6 +12,7 @@ body: |
   smart_question: "What approaches could build a healthy on-call culture on the platform squad over the next year?"
   smart_gaps: [time-bound]
   worksheet: {}
+  challenge: null
   unresolved:
     - observation: 'The worksheet has no context or constraints yet.'
       reason: 'Context and constraints is the next open worksheet area.'

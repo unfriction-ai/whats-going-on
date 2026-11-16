@@ -204,6 +204,10 @@ worksheet:
   success_criteria: { status: not_yet, text: null }
   stakeholders: { status: i_am_decider, text: null }
   scope_sources: { status: unknown, text: null }
+challenge:
+  round: clear
+  findings: {}
+  reply: null
 unresolved: []
 applied: []
 stop: true

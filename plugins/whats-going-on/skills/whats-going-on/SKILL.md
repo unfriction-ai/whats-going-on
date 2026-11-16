@@ -32,7 +32,7 @@ Select one stage, run its playbook, emit its Output, stop.
 | The message asks to continue from the latest result | the stage after the one that produced that result |
 | Anything else | define-the-problem |
 
-The latest result is the last fenced `yaml` block you emitted that has a `status` key. A block with a `status` key comes from define-the-problem. Continue carries its one primary problem forward. New material restarts at define-the-problem. Prior classifications do not advance on their own. Answers to `Ask yourself:` questions and worksheet probes are new facts. Run define-the-problem on the earlier ask plus those answers.
+The latest result is the last fenced `yaml` block you emitted that has a `status` key. A block with a `status` key comes from define-the-problem. Continue carries its one primary problem forward. New material restarts at define-the-problem. Prior classifications do not advance on their own. Answers to `Ask yourself:` questions, worksheet probes, and Challenge replies are new facts. Run define-the-problem on the earlier ask plus those answers.
 
 ## Principles
 

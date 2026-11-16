@@ -9,11 +9,12 @@ from typing import Any, Literal, TypeVar
 
 import yaml
 
+from .challenge import ChallengeAssessment, operator_ask, parse_challenge
 from .manifest import SKILL_DIR
 from .principles import WireKind, load_principles
 from .smart import SmartProposal, parse_smart, partition_unresolved
 from .wire import ContractViolation, Unresolved
-from .worksheet import WorksheetAssessment, ask_row, parse_worksheet
+from .worksheet import WorksheetAssessment, parse_worksheet
 
 NATURES = ("analytical", "conceptual")
 DIRECTIONS = ("convergent", "divergent")
@@ -45,6 +46,7 @@ VERDICT_KEYS = frozenset(
         "smart_question",
         "smart_gaps",
         "worksheet",
+        "challenge",
         "unresolved",
         "applied",
         "stop",
@@ -90,13 +92,14 @@ class Verdict:
     problems: Problems
     smart: SmartProposal
     worksheet: WorksheetAssessment
+    challenge: ChallengeAssessment
     unresolved: tuple[Unresolved, ...]
     applied: tuple[Applied, ...]
 
     @property
     def concerns(self) -> tuple[Unresolved, ...]:
-        """Unresolved rows that are not SMART gap rows or the worksheet ask row."""
-        ask = ask_row(self.worksheet)
+        """Unresolved rows that are not SMART gap rows or the operator ask row."""
+        ask = operator_ask(self.worksheet, self.challenge)
         concerns, _gap_rows = partition_unresolved(self.unresolved)
         return tuple(row for row in concerns if row.clarification != ask)
 
@@ -255,9 +258,14 @@ def _validate_wire(raw: dict[str, Any], preamble: str) -> Outcome | ContractViol
     if isinstance(sheet, ContractViolation):
         return sheet
 
+    challenge = parse_challenge(raw, sheet)
+    if isinstance(challenge, ContractViolation):
+        return challenge
+
     if "applied" not in raw:
         return ContractViolation("schema", "applied is required")
-    applied = _parse_applied(raw["applied"], problems_t, unresolved_t, ask_row(sheet))
+    ask = operator_ask(sheet, challenge)
+    applied = _parse_applied(raw["applied"], problems_t, unresolved_t, ask)
     if isinstance(applied, ContractViolation):
         return applied
 
@@ -269,6 +277,7 @@ def _validate_wire(raw: dict[str, Any], preamble: str) -> Outcome | ContractViol
             problems=problems_t,
             smart=smart,
             worksheet=sheet,
+            challenge=challenge,
             unresolved=unresolved_t,
             applied=applied,
         ),

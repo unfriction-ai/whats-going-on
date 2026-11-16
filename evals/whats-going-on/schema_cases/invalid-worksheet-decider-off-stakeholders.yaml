@@ -13,6 +13,7 @@ body: |
   smart_gaps: []
   worksheet:
     context_constraints: { status: i_am_decider, text: null }
+  challenge: null
   unresolved:
     - observation: 'The worksheet has no success criteria yet.'
       reason: 'Success criteria is the next open worksheet area.'

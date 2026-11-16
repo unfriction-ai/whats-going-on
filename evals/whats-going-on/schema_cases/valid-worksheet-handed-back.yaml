@@ -15,6 +15,7 @@ body: |
     context_constraints: { status: filled, text: "Three new people joined after a messy on-call week." }
     success_criteria: { status: unknown, text: null }
     stakeholders: { status: not_yet, text: null }
+  challenge: null
   unresolved:
     - observation: 'Two worksheet areas in a row were skipped.'
       reason: 'The SMART gaps below come first.'

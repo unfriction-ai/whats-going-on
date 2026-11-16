@@ -26,6 +26,7 @@ turns:
       smart_question: null
       smart_gaps: []
       worksheet: null
+      challenge: null
       unresolved:
         - observation: "Mobile is in a rough place; eng has competing theories"
           reason: "No measurable change, magnitude, or timeframe. Competing theories are not yet a defined question."
