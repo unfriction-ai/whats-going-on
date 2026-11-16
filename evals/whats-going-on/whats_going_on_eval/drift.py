@@ -454,7 +454,6 @@ def _restatement_guard_self_test(cases_dir: Path) -> list[DriftProblem]:
     missing = sorted(_REQUIRED_RESTATEMENT_CASES - {path.name for path in paths})
     if missing:
         problems.append(DriftProblem("restatement_guard", f"missing cases: {missing}"))
-    body = _GUARD_BODY
     for path in paths:
         doc = yaml.safe_load(path.read_text())
         if not isinstance(doc, dict) or "preamble" not in doc or "expect_fail" not in doc:
@@ -472,7 +471,7 @@ def _restatement_guard_self_test(cases_dir: Path) -> list[DriftProblem]:
                 DriftProblem("restatement_guard", f"{path.name}: unknown expect_fail {expected!r}")
             )
             continue
-        text = f"```yaml\n{body}```" if not preamble.strip() else f"{preamble}\n\n```yaml\n{body}```"
+        text = f"```yaml\n{_GUARD_BODY}```" if not preamble.strip() else f"{preamble}\n\n```yaml\n{_GUARD_BODY}```"
         parsed = parse_response(text)
         if not isinstance(parsed, Response):
             problems.append(

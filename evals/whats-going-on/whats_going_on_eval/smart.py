@@ -36,7 +36,7 @@ def in_card_order(letters: Sequence[str]) -> bool:
     """True when letters are distinct SMART letters listed in card order."""
     if not all(letter in SMART_LETTERS for letter in letters):
         return False
-    indexes = [SMART_LETTERS.index(letter) for letter in letters]  # type: ignore[arg-type]
+    indexes = [SMART_LETTERS.index(letter) for letter in letters]
     return indexes == sorted(set(indexes))
 
 
