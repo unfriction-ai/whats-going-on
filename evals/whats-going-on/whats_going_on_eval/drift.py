@@ -518,11 +518,7 @@ def _restatement_guard_self_test(cases_dir: Path) -> list[DriftProblem]:
     return problems
 
 
-def _strip_probe_scaffold(text: str) -> str:
-    """Keep only the question from each pasted worksheet probe line.
-
-    The operator pastes probes the skill emitted, so their template text is not contamination.
-    """
+def _strip_emitted_probe_scaffold(text: str) -> str:
     scaffolds = [area.probe_template.split(QUESTION_SLOT) for area in load_registry().areas]
     lines: list[str] = []
     for line in text.splitlines():
@@ -538,7 +534,7 @@ def _skill_contamination(fixtures: list[Fixture], mount: dict[str, str]) -> list
     out: list[DriftProblem] = []
     for fixture in fixtures:
         for turn in fixture.turns:
-            chunk = _strip_probe_scaffold(turn.input.strip())
+            chunk = _strip_emitted_probe_scaffold(turn.input.strip())
             if len(chunk) < 40:
                 continue
             for rel, text in mount.items():
