@@ -521,6 +521,92 @@ Stage 1 does not advance a problem through stages on its own. Each invocation cl
 
 More information alone does not flip divergent to convergent. Changing the question does. Invocations 2 to 4 are `partial`, because each one-line ask leaves SMART letters open, such as who decides or by when.
 
+### Case K. SMART question withheld
+
+**Input**
+
+```text
+Slack from a sales lead:
+"Our biggest competitor raised list prices 20% this week.
+What are they up to?"
+```
+
+**What to notice**
+
+The why is defined and gets a quadrant. It is about another company's motive, and the input names nothing we would do with the answer, so actionable is open. Without actionable, a SMART question would be a guess, so `smart_question` stays `null` and the gap rows ask. Do not invent a pricing response to make it actionable.
+
+**Expected result**
+
+```yaml
+status: partial
+main_question: "Why did our biggest competitor raise list prices 20% this week?"
+problems:
+  - statement: "Why did our biggest competitor raise list prices 20% this week?"
+    classification:
+      nature: analytical
+      direction: divergent
+    confidence: medium
+    why: "The ask is about another company's motive. Several explanations stay open, and only outside evidence bears on them."
+    next_method: "Gather public evidence on the price change and keep explanations open. Do not plan a response in this slice."
+smart_question: null
+smart_gaps: [measurable, actionable, relevant, time_bound]
+unresolved:
+  - observation: "The ask does not say what knowing their aim would look like"
+    reason: "SMART measurable is missing. The input gives no sign of done."
+    clarification: "Ask yourself: How will we know it is solved?"
+  - observation: "The ask names nothing we would do with the answer"
+    reason: "SMART actionable is missing. The competitor's motive is outside our reach, and no move of ours is named."
+    clarification: "Ask yourself: Does it point to something we can do?"
+  - observation: "The ask names no decision the answer feeds"
+    reason: "SMART relevant is missing. The input names no decider or stake."
+    clarification: "Ask yourself: Does it matter to the people who will decide?"
+  - observation: "The ask gives no date by which the answer is needed"
+    reason: "SMART time_bound is missing. This week is when prices rose, not when the answer is due."
+    clarification: "Ask yourself: By when does it need to be solved?"
+applied:
+  - name: principle-make-it-smart
+    at: smart_question
+    changed: "Withheld the SMART question because the ask points to nothing we can do yet."
+stop: true
+```
+
+### Case L. Answering the Ask-yourself questions
+
+**Input**
+
+```text
+Earlier ask, from a teammate after a messy on-call week:
+"We hired three new people onto the platform squad.
+How do we build a healthy on-call culture over the next year?"
+
+Answers to the Ask-yourself questions:
+Healthy means nobody carries more than one week of pages a month. The platform lead decides.
+```
+
+**What to notice**
+
+This answers Case D's two gap rows. The answers are new facts, so the run starts over from the ask plus the answers. `main_question` does not move. `smart_question` now carries the sign of done and the decider, and with no letter open the status is `classified`.
+
+**Expected result**
+
+```yaml
+status: classified
+main_question: "What approaches could build a healthy on-call culture on the platform squad over the next year?"
+problems:
+  - statement: "What approaches could build a healthy on-call culture on the platform squad over the next year?"
+    classification:
+      nature: conceptual
+      direction: divergent
+    confidence: high
+    why: "Culture and norms are conceptual. The ask invites many possible moves. No short list of options is fixed yet."
+    next_method: "Broad exploration of approaches before any narrowing. Do not brainstorm the list in this slice."
+smart_question: "What approaches could the platform lead adopt so nobody on the platform squad carries more than one week of pages a month within the next year?"
+smart_gaps: []
+unresolved: []
+applied: []
+stop: true
+```
+
 ## What stage 1 is not
 
 - Not root-cause analysis, issue trees, leverage scoring, or recommendations.
