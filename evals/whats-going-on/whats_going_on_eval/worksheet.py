@@ -331,6 +331,37 @@ def ask_row(assessment: WorksheetAssessment) -> str | None:
             assert_never(unreachable)
 
 
+def _sheet_cells(assessment: WorksheetAssessment) -> tuple[Cell, ...]:
+    match assessment:
+        case NotStarted():
+            return ()
+        case Asking(cells=cells) | HandedBack(cells=cells) | Complete(cells=cells):
+            return cells
+        case _ as unreachable:
+            assert_never(unreachable)
+
+
+def _normalize_ws(text: str) -> str:
+    return " ".join(text.split())
+
+
+def worksheet_prose(assessment: WorksheetAssessment) -> tuple[str, ...]:
+    parts = [cell.text for cell in _sheet_cells(assessment) if isinstance(cell, Filled)]
+    ask = ask_row(assessment)
+    if ask is not None:
+        parts.append(ask)
+    return tuple(parts)
+
+
+def ungrounded_cells(assessment: WorksheetAssessment, turn_input: str) -> tuple[Filled, ...]:
+    haystack = _normalize_ws(turn_input)
+    return tuple(
+        cell
+        for cell in _sheet_cells(assessment)
+        if isinstance(cell, Filled) and _normalize_ws(cell.text) not in haystack
+    )
+
+
 @cache
 def _probe_patterns() -> tuple[re.Pattern[str], ...]:
     slot = re.escape(QUESTION_SLOT)

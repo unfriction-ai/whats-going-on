@@ -16,6 +16,9 @@ turns:
       smart:
         proposal: proposed
         gaps: [time_bound]
+      worksheet:
+        stop: asking
+        cells: {}
     tripwires:
       invented: []
       methodNotProblem: []

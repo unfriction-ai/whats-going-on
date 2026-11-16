@@ -17,6 +17,7 @@ from .fixtures import (
     Turn,
     covered_families,
     smart_matches,
+    worksheet_matches,
 )
 from .grade import _restatement_fails, grade_gold, rubric_keys_match_doc
 from .manifest import (
@@ -351,6 +352,13 @@ def _gold_self_test(fixtures: list[Fixture]) -> list[DriftProblem]:
                         f"{fixture.id} turn {i}: gold SMART {turn.gold.verdict.smart} vs expect {turn.expect.smart}",
                     )
                 )
+            if not worksheet_matches(turn.expect.worksheet, turn.gold.verdict.worksheet):
+                out.append(
+                    DriftProblem(
+                        "gold_worksheet_mismatch",
+                        f"{fixture.id} turn {i}: gold worksheet vs expect {turn.expect.worksheet}",
+                    )
+                )
         results = grade_gold(fixture)
         for i, result in enumerate(results):
             if result.hard_fails or result.score < 1.0 - 1e-9:
@@ -447,6 +455,7 @@ def _guard_turn(user_input: str) -> Turn:
             unresolved=(),
             asks=(),
             smart=None,
+            worksheet=None,
         ),
         tripwires=Tripwires(invented=(), method_not_problem=(), solve_leak=()),
         restatement=f"{NO_ASK} Noted.",

@@ -19,6 +19,17 @@ from .smart import (
     Withheld,
     in_card_order,
 )
+from .worksheet import (
+    AREAS,
+    AreaId,
+    Asking,
+    Complete,
+    Filled,
+    HandedBack,
+    NotStarted,
+    Stop,
+    WorksheetAssessment,
+)
 
 Kind = Literal["abstain", "classify"]
 Split = Literal["seed", "holdout"]
@@ -52,6 +63,15 @@ class SmartExpect:
     gaps: tuple[SmartLetter, ...]
 
 
+CellExpectStatus = Literal["filled", "unknown", "not_yet", "i_am_decider"]
+
+
+@dataclass(frozen=True)
+class WorksheetExpect:
+    stop: Stop
+    cells: tuple[tuple[AreaId, CellExpectStatus], ...]
+
+
 @dataclass(frozen=True)
 class Expectation:
     kind: Kind
@@ -60,6 +80,27 @@ class Expectation:
     unresolved: tuple[ExpectedUnresolved, ...]
     asks: tuple[tuple[re.Pattern[str], ...], ...]
     smart: SmartExpect | None
+    worksheet: WorksheetExpect | None
+
+
+def worksheet_matches(expect: WorksheetExpect | None, assessment: WorksheetAssessment) -> bool:
+    if expect is None:
+        return isinstance(assessment, NotStarted)
+    match assessment:
+        case NotStarted():
+            return False
+        case Asking(cells=cells):
+            stop = "asking"
+        case HandedBack(cells=cells):
+            stop = "handed_back"
+        case Complete(cells=cells):
+            stop = "complete"
+        case _ as unreachable:
+            assert_never(unreachable)
+    got = tuple(
+        (cell.area, "filled" if isinstance(cell, Filled) else cell.status) for cell in cells
+    )
+    return expect.stop == stop and expect.cells == got
 
 
 def smart_matches(expect: SmartExpect | None, proposal: SmartProposal) -> bool:
@@ -188,6 +229,8 @@ def _parse_expectation(raw: dict[str, Any]) -> Expectation:
     if kind == "abstain":
         if "smart" in raw:
             raise ValueError("abstain expect must not set smart; the smart step needs a primary")
+        if "worksheet" in raw:
+            raise ValueError("abstain expect must not set worksheet")
         asks_raw = raw.get("asks") or []
         asks: list[tuple[re.Pattern[str], ...]] = []
         for i, item in enumerate(asks_raw):
@@ -199,6 +242,7 @@ def _parse_expectation(raw: dict[str, Any]) -> Expectation:
             unresolved=tuple(unresolved),
             asks=tuple(asks),
             smart=None,
+            worksheet=None,
         )
 
     problems_raw = raw.get("problems")
@@ -214,14 +258,50 @@ def _parse_expectation(raw: dict[str, Any]) -> Expectation:
         anchors=_compile_anchor_list(item.get("anchor"), "problems[0].anchor"),
         quadrants=tuple(str(q) for q in quads),
     )
+    smart = _parse_smart_expect(raw.get("smart"))
     return Expectation(
         kind="classify",
         statuses=tuple(str(s) for s in statuses),
         problems=(primary,),
         unresolved=tuple(unresolved),
         asks=(),
-        smart=_parse_smart_expect(raw.get("smart")),
+        smart=smart,
+        worksheet=_parse_worksheet_expect(raw, smart),
     )
+
+
+def _parse_stop(raw: Any) -> Stop:
+    if raw == "asking" or raw == "handed_back" or raw == "complete":
+        return raw
+    raise ValueError("expect.worksheet.stop must be asking, handed_back, or complete")
+
+
+def _parse_cell_expect(area: str, raw: Any) -> CellExpectStatus:
+    if raw == "filled" or raw == "unknown" or raw == "not_yet" or raw == "i_am_decider":
+        return raw
+    raise ValueError(f"expect.worksheet.cells.{area} must be filled or a skip status")
+
+
+def _parse_worksheet_expect(raw: dict[str, Any], smart: SmartExpect) -> WorksheetExpect | None:
+    present = "worksheet" in raw
+    if smart.proposal != "proposed":
+        if present:
+            raise ValueError("expect.worksheet is set only when smart.proposal is proposed")
+        return None
+    body = raw.get("worksheet")
+    if not isinstance(body, dict) or set(body) != {"stop", "cells"}:
+        raise ValueError("proposed expect.worksheet must be {stop, cells}")
+    cells = body["cells"]
+    if not isinstance(cells, dict):
+        raise ValueError("expect.worksheet.cells must be a mapping of area to status")
+    keys = tuple(str(area) for area in cells)
+    prefix = AREAS[: len(keys)]
+    if keys != prefix:
+        raise ValueError(
+            f"expect.worksheet.cells {list(keys)} must be a prefix of {list(AREAS)}"
+        )
+    parsed = tuple((area, _parse_cell_expect(area, cells[area])) for area in prefix)
+    return WorksheetExpect(stop=_parse_stop(body["stop"]), cells=parsed)
 
 
 def _parse_smart_expect(raw: Any) -> SmartExpect:
