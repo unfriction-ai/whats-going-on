@@ -1,0 +1,215 @@
+turns:
+  - input: |
+      Open support tickets went from 400 in January to 1,200 this month. Why did the backlog triple?
+      I need an answer before the April 2 staffing review.
+    restatement: "Someone asks why the support ticket backlog tripled and needs an answer before the April 2 staffing review. Open support tickets went from 400 in January to 1,200 this month."
+    expect:
+      kind: classify
+      statuses: [partial]
+      problems:
+        - anchor: ["ticket|backlog", "why|cause|triple"]
+          quadrants: [analytical-convergent]
+      unresolved: []
+      smart:
+        proposal: proposed
+        gaps: []
+      worksheet:
+        stop: asking
+        cells: {}
+    tripwires:
+      invented: ["churn", "outage", "holiday"]
+      methodNotProblem: []
+      solveLeak: ["\\bhire\\b", "add (more )?agents"]
+    gold: |
+      ```yaml
+      status: partial
+      main_question: "Why did open support tickets triple from 400 in January to 1,200 this month?"
+      problems:
+        - statement: "Why did open support tickets triple from 400 in January to 1,200 this month?"
+          classification:
+            nature: analytical
+            direction: convergent
+          confidence: high
+          why: "A measured rise with a timeframe. Ticket data should converge on what changed."
+          next_method: "Evidence-based diagnosis from ticket intake and resolution data. Do not plan staffing in this slice."
+      smart_question: "Why did open support tickets triple from 400 in January to 1,200 this month, with an answer needed before the April 2 staffing review?"
+      smart_gaps: []
+      worksheet: {}
+      unresolved:
+        - observation: 'The worksheet has no context or constraints yet.'
+          reason: 'Context and constraints is the next open worksheet area.'
+          clarification: 'Context and constraints: Around "Why did open support tickets triple from 400 in January to 1,200 this month, with an answer needed before the April 2 staffing review?", what background or pressures shape how you solve it, and what cannot change?'
+      applied: []
+      stop: true
+      ```
+  - input: |
+      Open support tickets went from 400 in January to 1,200 this month. Why did the backlog triple?
+      I need an answer before the April 2 staffing review.
+
+      Context and constraints: Around "Why did open support tickets triple from 400 in January to 1,200 this month, with an answer needed before the April 2 staffing review?", what background or pressures shape how you solve it, and what cannot change?
+      I don't know
+    restatement: "Someone asks why the support ticket backlog tripled and needs an answer before the April 2 staffing review. Open support tickets went from 400 in January to 1,200 this month."
+    expect:
+      kind: classify
+      statuses: [partial]
+      problems:
+        - anchor: ["ticket|backlog", "why|cause|triple"]
+          quadrants: [analytical-convergent]
+      unresolved: []
+      smart:
+        proposal: proposed
+        gaps: []
+      worksheet:
+        stop: asking
+        cells:
+          context_constraints: unknown
+    tripwires:
+      invented: ["churn", "outage", "holiday"]
+      methodNotProblem: []
+      solveLeak: ["\\bhire\\b", "add (more )?agents"]
+    gold: |
+      ```yaml
+      status: partial
+      main_question: "Why did open support tickets triple from 400 in January to 1,200 this month?"
+      problems:
+        - statement: "Why did open support tickets triple from 400 in January to 1,200 this month?"
+          classification:
+            nature: analytical
+            direction: convergent
+          confidence: high
+          why: "A measured rise with a timeframe. Ticket data should converge on what changed."
+          next_method: "Evidence-based diagnosis from ticket intake and resolution data. Do not plan staffing in this slice."
+      smart_question: "Why did open support tickets triple from 400 in January to 1,200 this month, with an answer needed before the April 2 staffing review?"
+      smart_gaps: []
+      worksheet:
+        context_constraints:
+          status: unknown
+          text: null
+      unresolved:
+        - observation: 'The worksheet has no success criteria yet.'
+          reason: 'Success criteria is the next open worksheet area.'
+          clarification: 'Success criteria: For "Why did open support tickets triple from 400 in January to 1,200 this month, with an answer needed before the April 2 staffing review?", what has to be true for the answer to count as success, and what would make it fail?'
+      applied: []
+      stop: true
+      ```
+  - input: |
+      Open support tickets went from 400 in January to 1,200 this month. Why did the backlog triple?
+      I need an answer before the April 2 staffing review.
+
+      Context and constraints: Around "Why did open support tickets triple from 400 in January to 1,200 this month, with an answer needed before the April 2 staffing review?", what background or pressures shape how you solve it, and what cannot change?
+      I don't know
+
+      Success criteria: For "Why did open support tickets triple from 400 in January to 1,200 this month, with an answer needed before the April 2 staffing review?", what has to be true for the answer to count as success, and what would make it fail?
+      Not yet
+    restatement: "Someone asks why the support ticket backlog tripled and needs an answer before the April 2 staffing review. Open support tickets went from 400 in January to 1,200 this month."
+    expect:
+      kind: classify
+      statuses: [partial]
+      problems:
+        - anchor: ["ticket|backlog", "why|cause|triple"]
+          quadrants: [analytical-convergent]
+      unresolved: []
+      smart:
+        proposal: proposed
+        gaps: []
+      worksheet:
+        stop: asking
+        cells:
+          context_constraints: unknown
+          success_criteria: not_yet
+    tripwires:
+      invented: ["churn", "outage", "holiday"]
+      methodNotProblem: []
+      solveLeak: ["\\bhire\\b", "add (more )?agents"]
+    gold: |
+      ```yaml
+      status: partial
+      main_question: "Why did open support tickets triple from 400 in January to 1,200 this month?"
+      problems:
+        - statement: "Why did open support tickets triple from 400 in January to 1,200 this month?"
+          classification:
+            nature: analytical
+            direction: convergent
+          confidence: high
+          why: "A measured rise with a timeframe. Ticket data should converge on what changed."
+          next_method: "Evidence-based diagnosis from ticket intake and resolution data. Do not plan staffing in this slice."
+      smart_question: "Why did open support tickets triple from 400 in January to 1,200 this month, with an answer needed before the April 2 staffing review?"
+      smart_gaps: []
+      worksheet:
+        context_constraints:
+          status: unknown
+          text: null
+        success_criteria:
+          status: not_yet
+          text: null
+      unresolved:
+        - observation: 'The worksheet has no stakeholders yet.'
+          reason: 'Stakeholders is the next open worksheet area.'
+          clarification: 'Stakeholders: Who can make or block the decision behind "Why did open support tickets triple from 400 in January to 1,200 this month, with an answer needed before the April 2 staffing review?", and who must agree? Say "I am the decider" if that is you.'
+      applied: []
+      stop: true
+      ```
+  - input: |
+      Open support tickets went from 400 in January to 1,200 this month. Why did the backlog triple?
+      I need an answer before the April 2 staffing review.
+
+      Context and constraints: Around "Why did open support tickets triple from 400 in January to 1,200 this month, with an answer needed before the April 2 staffing review?", what background or pressures shape how you solve it, and what cannot change?
+      I don't know
+
+      Success criteria: For "Why did open support tickets triple from 400 in January to 1,200 this month, with an answer needed before the April 2 staffing review?", what has to be true for the answer to count as success, and what would make it fail?
+      Not yet
+
+      Stakeholders: Who can make or block the decision behind "Why did open support tickets triple from 400 in January to 1,200 this month, with an answer needed before the April 2 staffing review?", and who must agree? Say "I am the decider" if that is you.
+      I'm the decider
+    restatement: "Someone asks why the support ticket backlog tripled and needs an answer before the April 2 staffing review. Open support tickets went from 400 in January to 1,200 this month."
+    expect:
+      kind: classify
+      statuses: [partial]
+      problems:
+        - anchor: ["ticket|backlog", "why|cause|triple"]
+          quadrants: [analytical-convergent]
+      unresolved: []
+      smart:
+        proposal: proposed
+        gaps: []
+      worksheet:
+        stop: asking
+        cells:
+          context_constraints: unknown
+          success_criteria: not_yet
+          stakeholders: i_am_decider
+    tripwires:
+      invented: ["churn", "outage", "holiday"]
+      methodNotProblem: []
+      solveLeak: ["\\bhire\\b", "add (more )?agents"]
+    gold: |
+      ```yaml
+      status: partial
+      main_question: "Why did open support tickets triple from 400 in January to 1,200 this month?"
+      problems:
+        - statement: "Why did open support tickets triple from 400 in January to 1,200 this month?"
+          classification:
+            nature: analytical
+            direction: convergent
+          confidence: high
+          why: "A measured rise with a timeframe. Ticket data should converge on what changed."
+          next_method: "Evidence-based diagnosis from ticket intake and resolution data. Do not plan staffing in this slice."
+      smart_question: "Why did open support tickets triple from 400 in January to 1,200 this month, with an answer needed before the April 2 staffing review?"
+      smart_gaps: []
+      worksheet:
+        context_constraints:
+          status: unknown
+          text: null
+        success_criteria:
+          status: not_yet
+          text: null
+        stakeholders:
+          status: i_am_decider
+          text: null
+      unresolved:
+        - observation: 'The worksheet has no scope and sources yet.'
+          reason: 'Scope and sources is the next open worksheet area.'
+          clarification: 'Scope and sources: For "Why did open support tickets triple from 400 in January to 1,200 this month, with an answer needed before the April 2 staffing review?", what is in and out of scope, and where does evidence already exist?'
+      applied: []
+      stop: true
+      ```

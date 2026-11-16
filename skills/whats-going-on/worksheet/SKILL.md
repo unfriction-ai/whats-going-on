@@ -48,4 +48,5 @@ Answer the Ask yourself prompts in this fence. Then paste those answers with the
 3. Walk areas in table order. Stop at the first area with no reply in the paste.
 4. Ask exactly one open area when the stop rule says asking. Put that probe as one Unresolved row immediately before the SMART gap suffix. Its `clarification` is the area probe with `{question}` replaced by this run's `smart_question`.
 5. When the stop rule says handed back, put the Hand-back sentence as that row's `clarification` instead (exact text from ## Hand-back).
-6. Never write a cell the paste did not answer.
+6. When every area is filled or skipped, add no worksheet row. The Hand-back sentence is only for a skip streak.
+7. Never write a cell the paste did not answer.
