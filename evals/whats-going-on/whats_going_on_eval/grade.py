@@ -15,6 +15,7 @@ from .parse import (
     parse_response,
     parse_restatement,
 )
+from .smart import partition_unresolved
 from .wire import ContractViolation
 
 RUBRIC: dict[str, float] = {
@@ -170,6 +171,7 @@ def _hard_fails(turn: Turn, response: Response, text: str) -> list[HardFail]:
         "clarification": " ".join(u.clarification for u in verdict.unresolved),
         "changed": " ".join(a.changed for a in verdict.applied),
     }
+
     leak_pats = list(GLOBAL_SOLVE_LEAK) + list(turn.tripwires.solve_leak)
     for field, content in prose_fields.items():
         for pat in leak_pats:
@@ -255,13 +257,14 @@ def _abstention_score(expect: Expectation, verdict: Verdict) -> float:
 
 
 def _classify_abstention(expect: Expectation, verdict: Verdict) -> float:
+    concerns, _gap_rows = partition_unresolved(verdict.unresolved)
     if not expect.unresolved:
-        if not verdict.unresolved:
+        if not concerns:
             return 1.0
         return 0.5
     matched = 0
     for exp in expect.unresolved:
-        for actual in verdict.unresolved:
+        for actual in concerns:
             blob = f"{actual.observation} {actual.reason}"
             if all(p.search(blob) for p in exp.anchors):
                 matched += 1

@@ -12,6 +12,9 @@ turns:
         - anchor: ["free tier", "keep"]
           quadrants: [analytical-convergent, conceptual-convergent]
       unresolved: []
+      smart:
+        proposal: proposed
+        gaps: []
     tripwires:
       invented: ["churn", "\\d+ ?%"]
       methodNotProblem: ["pull|cohort|conversion"]
@@ -28,6 +31,8 @@ turns:
           confidence: medium
           why: "The head of growth expects free-to-paid conversion data to inform the call. Finance wants one answer by the end of the quarter."
           next_method: "Read free-to-paid conversion by signup cohort against the free-tier decision. The requested pull serves this decision. It is not a separate problem."
+      smart_question: "Should we keep the free tier, with Finance expecting the call by the end of the quarter?"
+      smart_gaps: []
       unresolved: []
       applied:
         - name: principle-read-the-room

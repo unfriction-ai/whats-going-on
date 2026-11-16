@@ -10,6 +10,9 @@ turns:
           quadrants: [analytical-convergent]
       unresolved:
         - anchor: ["stop|again", "fail|batch"]
+      smart:
+        proposal: proposed
+        gaps: [time_bound]
     tripwires:
       invented: []
       methodNotProblem: []
@@ -26,10 +29,15 @@ turns:
           confidence: high
           why: "The ask wants the reason the batch failed. Evidence should converge on what happened."
           next_method: "Evidence-based incident diagnosis. Finish this before prevention approaches."
+      smart_question: "Why did the nightly billing batch fail?"
+      smart_gaps: [time_bound]
       unresolved:
         - observation: "The on-call lead also asks how to stop the nightly billing batch from failing again"
           reason: "Deferred until the primary problem is answered. Prevention approaches depend on why the batch failed."
           clarification: "Ask about prevention again once the cause of the batch failure is settled."
+        - observation: "The on-call lead does not say by when the cause must be known"
+          reason: "SMART time_bound is missing. The input gives no date by which the answer is needed."
+          clarification: "Ask yourself: By when does it need to be solved?"
       applied:
         - name: principle-read-the-room
           at: problems[0]

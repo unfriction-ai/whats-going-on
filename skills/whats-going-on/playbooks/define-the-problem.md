@@ -61,6 +61,10 @@ problems:
     why: "Evidence for both dimensions"
     next_method: "Kind of reasoning to use next, not the answer"
 
+smart_question: "The primary, carrying each met SMART letter's facts" | null
+
+smart_gaps: [specific | measurable | actionable | relevant | time_bound]
+
 unresolved:
   - observation: "What was said"
     reason: "Why this is not yet a defined problem"
@@ -68,16 +72,18 @@ unresolved:
 
 applied:
   - name: principle-<name>
-    at: status | problems[0] | problems[0].classification | problems[0].confidence | unresolved[<i>]
+    at: status | problems[0] | problems[0].classification | problems[0].confidence | smart_question | unresolved[<i>]
     changed: "The choice the principle changed, in one line"
 
 stop: true
 ```
 
-`problems` holds at most one item, the primary. An empty `problems` list is valid when status is `needs_clarification` or `not_a_problem`. Always emit `main_question`. Copy the primary's `statement` into it exactly. Write `null` when `problems` is empty. Always emit `unresolved`. Write `[]` when it is empty. Always emit `applied`. Write `[]` when no principle decided a value.
+`problems` holds at most one item, the primary. An empty `problems` list is valid when status is `needs_clarification` or `not_a_problem`. Always emit `main_question`. Copy the primary's `statement` into it exactly. Write `null` when `problems` is empty. Always emit `smart_question` and `smart_gaps`. Write `null` and `[]` when there is no primary. Always emit `unresolved`, with any gap rows last. Write `[]` when it is empty. Always emit `applied`. Write `[]` when no principle decided a value.
 
 ## Never
 
 - Put a second item in `problems`.
 - Reword the primary's statement in `main_question`, or name a question there that `problems` does not hold.
+- Put `smart_question` in `main_question`, or classify `smart_question`.
+- Write a gap row without its card prompt word for word.
 - Write anything after the YAML block.

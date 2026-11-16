@@ -12,6 +12,9 @@ turns:
         - anchor: ["p99|latency", "checkout"]
           quadrants: [analytical-convergent]
       unresolved: []
+      smart:
+        proposal: proposed
+        gaps: []
     tripwires:
       invented: []
       methodNotProblem: []
@@ -28,6 +31,8 @@ turns:
           confidence: high
           why: "Latency estimation needs quantitative data. The objective is one figure for a defined capacity decision."
           next_method: "Estimate from production telemetry and load assumptions. Do not open an architecture redesign workshop."
+      smart_question: "What p99 latency estimates for the checkout API should inform the Q1 hardware budget at Friday's capacity review?"
+      smart_gaps: []
       unresolved: []
       applied: []
       stop: true

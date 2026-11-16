@@ -7,7 +7,9 @@ from typing import Literal, get_args
 
 import yaml
 
-WireKind = Literal["status", "problem", "classification", "confidence", "unresolved"]
+WireKind = Literal[
+    "status", "problem", "classification", "confidence", "smart_question", "unresolved"
+]
 WIRE_KINDS: tuple[WireKind, ...] = get_args(WireKind)
 
 _SECTION_RE = re.compile(

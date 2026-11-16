@@ -16,6 +16,8 @@ turns:
       status: not_a_problem
       main_question: null
       problems: []
+      smart_question: null
+      smart_gaps: []
       unresolved: []
       applied: []
       stop: true

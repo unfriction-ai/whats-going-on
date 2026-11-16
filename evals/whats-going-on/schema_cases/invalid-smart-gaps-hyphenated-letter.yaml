@@ -1,0 +1,19 @@
+expect_ok: false
+expect_kind: smart_schema
+body: |
+  status: partial
+  main_question: "What approaches could build a healthy on-call culture on the platform squad over the next year?"
+  problems:
+    - statement: "What approaches could build a healthy on-call culture on the platform squad over the next year?"
+      classification: { nature: conceptual, direction: divergent }
+      confidence: high
+      why: "Culture and norms are conceptual. The ask invites many possible moves."
+      next_method: "Broad exploration of approaches before any narrowing."
+  smart_question: "What approaches could build a healthy on-call culture on the platform squad over the next year?"
+  smart_gaps: [time-bound]
+  unresolved:
+    - observation: "No deadline is given"
+      reason: "SMART time_bound is missing."
+      clarification: "Ask yourself: By when does it need to be solved?"
+  applied: []
+  stop: true

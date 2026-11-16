@@ -3,7 +3,7 @@ name: principle-dont-solve-yet
 description: >-
   Applies when a whats-going-on stage is about to diagnose, brainstorm, or
   recommend. Stop once the problem is identified.
-governs: [problem, unresolved]
+governs: [problem, unresolved, smart_question]
 disable-model-invocation: true
 ---
 
@@ -17,11 +17,11 @@ State what needs resolving, then stop. Do not hunt a root cause, build an issue 
 
 ## When
 
-Each time you write a statement, a `why`, a `next_method`, or a `clarification`, and each time the input already proposes a fix.
+Each time you write a statement, a `why`, a `next_method`, a `smart_question`, or a `clarification`, and each time the input already proposes a fix.
 
 ## Cite or omit
 
-Cite at `problems[0]` when this rule kept a cause, an option, or an answer out of the statement, `why`, or `next_method`. Cite at `unresolved[<i>]` when it kept a requested fix or plan as an open question instead of answering it. Omit it when nothing in the input or your notes pulled toward an answer.
+Cite at `problems[0]` when this rule kept a cause, an option, or an answer out of the statement, `why`, or `next_method`. Cite at `unresolved[<i>]` when it kept a requested fix or plan as an open question instead of answering it. Cite at `smart_question` when it kept a fix or an option out of the SMART question. Omit it when nothing in the input or your notes pulled toward an answer.
 
 ## Failure signature
 

@@ -197,6 +197,8 @@ problems:
     confidence: high
     why: "A measured change with a timeframe."
     next_method: "Compare telemetry before and after the change."
+smart_question: "Why did checkout latency rise?"
+smart_gaps: []
 unresolved: []
 applied: []
 stop: true

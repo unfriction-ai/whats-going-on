@@ -9,6 +9,8 @@ body: |
       confidence: medium
       why: "Several measurable explanations remain open."
       next_method: "Gather facts on pool config before any workshop."
+  smart_question: "Should ops run a two-day architecture workshop?"
+  smart_gaps: []
   unresolved:
     - observation: "Ops wants a two-day architecture workshop"
       reason: "That is a proposed approach, not a defined problem."

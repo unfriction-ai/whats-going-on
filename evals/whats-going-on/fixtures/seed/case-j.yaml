@@ -17,6 +17,8 @@ turns:
       status: needs_clarification
       main_question: null
       problems: []
+      smart_question: null
+      smart_gaps: []
       unresolved:
         - observation: "Mobile is in a rough place"
           reason: "No measurable change, magnitude, or timeframe."
@@ -31,18 +33,21 @@ turns:
     restatement: "Someone asks why crash-free sessions dropped 8% in four weeks. Crash-free sessions dropped 8% in four weeks."
     expect:
       kind: classify
-      statuses: [classified]
+      statuses: [partial]
       problems:
         - anchor: ["crash-free|crash free", "why|cause|drop"]
           quadrants: [analytical-convergent]
       unresolved: []
+      smart:
+        proposal: proposed
+        gaps: [relevant, time_bound]
     tripwires:
       invented: []
       methodNotProblem: []
       solveLeak: ["initiative"]
     gold: |
       ```yaml
-      status: classified
+      status: partial
       main_question: "Why did crash-free sessions drop 8% over four weeks?"
       problems:
         - statement: "Why did crash-free sessions drop 8% over four weeks?"
@@ -50,7 +55,15 @@ turns:
           confidence: high
           why: "A measured drop with a timeframe. Data should converge on what changed."
           next_method: "Evidence-based diagnosis from crash telemetry and release history."
-      unresolved: []
+      smart_question: "Why did crash-free sessions drop 8% over four weeks?"
+      smart_gaps: [relevant, time_bound]
+      unresolved:
+        - observation: "The ask names no one who will act on the cause"
+          reason: "SMART relevant is missing. The input names no decider or stake."
+          clarification: "Ask yourself: Does it matter to the people who will decide?"
+        - observation: "The ask gives no date by which the cause is needed"
+          reason: "SMART time_bound is missing. Four weeks is the span of the drop, not a deadline."
+          clarification: "Ask yourself: By when does it need to be solved?"
       applied: []
       stop: true
       ```
@@ -58,18 +71,21 @@ turns:
     restatement: "Someone asks what product or eng initiatives could recover crash-free sessions. The question is about recovering crash-free sessions."
     expect:
       kind: classify
-      statuses: [classified]
+      statuses: [partial]
       problems:
         - anchor: ["initiative|approach|way", "recover|crash-free"]
           quadrants: [conceptual-divergent]
       unresolved: []
+      smart:
+        proposal: proposed
+        gaps: [relevant, time_bound]
     tripwires:
       invented: []
       methodNotProblem: []
       solveLeak: []
     gold: |
       ```yaml
-      status: classified
+      status: partial
       main_question: "What product or eng initiatives could recover crash-free sessions?"
       problems:
         - statement: "What product or eng initiatives could recover crash-free sessions?"
@@ -77,7 +93,15 @@ turns:
           confidence: high
           why: "Initiatives are design and judgment calls. The ask opens many options."
           next_method: "Broad exploration of initiatives before narrowing. Do not list them in this slice."
-      unresolved: []
+      smart_question: "What product or eng initiatives could recover crash-free sessions?"
+      smart_gaps: [relevant, time_bound]
+      unresolved:
+        - observation: "The ask names no one who will choose among the initiatives"
+          reason: "SMART relevant is missing. The input names no decider or stake."
+          clarification: "Ask yourself: Does it matter to the people who will decide?"
+        - observation: "The ask gives no date for the recovery"
+          reason: "SMART time_bound is missing. The input gives no date by which the answer is needed."
+          clarification: "Ask yourself: By when does it need to be solved?"
       applied:
         - name: principle-read-the-room
           at: problems[0].classification
@@ -88,18 +112,21 @@ turns:
     restatement: "Someone asks which of these three recovery initiatives should be funded. The choice is among three recovery initiatives."
     expect:
       kind: classify
-      statuses: [classified]
+      statuses: [partial]
       problems:
         - anchor: ["fund|choose|which"]
           quadrants: [conceptual-convergent]
       unresolved: []
+      smart:
+        proposal: proposed
+        gaps: [time_bound]
     tripwires:
       invented: []
       methodNotProblem: []
       solveLeak: ["we should fund", "fund (the )?(first|second|third)"]
     gold: |
       ```yaml
-      status: classified
+      status: partial
       main_question: "Which of the three recovery initiatives should we fund?"
       problems:
         - statement: "Which of the three recovery initiatives should we fund?"
@@ -107,7 +134,12 @@ turns:
           confidence: medium
           why: "A funding choice among a fixed set is a judgment call that must settle on one."
           next_method: "Set decision criteria and compare the three. Do not pick one in this slice."
-      unresolved: []
+      smart_question: "Which of the three recovery initiatives should we fund?"
+      smart_gaps: [time_bound]
+      unresolved:
+        - observation: "The ask gives no date for the funding call"
+          reason: "SMART time_bound is missing. The input gives no date by which the answer is needed."
+          clarification: "Ask yourself: By when does it need to be solved?"
       applied:
         - name: principle-read-the-room
           at: problems[0].classification

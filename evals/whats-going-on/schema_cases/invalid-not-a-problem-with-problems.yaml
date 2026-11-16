@@ -9,6 +9,8 @@ body: |
       confidence: high
       why: "Asks for a cause."
       next_method: "Diagnose from logs."
+  smart_question: "Why did staging go down?"
+  smart_gaps: []
   unresolved: []
   applied: []
   stop: true
