@@ -11,6 +11,10 @@ body: |
       next_method: "Diagnose from logs."
   smart_question: "Why did staging go down?"
   smart_gaps: []
-  unresolved: []
+  worksheet: {}
+  unresolved:
+    - observation: 'The worksheet has no context or constraints yet.'
+      reason: 'Context and constraints is the next open worksheet area.'
+      clarification: 'Context and constraints: Around "Why did staging go down?", what background or pressures shape how you solve it, and what cannot change?'
   applied: []
   stop: true

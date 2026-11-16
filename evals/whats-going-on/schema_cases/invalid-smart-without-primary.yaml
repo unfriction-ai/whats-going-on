@@ -6,9 +6,13 @@ body: |
   problems: []
   smart_question: "What approaches could build a healthy on-call culture on the platform squad over the next year?"
   smart_gaps: []
+  worksheet: {}
   unresolved:
     - observation: "Mobile is in a rough place"
       reason: "No measurable change."
       clarification: "What changed, by how much, and since when?"
+    - observation: 'The worksheet has no context or constraints yet.'
+      reason: 'Context and constraints is the next open worksheet area.'
+      clarification: 'Context and constraints: Around "What approaches could build a healthy on-call culture on the platform squad over the next year?", what background or pressures shape how you solve it, and what cannot change?'
   applied: []
   stop: true

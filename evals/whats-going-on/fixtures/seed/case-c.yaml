@@ -7,7 +7,7 @@ turns:
     restatement: "A design lead asks to lock one or two handoff changes this sprint so the bounce stops. Tickets keep bouncing between Design and Eng with missing acceptance criteria."
     expect:
       kind: classify
-      statuses: [classified]
+      statuses: [partial]
       problems:
         - anchor: ["handoff", "acceptance|bounce"]
           quadrants: [conceptual-convergent]
@@ -21,7 +21,7 @@ turns:
       solveLeak: ["we should (add|require|adopt)", "definition of ready"]
     gold: |
       ```yaml
-      status: classified
+      status: partial
       main_question: "Which one or two handoff changes should Design and Eng adopt so tickets stop bouncing for missing acceptance criteria?"
       problems:
         - statement: "Which one or two handoff changes should Design and Eng adopt so tickets stop bouncing for missing acceptance criteria?"
@@ -33,7 +33,11 @@ turns:
           next_method: "Generate and narrow handoff changes toward one or two fixes. Do not propose the fixes in this slice."
       smart_question: "Which one or two handoff changes should Design and Eng lock this sprint so tickets stop bouncing for missing acceptance criteria?"
       smart_gaps: []
-      unresolved: []
+      worksheet: {}
+      unresolved:
+        - observation: 'The worksheet has no context or constraints yet.'
+          reason: 'Context and constraints is the next open worksheet area.'
+          clarification: 'Context and constraints: Around "Which one or two handoff changes should Design and Eng lock this sprint so tickets stop bouncing for missing acceptance criteria?", what background or pressures shape how you solve it, and what cannot change?'
       applied: []
       stop: true
       ```

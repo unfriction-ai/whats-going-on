@@ -11,6 +11,7 @@ body: |
       next_method: "Broad exploration of approaches before any narrowing."
   smart_question: null
   smart_gaps: [measurable, relevant]
+  worksheet: null
   unresolved:
     - observation: "The ask says healthy but not what healthy looks like"
       reason: "SMART measurable is missing. The input gives no sign of done."

@@ -199,6 +199,11 @@ problems:
     next_method: "Compare telemetry before and after the change."
 smart_question: "Why did checkout latency rise?"
 smart_gaps: []
+worksheet:
+  context_constraints: { status: unknown, text: null }
+  success_criteria: { status: not_yet, text: null }
+  stakeholders: { status: i_am_decider, text: null }
+  scope_sources: { status: unknown, text: null }
 unresolved: []
 applied: []
 stop: true

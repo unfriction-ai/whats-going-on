@@ -1,7 +1,7 @@
 expect_ok: false
 expect_kind: schema
 body: |
-  status: classified
+  status: partial
   main_question:
     - "What p99 latency estimates for the checkout API should inform the Q1 hardware budget?"
   problems:
@@ -12,6 +12,10 @@ body: |
       next_method: "Estimate from production telemetry."
   smart_question: "What p99 latency estimates for the checkout API should inform the Q1 hardware budget?"
   smart_gaps: []
-  unresolved: []
+  worksheet: {}
+  unresolved:
+    - observation: 'The worksheet has no context or constraints yet.'
+      reason: 'Context and constraints is the next open worksheet area.'
+      clarification: 'Context and constraints: Around "What p99 latency estimates for the checkout API should inform the Q1 hardware budget?", what background or pressures shape how you solve it, and what cannot change?'
   applied: []
   stop: true

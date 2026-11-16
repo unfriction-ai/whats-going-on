@@ -34,10 +34,14 @@ turns:
           next_method: "Evidence-based incident diagnosis. Finish this before prevention options."
       smart_question: "Why exactly did staging go down last night?"
       smart_gaps: [time_bound]
+      worksheet: {}
       unresolved:
         - observation: "The director also wants three realistic ways to stop this class of failure, ranked by likelihood"
           reason: "Deferred until the primary problem is answered. Prevention options depend on why staging went down."
           clarification: "Ask about prevention again once the cause of the outage is settled."
+        - observation: 'The worksheet has no context or constraints yet.'
+          reason: 'Context and constraints is the next open worksheet area.'
+          clarification: 'Context and constraints: Around "Why exactly did staging go down last night?", what background or pressures shape how you solve it, and what cannot change?'
         - observation: "The director does not say by when the cause must be known"
           reason: "SMART time_bound is missing. Last night is when staging went down, not when the answer is due."
           clarification: "Ask yourself: By when does it need to be solved?"

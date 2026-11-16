@@ -31,10 +31,14 @@ turns:
           next_method: "Evidence-based incident diagnosis. Finish this before prevention approaches."
       smart_question: "Why did the nightly billing batch fail?"
       smart_gaps: [time_bound]
+      worksheet: {}
       unresolved:
         - observation: "The on-call lead also asks how to stop the nightly billing batch from failing again"
           reason: "Deferred until the primary problem is answered. Prevention approaches depend on why the batch failed."
           clarification: "Ask about prevention again once the cause of the batch failure is settled."
+        - observation: 'The worksheet has no context or constraints yet.'
+          reason: 'Context and constraints is the next open worksheet area.'
+          clarification: 'Context and constraints: Around "Why did the nightly billing batch fail?", what background or pressures shape how you solve it, and what cannot change?'
         - observation: "The on-call lead does not say by when the cause must be known"
           reason: "SMART time_bound is missing. The input gives no date by which the answer is needed."
           clarification: "Ask yourself: By when does it need to be solved?"

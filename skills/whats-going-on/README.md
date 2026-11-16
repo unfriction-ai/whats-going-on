@@ -34,7 +34,7 @@ Do not classify a proposed method as the problem. Identify the question the work
 |---|---|---|
 | `not_a_problem` | No decision or problem to resolve (for example a pure FYI or a fully specified rename) | Say so and stop |
 | `needs_clarification` | Concern or symptom is present, but the problem is not defined enough | Abstain. Ask for what is missing |
-| `classified` | One primary problem is defined, nothing else is open, and the input meets every SMART letter | State the problem, its SMART question, and its quadrant |
+| `classified` | One primary problem is defined, nothing else is open, the input meets every SMART letter, and the worksheet is finished | State the problem, its SMART question, and its quadrant |
 | `partial` | One primary problem is defined, and other concerns or SMART gaps stay open | Classify the primary. List the rest in `unresolved` |
 
 Hard fail: inventing details to force a quadrant, or starting to solve while classifying.
@@ -130,6 +130,8 @@ smart_question: "The primary, carrying each met SMART letter's facts" | null
 
 smart_gaps: [specific | measurable | actionable | relevant | time_bound]
 
+worksheet: null | { <id>: { status: filled | unknown | not_yet | i_am_decider, text: "The reply, verbatim" | null } }
+
 unresolved:
   - observation: "What was said"
     reason: "Why this is not yet a defined problem"
@@ -197,6 +199,7 @@ main_question: null
 problems: []
 smart_question: null
 smart_gaps: []
+worksheet: null
 unresolved:
   - observation: "Mobile is in a rough place; eng has competing theories"
     reason: "No measurable change, magnitude, or timeframe. Competing theories are not yet a defined question."
@@ -225,7 +228,7 @@ One estimate for one review. Data does the work. One answer.
 **Expected result**
 
 ```yaml
-status: classified
+status: partial
 main_question: "What p99 latency estimates for the checkout API should inform the Q1 hardware budget?"
 problems:
   - statement: "What p99 latency estimates for the checkout API should inform the Q1 hardware budget?"
@@ -237,7 +240,11 @@ problems:
     next_method: "Estimate from production telemetry and load assumptions. Do not open an architecture redesign workshop."
 smart_question: "What p99 latency estimates for the checkout API should inform the Q1 hardware budget at Friday's capacity review?"
 smart_gaps: []
-unresolved: []
+worksheet: {}
+unresolved:
+  - observation: 'The worksheet has no context or constraints yet.'
+    reason: 'Context and constraints is the next open worksheet area.'
+    clarification: 'Context and constraints: Around "What p99 latency estimates for the checkout API should inform the Q1 hardware budget at Friday''s capacity review?", what background or pressures shape how you solve it, and what cannot change?'
 applied: []
 stop: true
 ```
@@ -261,7 +268,7 @@ The topic is a way of working, not a number. "One or two handoff changes" alread
 **Expected result**
 
 ```yaml
-status: classified
+status: partial
 main_question: "Which one or two handoff changes should Design and Eng adopt so tickets stop bouncing for missing acceptance criteria?"
 problems:
   - statement: "Which one or two handoff changes should Design and Eng adopt so tickets stop bouncing for missing acceptance criteria?"
@@ -273,7 +280,11 @@ problems:
     next_method: "Generate and narrow handoff changes toward one or two fixes. Do not propose the fixes in this slice."
 smart_question: "Which one or two handoff changes should Design and Eng lock this sprint so tickets stop bouncing for missing acceptance criteria?"
 smart_gaps: []
-unresolved: []
+worksheet: {}
+unresolved:
+  - observation: 'The worksheet has no context or constraints yet.'
+    reason: 'Context and constraints is the next open worksheet area.'
+    clarification: 'Context and constraints: Around "Which one or two handoff changes should Design and Eng lock this sprint so tickets stop bouncing for missing acceptance criteria?", what background or pressures shape how you solve it, and what cannot change?'
 applied: []
 stop: true
 ```
@@ -290,7 +301,7 @@ How do we build a healthy on-call culture over the next year?"
 
 **What to notice**
 
-Culture and norms are conceptual. "How do we" over a year leaves many approaches open. A desired change counts as a valid problem even when nothing is on fire right now. "Healthy" is not a sign of done, and nobody is named as the decider, so measurable and relevant become Ask-yourself rows. The primary is classified anyway. The status is `partial` only because of those rows.
+Culture and norms are conceptual. "How do we" over a year leaves many approaches open. A desired change counts as a valid problem even when nothing is on fire right now. "Healthy" is not a sign of done, and nobody is named as the decider, so measurable and relevant become Ask-yourself rows. The primary is classified anyway. The status is `partial` only because of those rows and the first worksheet probe.
 
 **Expected result**
 
@@ -307,7 +318,11 @@ problems:
     next_method: "Broad exploration of approaches before any narrowing. Do not brainstorm the list in this slice."
 smart_question: "What approaches could build a healthy on-call culture on the platform squad over the next year?"
 smart_gaps: [measurable, relevant]
+worksheet: {}
 unresolved:
+  - observation: 'The worksheet has no context or constraints yet.'
+    reason: 'Context and constraints is the next open worksheet area.'
+    clarification: 'Context and constraints: Around "What approaches could build a healthy on-call culture on the platform squad over the next year?", what background or pressures shape how you solve it, and what cannot change?'
   - observation: "The ask says healthy but not what healthy looks like"
     reason: "SMART measurable is missing. The input gives no sign of done."
     clarification: "Ask yourself: How will we know it is solved?"
@@ -316,7 +331,7 @@ unresolved:
     clarification: "Ask yourself: Does it matter to the people who will decide?"
 applied:
   - name: principle-make-it-smart
-    at: unresolved[0]
+    at: unresolved[1]
     changed: "Asked for a sign of done instead of treating healthy as measurable."
   - name: principle-dont-invent-problems
     at: smart_question
@@ -341,7 +356,7 @@ Simplifying an interface is design judgment, not a dataset. "Settle on one or tw
 **Expected result**
 
 ```yaml
-status: classified
+status: partial
 main_question: "Which one or two admin-console UI changes should we make before the enterprise demo to reduce overwhelm?"
 problems:
   - statement: "Which one or two admin-console UI changes should we make before the enterprise demo to reduce overwhelm?"
@@ -353,7 +368,11 @@ problems:
     next_method: "Compare candidate UI changes and narrow to one or two. Do not pick them in this slice."
 smart_question: "Which one or two admin-console UI changes should we settle on before the enterprise demo on the 20th to cut the clutter trial users report?"
 smart_gaps: []
-unresolved: []
+worksheet: {}
+unresolved:
+  - observation: 'The worksheet has no context or constraints yet.'
+    reason: 'Context and constraints is the next open worksheet area.'
+    clarification: 'Context and constraints: Around "Which one or two admin-console UI changes should we settle on before the enterprise demo on the 20th to cut the clutter trial users report?", what background or pressures shape how you solve it, and what cannot change?'
 applied: []
 stop: true
 ```
@@ -387,10 +406,14 @@ problems:
     next_method: "Evidence-based incident diagnosis. Finish this before prevention options."
 smart_question: "Why exactly did staging go down last night?"
 smart_gaps: [time_bound]
+worksheet: {}
 unresolved:
   - observation: "The director also wants three realistic ways to stop this class of failure, ranked by likelihood"
     reason: "Deferred until the primary problem is answered. Prevention options depend on why staging went down."
     clarification: "Ask about prevention again once the cause of the outage is settled."
+  - observation: 'The worksheet has no context or constraints yet.'
+    reason: 'Context and constraints is the next open worksheet area.'
+    clarification: 'Context and constraints: Around "Why exactly did staging go down last night?", what background or pressures shape how you solve it, and what cannot change?'
   - observation: "The director does not say by when the cause must be known"
     reason: "SMART time_bound is missing. Last night is when staging went down, not when the answer is due."
     clarification: "Ask yourself: By when does it need to be solved?"
@@ -433,7 +456,11 @@ problems:
     next_method: "Clarify decision criteria and trade-offs among services. Do not expand the LOC spreadsheet in this slice."
 smart_question: "How should the two directors decide which services to sunset first, weighing product strategy and customer impact?"
 smart_gaps: [time_bound]
+worksheet: {}
 unresolved:
+  - observation: 'The worksheet has no context or constraints yet.'
+    reason: 'Context and constraints is the next open worksheet area.'
+    clarification: 'Context and constraints: Around "How should the two directors decide which services to sunset first, weighing product strategy and customer impact?", what background or pressures shape how you solve it, and what cannot change?'
   - observation: "The input gives no date for the sunset decision"
     reason: "SMART time_bound is missing. The input gives no date by which the answer is needed."
     clarification: "Ask yourself: By when does it need to be solved?"
@@ -473,10 +500,14 @@ problems:
     next_method: "Gather facts on pool config, error rates, and timing before any architecture workshop."
 smart_question: "Are this morning's checkout API timeouts across three regions explained by yesterday's lowered connection-pool max, or by something else measurable, before Ops commits to this week's workshop?"
 smart_gaps: []
+worksheet: {}
 unresolved:
   - observation: "Ops wants a two-day architecture workshop on resilient request paths"
     reason: "That is a proposed approach, not a defined problem. Redesign may be wrong if the pool config is the cause."
     clarification: "What decision must this week's work settle? Confirm root cause first, or commit to redesign regardless?"
+  - observation: 'The worksheet has no context or constraints yet.'
+    reason: 'Context and constraints is the next open worksheet area.'
+    clarification: 'Context and constraints: Around "Are this morning''s checkout API timeouts across three regions explained by yesterday''s lowered connection-pool max, or by something else measurable, before Ops commits to this week''s workshop?", what background or pressures shape how you solve it, and what cannot change?'
 applied:
   - name: principle-read-the-room
     at: problems[0]
@@ -503,6 +534,7 @@ main_question: null
 problems: []
 smart_question: null
 smart_gaps: []
+worksheet: null
 unresolved: []
 applied: []
 stop: true
@@ -550,6 +582,7 @@ problems:
     next_method: "Gather public evidence on the price change and keep explanations open. Do not plan a response in this slice."
 smart_question: null
 smart_gaps: [measurable, actionable, relevant, time_bound]
+worksheet: null
 unresolved:
   - observation: "The ask does not say what knowing their aim would look like"
     reason: "SMART measurable is missing. The input gives no sign of done."
@@ -585,12 +618,12 @@ Healthy means nobody carries more than one week of pages a month. The platform l
 
 **What to notice**
 
-This answers Case D's two gap rows. The answers are new facts, so the run starts over from the ask plus the answers. `main_question` does not move. `smart_question` now carries the sign of done and the decider, and with no letter open the status is `classified`.
+This answers Case D's two gap rows. The answers are new facts, so the run starts over from the ask plus the answers. `main_question` does not move. `smart_question` now carries the sign of done and the decider, so no letter is open. The worksheet has not started, so its first probe keeps the status `partial`.
 
 **Expected result**
 
 ```yaml
-status: classified
+status: partial
 main_question: "What approaches could build a healthy on-call culture on the platform squad over the next year?"
 problems:
   - statement: "What approaches could build a healthy on-call culture on the platform squad over the next year?"
@@ -602,7 +635,11 @@ problems:
     next_method: "Broad exploration of approaches before any narrowing. Do not brainstorm the list in this slice."
 smart_question: "What approaches could the platform lead adopt so nobody on the platform squad carries more than one week of pages a month within the next year?"
 smart_gaps: []
-unresolved: []
+worksheet: {}
+unresolved:
+  - observation: 'The worksheet has no context or constraints yet.'
+    reason: 'Context and constraints is the next open worksheet area.'
+    clarification: 'Context and constraints: Around "What approaches could the platform lead adopt so nobody on the platform squad carries more than one week of pages a month within the next year?", what background or pressures shape how you solve it, and what cannot change?'
 applied: []
 stop: true
 ```

@@ -1,0 +1,26 @@
+expect_ok: true
+derived_status: partial
+body: |
+  status: partial
+  main_question: "What approaches could build a healthy on-call culture on the platform squad over the next year?"
+  problems:
+    - statement: "What approaches could build a healthy on-call culture on the platform squad over the next year?"
+      classification: { nature: conceptual, direction: divergent }
+      confidence: high
+      why: "Culture and norms are conceptual. The ask invites many possible moves."
+      next_method: "Broad exploration of approaches before any narrowing."
+  smart_question: "What approaches could build a healthy on-call culture on the platform squad over the next year?"
+  smart_gaps: [relevant]
+  worksheet:
+    context_constraints: { status: filled, text: "Three new people joined after a messy on-call week." }
+    success_criteria: { status: unknown, text: null }
+    stakeholders: { status: not_yet, text: null }
+  unresolved:
+    - observation: 'Two worksheet areas in a row were skipped.'
+      reason: 'The SMART gaps below come first.'
+      clarification: 'Answer the Ask yourself prompts in this fence. Then paste those answers with the Sheet lines so far.'
+    - observation: 'The ask does not say who decides on on-call changes'
+      reason: 'SMART relevant is missing. The input names no decider or stake.'
+      clarification: 'Ask yourself: Does it matter to the people who will decide?'
+  applied: []
+  stop: true

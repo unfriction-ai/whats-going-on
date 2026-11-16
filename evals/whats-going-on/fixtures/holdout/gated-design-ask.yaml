@@ -34,10 +34,14 @@ turns:
           next_method: "Weigh the stated trade-offs for the Friday go or no-go call. Settle this before any pricing-page design."
       smart_question: "Should offline mode ship in the March release, as leadership decides on Friday?"
       smart_gaps: []
+      worksheet: {}
       unresolved:
         - observation: "The product manager asks design to mock up how offline mode would be featured on the pricing page"
           reason: "Deferred until the primary problem is answered. How to feature offline mode depends on whether it ships in March."
           clarification: "Ask about the pricing-page treatment again once the March launch decision is made."
+        - observation: 'The worksheet has no context or constraints yet.'
+          reason: 'Context and constraints is the next open worksheet area.'
+          clarification: 'Context and constraints: Around "Should offline mode ship in the March release, as leadership decides on Friday?", what background or pressures shape how you solve it, and what cannot change?'
       applied:
         - name: principle-read-the-room
           at: problems[0]
