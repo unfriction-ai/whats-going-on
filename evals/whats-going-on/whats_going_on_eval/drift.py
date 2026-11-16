@@ -9,7 +9,15 @@ from pathlib import Path
 import yaml
 
 from .chain import ChainMode
-from .fixtures import REQUIRED_FAMILIES, Expectation, Fixture, Tripwires, Turn, covered_families
+from .fixtures import (
+    REQUIRED_FAMILIES,
+    Expectation,
+    Fixture,
+    Tripwires,
+    Turn,
+    covered_families,
+    smart_matches,
+)
 from .grade import _restatement_fails, grade_gold, rubric_keys_match_doc
 from .manifest import (
     RESTATEMENT_CASES_DIR,
@@ -18,6 +26,7 @@ from .manifest import (
     assert_skill_tree_clean,
 )
 from .principles import load_principles, principle_names
+from .smart import load_cards, parse_cards
 from .parse import (
     CONFIDENCES,
     DIRECTIONS,
@@ -44,7 +53,7 @@ SENTINEL_OWNER: dict[ChainMode, str] = {
     "playbooks": "restate/SKILL.md",
 }
 
-CASE_HEADER_RE = re.compile(r"### Case ([A-J])\.")
+CASE_HEADER_RE = re.compile(r"### Case ([A-L])\.")
 
 README_PRINCIPLES_RE = re.compile(
     r"^## Principles\s*\n(?P<body>(?:.*\n)*?)(?=^## |\Z)",
@@ -125,6 +134,7 @@ def check_suite(
         problems.extend(_sentinel_sync(sentinel_rel, mount[sentinel_rel]))
     problems.extend(_enum_drift(readme))
     problems.extend(_principles_drift(readme))
+    problems.extend(_smart_cards_drift(readme))
     problems.extend(_seed_readme_drift(fixtures, readme))
     problems.extend(_gold_self_test(fixtures))
     problems.extend(_tripwire_vs_input(fixtures))
@@ -187,7 +197,7 @@ def _principles_drift(readme: str) -> list[DriftProblem]:
     for line in section.group("body").splitlines():
         row = README_PRINCIPLE_ROW_RE.match(line)
         if row:
-            rows[row.group(1)] = frozenset(re.findall(r"`([a-z]+)`", row.group("governs")))
+            rows[row.group(1)] = frozenset(re.findall(r"`([a-z_]+)`", row.group("governs")))
     out: list[DriftProblem] = []
     index = principle_names(SKILL_DIR)
     if tuple(rows) != index:
@@ -288,6 +298,13 @@ def _seed_readme_drift(fixtures: list[Fixture], readme: str) -> list[DriftProble
                         f"{fixture.id}: gold shape differs from README Case {letter}",
                     )
                 )
+            elif fixture_gold.verdict.smart != readme_gold.verdict.smart:
+                out.append(
+                    DriftProblem(
+                        "readme_drift",
+                        f"{fixture.id}: gold SMART question or gaps differ from README Case {letter}",
+                    )
+                )
             else:
                 for a, b in zip(
                     fixture_gold.verdict.problems, readme_gold.verdict.problems, strict=True
@@ -303,9 +320,28 @@ def _seed_readme_drift(fixtures: list[Fixture], readme: str) -> list[DriftProble
     return out
 
 
+def _smart_cards_drift(readme: str) -> list[DriftProblem]:
+    try:
+        skill_cards = load_cards(SKILL_DIR)
+        readme_cards = parse_cards(readme)
+    except ValueError as exc:
+        return [DriftProblem("smart_cards", str(exc))]
+    if readme_cards != skill_cards:
+        return [DriftProblem("smart_cards", "README SMART cards differ from smart/SKILL.md")]
+    return []
+
+
 def _gold_self_test(fixtures: list[Fixture]) -> list[DriftProblem]:
     out: list[DriftProblem] = []
     for fixture in fixtures:
+        for i, turn in enumerate(fixture.turns):
+            if not smart_matches(turn.expect.smart, turn.gold.verdict.smart):
+                out.append(
+                    DriftProblem(
+                        "gold_smart_mismatch",
+                        f"{fixture.id} turn {i}: gold SMART {turn.gold.verdict.smart} vs expect {turn.expect.smart}",
+                    )
+                )
         results = grade_gold(fixture)
         for i, result in enumerate(results):
             if result.hard_fails or result.score < 1.0 - 1e-9:
@@ -382,11 +418,15 @@ def _sentinel_sync(owner_rel: str, owner: str) -> list[DriftProblem]:
     return problems
 
 
+_GUARD_BODY = (
+    "status: not_a_problem\nmain_question: null\nproblems: []\n"
+    "smart_question: null\nsmart_gaps: []\nunresolved: []\napplied: []\nstop: true\n"
+)
+
+
 def _guard_turn(user_input: str) -> Turn:
     text = user_input.strip() or "Noted."
-    gold = parse_response(
-        "```yaml\nstatus: not_a_problem\nmain_question: null\nproblems: []\nunresolved: []\napplied: []\nstop: true\n```"
-    )
+    gold = parse_response(f"```yaml\n{_GUARD_BODY}```")
     if not isinstance(gold, Response):
         raise RuntimeError("guard gold failed to parse")
     return Turn(
@@ -397,6 +437,7 @@ def _guard_turn(user_input: str) -> Turn:
             problems=(),
             unresolved=(),
             asks=(),
+            smart=None,
         ),
         tripwires=Tripwires(invented=(), method_not_problem=(), solve_leak=()),
         restatement=f"{NO_ASK} Noted.",
@@ -413,7 +454,6 @@ def _restatement_guard_self_test(cases_dir: Path) -> list[DriftProblem]:
     missing = sorted(_REQUIRED_RESTATEMENT_CASES - {path.name for path in paths})
     if missing:
         problems.append(DriftProblem("restatement_guard", f"missing cases: {missing}"))
-    body = "status: not_a_problem\nmain_question: null\nproblems: []\nunresolved: []\napplied: []\nstop: true\n"
     for path in paths:
         doc = yaml.safe_load(path.read_text())
         if not isinstance(doc, dict) or "preamble" not in doc or "expect_fail" not in doc:
@@ -431,7 +471,7 @@ def _restatement_guard_self_test(cases_dir: Path) -> list[DriftProblem]:
                 DriftProblem("restatement_guard", f"{path.name}: unknown expect_fail {expected!r}")
             )
             continue
-        text = f"```yaml\n{body}```" if not preamble.strip() else f"{preamble}\n\n```yaml\n{body}```"
+        text = f"```yaml\n{_GUARD_BODY}```" if not preamble.strip() else f"{preamble}\n\n```yaml\n{_GUARD_BODY}```"
         parsed = parse_response(text)
         if not isinstance(parsed, Response):
             problems.append(

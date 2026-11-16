@@ -4,6 +4,8 @@ body: |
   status: needs_clarification
   main_question: "What changed on mobile, by how much, and since when?"
   problems: []
+  smart_question: null
+  smart_gaps: []
   unresolved:
     - observation: "Mobile is in a rough place"
       reason: "No measurable change."

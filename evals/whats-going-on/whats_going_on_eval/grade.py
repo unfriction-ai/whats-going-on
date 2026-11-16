@@ -4,18 +4,19 @@ from __future__ import annotations
 
 import re
 from dataclasses import dataclass
-from typing import Literal
+from typing import Literal, assert_never
 
 from .fixtures import Expectation, ExpectedProblem, Fixture, Turn, _gold_response_text
 from .parse import (
     ClassifiedProblem,
-    ContractViolation,
     Halt,
     Response,
     Verdict,
     parse_response,
     parse_restatement,
 )
+from .smart import NoPrimary, Proposed, Withheld, partition_unresolved
+from .wire import ContractViolation
 
 RUBRIC: dict[str, float] = {
     "detection": 0.25,
@@ -170,6 +171,16 @@ def _hard_fails(turn: Turn, response: Response, text: str) -> list[HardFail]:
         "clarification": " ".join(u.clarification for u in verdict.unresolved),
         "changed": " ".join(a.changed for a in verdict.applied),
     }
+    match verdict.smart:
+        case NoPrimary() | Withheld():
+            pass
+        case Proposed(question=question):
+            prose_fields["smart_question"] = question
+            if turn.expect.smart is not None and turn.expect.smart.proposal == "withheld":
+                fails.append(HardFail("smart_proposed_when_withheld", question))
+        case _ as unreachable:
+            assert_never(unreachable)
+
     leak_pats = list(GLOBAL_SOLVE_LEAK) + list(turn.tripwires.solve_leak)
     for field, content in prose_fields.items():
         for pat in leak_pats:
@@ -255,13 +266,14 @@ def _abstention_score(expect: Expectation, verdict: Verdict) -> float:
 
 
 def _classify_abstention(expect: Expectation, verdict: Verdict) -> float:
+    concerns, _gap_rows = partition_unresolved(verdict.unresolved)
     if not expect.unresolved:
-        if not verdict.unresolved:
+        if not concerns:
             return 1.0
         return 0.5
     matched = 0
     for exp in expect.unresolved:
-        for actual in verdict.unresolved:
+        for actual in concerns:
             blob = f"{actual.observation} {actual.reason}"
             if all(p.search(blob) for p in exp.anchors):
                 matched += 1

@@ -1,0 +1,14 @@
+expect_ok: false
+expect_kind: principle_at
+body: |
+  status: not_a_problem
+  main_question: null
+  problems: []
+  smart_question: null
+  smart_gaps: []
+  unresolved: []
+  applied:
+    - name: principle-make-it-smart
+      at: smart_question
+      changed: "Withheld the SMART question."
+  stop: true

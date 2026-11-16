@@ -11,6 +11,8 @@ import yaml
 
 from .manifest import SKILL_DIR
 from .principles import WireKind, load_principles
+from .smart import SmartProposal, parse_smart
+from .wire import ContractViolation, Unresolved
 
 NATURES = ("analytical", "conceptual")
 DIRECTIONS = ("convergent", "divergent")
@@ -35,7 +37,16 @@ NO_ASK = "No ask is stated."
 FENCE_RE = re.compile(r"```yaml\s*\n(.*?)```", re.DOTALL | re.IGNORECASE)
 
 VERDICT_KEYS = frozenset(
-    {"status", "main_question", "problems", "unresolved", "applied", "stop"}
+    {
+        "status",
+        "main_question",
+        "problems",
+        "smart_question",
+        "smart_gaps",
+        "unresolved",
+        "applied",
+        "stop",
+    }
 )
 HALT_KEYS = frozenset({"next_stage", "available", "stop"})
 
@@ -63,13 +74,6 @@ Problems = AtMostOne[ClassifiedProblem]
 
 
 @dataclass(frozen=True)
-class Unresolved:
-    observation: str
-    reason: str
-    clarification: str
-
-
-@dataclass(frozen=True)
 class Applied:
     name: str
     at: str
@@ -82,6 +86,7 @@ class Verdict:
     status: Status
     main_question: str | None
     problems: Problems
+    smart: SmartProposal
     unresolved: tuple[Unresolved, ...]
     applied: tuple[Applied, ...]
 
@@ -109,12 +114,6 @@ class Halt:
 
 
 Outcome = Response | Halt
-
-
-@dataclass(frozen=True)
-class ContractViolation:
-    kind: str
-    detail: str = ""
 
 
 def derive_status(problems: Problems, unresolved: tuple[Unresolved, ...]) -> Status:
@@ -238,6 +237,10 @@ def _validate_wire(raw: dict[str, Any], preamble: str) -> Outcome | ContractViol
     if isinstance(main_question, ContractViolation):
         return main_question
 
+    smart = parse_smart(raw, bool(problems_t), unresolved_t)
+    if isinstance(smart, ContractViolation):
+        return smart
+
     if "applied" not in raw:
         return ContractViolation("schema", "applied is required")
     applied = _parse_applied(raw["applied"], problems_t, unresolved_t)
@@ -250,6 +253,7 @@ def _validate_wire(raw: dict[str, Any], preamble: str) -> Outcome | ContractViol
             status=derived,
             main_question=main_question,
             problems=problems_t,
+            smart=smart,
             unresolved=unresolved_t,
             applied=applied,
         ),
@@ -284,6 +288,8 @@ def _resolve_at(
 ) -> WireKind | None:
     if at == "status":
         return "status"
+    if at == "smart_question":
+        return "smart_question" if problems else None
     match = _ROW_AT_RE.fullmatch(at)
     if not match:
         return None

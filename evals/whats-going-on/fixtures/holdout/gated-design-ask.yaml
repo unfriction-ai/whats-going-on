@@ -13,6 +13,9 @@ turns:
           quadrants: [conceptual-convergent]
       unresolved:
         - anchor: ["pricing", "offline|feature|mock"]
+      smart:
+        proposal: proposed
+        gaps: []
     tripwires:
       invented: ["revenue", "\\$\\d"]
       methodNotProblem: []
@@ -29,6 +32,8 @@ turns:
           confidence: medium
           why: "Leadership must settle one go or no-go call by Friday. It weighs the Northwind renewal against help docs that are not ready, which is judgment, not a measurement."
           next_method: "Weigh the stated trade-offs for the Friday go or no-go call. Settle this before any pricing-page design."
+      smart_question: "Should offline mode ship in the March release, as leadership decides on Friday?"
+      smart_gaps: []
       unresolved:
         - observation: "The product manager asks design to mock up how offline mode would be featured on the pricing page"
           reason: "Deferred until the primary problem is answered. How to feature offline mode depends on whether it ships in March."

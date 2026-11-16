@@ -7,18 +7,21 @@ turns:
     restatement: "A teammate asks how to build a healthy on-call culture over the next year. The platform squad hired three new people after a messy on-call week."
     expect:
       kind: classify
-      statuses: [classified]
+      statuses: [partial]
       problems:
         - anchor: ["on-call|oncall", "culture"]
           quadrants: [conceptual-divergent]
       unresolved: []
+      smart:
+        proposal: proposed
+        gaps: [measurable, relevant]
     tripwires:
       invented: []
       methodNotProblem: []
       solveLeak: ["rotate every", "pagerduty", "hire an SRE"]
     gold: |
       ```yaml
-      status: classified
+      status: partial
       main_question: "What approaches could build a healthy on-call culture on the platform squad over the next year?"
       problems:
         - statement: "What approaches could build a healthy on-call culture on the platform squad over the next year?"
@@ -28,7 +31,21 @@ turns:
           confidence: high
           why: "Culture and norms are conceptual. The ask invites many possible moves. No short list of options is fixed yet."
           next_method: "Broad exploration of approaches before any narrowing. Do not brainstorm the list in this slice."
-      unresolved: []
-      applied: []
+      smart_question: "What approaches could build a healthy on-call culture on the platform squad over the next year?"
+      smart_gaps: [measurable, relevant]
+      unresolved:
+        - observation: "The ask says healthy but not what healthy looks like"
+          reason: "SMART measurable is missing. The input gives no sign of done."
+          clarification: "Ask yourself: How will we know it is solved?"
+        - observation: "The ask does not say who decides on on-call changes"
+          reason: "SMART relevant is missing. The input names no decider or stake."
+          clarification: "Ask yourself: Does it matter to the people who will decide?"
+      applied:
+        - name: principle-make-it-smart
+          at: unresolved[0]
+          changed: "Asked for a sign of done instead of treating healthy as measurable."
+        - name: principle-dont-invent-problems
+          at: smart_question
+          changed: "Kept the SMART question to the input's own scope instead of adding a metric."
       stop: true
       ```

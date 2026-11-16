@@ -4,7 +4,7 @@ description: >-
   Applies when a whats-going-on stage decides whether a concern is a problem,
   whether to classify it, or how sure to be. Do not invent a problem the input
   does not support.
-governs: [problem, unresolved, classification]
+governs: [problem, unresolved, classification, smart_question]
 disable-model-invocation: true
 ---
 
@@ -24,7 +24,7 @@ Each time a concern could become a Defined row, and each time you are about to c
 
 ## Cite or omit
 
-Cite at `unresolved[<i>]` when this rule kept a concern unresolved that you could have defined by filling a gap. Cite at `problems[0]` when it made you drop a detail from the statement. Cite at `problems[0].classification` when it held a quadrant to what the input supports. Omit it when the input defined the problem plainly and nothing tempted you to fill a gap.
+Cite at `unresolved[<i>]` when this rule kept a concern unresolved that you could have defined by filling a gap. Cite at `problems[0]` when it made you drop a detail from the statement. Cite at `problems[0].classification` when it held a quadrant to what the input supports. Cite at `smart_question` when it kept a metric, a deadline, or a decider the input never gives out of the SMART question. Omit it when the input defined the problem plainly and nothing tempted you to fill a gap.
 
 ## Failure signature
 

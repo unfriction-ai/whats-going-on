@@ -1,0 +1,14 @@
+expect_ok: false
+expect_kind: smart_without_primary
+body: |
+  status: needs_clarification
+  main_question: null
+  problems: []
+  smart_question: null
+  smart_gaps: []
+  unresolved:
+    - observation: "The ask says healthy but not what healthy looks like"
+      reason: "SMART measurable is missing. The input gives no sign of done."
+      clarification: "Ask yourself: How will we know it is solved?"
+  applied: []
+  stop: true

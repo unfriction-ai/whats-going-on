@@ -23,6 +23,8 @@ turns:
       status: needs_clarification
       main_question: null
       problems: []
+      smart_question: null
+      smart_gaps: []
       unresolved:
         - observation: "Mobile is in a rough place; eng has competing theories"
           reason: "No measurable change, magnitude, or timeframe. Competing theories are not yet a defined question."
