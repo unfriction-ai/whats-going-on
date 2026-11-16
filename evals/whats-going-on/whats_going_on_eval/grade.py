@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import re
 from dataclasses import dataclass
-from typing import Literal
+from typing import Literal, assert_never
 
 from .fixtures import Expectation, ExpectedProblem, Fixture, Turn, _gold_response_text
 from .parse import (
@@ -15,7 +15,7 @@ from .parse import (
     parse_response,
     parse_restatement,
 )
-from .smart import partition_unresolved
+from .smart import NoPrimary, Proposed, Withheld, partition_unresolved
 from .wire import ContractViolation
 
 RUBRIC: dict[str, float] = {
@@ -171,6 +171,15 @@ def _hard_fails(turn: Turn, response: Response, text: str) -> list[HardFail]:
         "clarification": " ".join(u.clarification for u in verdict.unresolved),
         "changed": " ".join(a.changed for a in verdict.applied),
     }
+    match verdict.smart:
+        case NoPrimary() | Withheld():
+            pass
+        case Proposed(question=question):
+            prose_fields["smart_question"] = question
+            if turn.expect.smart is not None and turn.expect.smart.proposal == "withheld":
+                fails.append(HardFail("smart_proposed_when_withheld", question))
+        case _ as unreachable:
+            assert_never(unreachable)
 
     leak_pats = list(GLOBAL_SOLVE_LEAK) + list(turn.tripwires.solve_leak)
     for field, content in prose_fields.items():
