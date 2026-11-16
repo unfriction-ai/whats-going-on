@@ -8,7 +8,7 @@ from pathlib import Path
 from .chain import derive_mount, lint_chain, load_chain, named_skills
 from .principles import load_principles, principle_names
 
-SUITE_VERSION = 1
+SUITE_VERSION = 2
 
 SKILL_ROOT_ALLOWED = frozenset(
     {

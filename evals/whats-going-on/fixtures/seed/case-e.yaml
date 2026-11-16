@@ -12,6 +12,9 @@ turns:
         - anchor: ["admin|UI|console", "clutter|overwhelm"]
           quadrants: [conceptual-convergent]
       unresolved: []
+      smart:
+        proposal: proposed
+        gaps: []
     tripwires:
       invented: []
       methodNotProblem: []
@@ -28,6 +31,8 @@ turns:
           confidence: high
           why: "Clutter reduction is a design and priority call. The ask already requires settling on a small set of changes by a deadline."
           next_method: "Compare candidate UI changes and narrow to one or two. Do not pick them in this slice."
+      smart_question: "Which one or two admin-console UI changes should we settle on before the enterprise demo on the 20th to cut the clutter trial users report?"
+      smart_gaps: []
       unresolved: []
       applied: []
       stop: true

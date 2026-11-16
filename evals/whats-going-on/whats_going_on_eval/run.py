@@ -35,7 +35,8 @@ from .manifest import (
     read_mount,
     skill_view_hash,
 )
-from .parse import ContractViolation, Halt, Response, describe_violation, parse_response
+from .parse import Halt, Response, describe_violation, parse_response
+from .wire import ContractViolation
 from .runs import (
     new_run_id,
     read_transcript,

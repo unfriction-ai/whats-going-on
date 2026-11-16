@@ -14,6 +14,9 @@ turns:
           quadrants: [analytical-divergent]
       unresolved:
         - anchor: ["workshop|architecture"]
+      smart:
+        proposal: proposed
+        gaps: []
     tripwires:
       invented: []
       methodNotProblem: ["workshop|resilient request"]
@@ -30,6 +33,8 @@ turns:
           confidence: medium
           why: "The notes point at a data-checkable cause space. Several explanations remain open."
           next_method: "Gather facts on pool config, error rates, and timing before any architecture workshop."
+      smart_question: "Are this morning's checkout API timeouts across three regions explained by yesterday's lowered connection-pool max, or by something else measurable, before Ops commits to this week's workshop?"
+      smart_gaps: []
       unresolved:
         - observation: "Ops wants a two-day architecture workshop on resilient request paths"
           reason: "That is a proposed approach, not a defined problem. Redesign may be wrong if the pool config is the cause."

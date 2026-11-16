@@ -41,7 +41,7 @@ python -m whats_going_on_eval compare <runA> <runB> --blind
 
 Exit 0: no hard fails. Exit 1: hard fail. Exit 2: harness or drift error.
 
-Hard fails gate the run. Score is informational. The report splits seed and holdout. Verdict YAML must include `applied` (use `[]` when empty). Halt blocks must not include `applied`.
+Hard fails gate the run. Score is informational. The report splits seed and holdout. Verdict YAML must include `smart_question`, `smart_gaps`, and `applied` (use `null`, `[]`, and `[]` when empty). Halt blocks must not include `applied`. Proposing a `smart_question` where the fixture expects it withheld is the hard fail `smart_proposed_when_withheld`. SMART gap rows, the `unresolved` rows whose `clarification` is `Ask yourself: ` plus a card prompt, do not count toward the `abstention` axis.
 
 `--judge` is accepted on the run manifest. It does not call a live evidence judge yet.
 
@@ -49,7 +49,7 @@ Hard fails gate the run. Score is informational. The report splits seed and hold
 
 | Path | Role |
 |---|---|
-| `fixtures/seed/` | README cases A–J |
+| `fixtures/seed/` | README cases A–L |
 | `fixtures/holdout/` | Never quoted in README or SKILL.md |
 | `schema_cases/` | Valid and invalid wire documents. `expect_kind` pins the violation an invalid case must raise |
 | `rubric.md` | Weights. Criterion names must equal grader keys |
@@ -58,7 +58,7 @@ Hard fails gate the run. Score is informational. The report splits seed and hold
 
 ## Adding a fixture
 
-Copy the nearest file under `fixtures/holdout/`. Do not store a `family` field. Families are derived from expectation shape. Run `check`. Gold must score 1.0.
+Copy the nearest file under `fixtures/holdout/`. Do not store a `family` field. Families are derived from expectation shape. A classify turn sets `expect.smart` to `{proposal: proposed | withheld, gaps: [...]}`, and the gold must agree with it. An abstain turn has no `smart` block. List only concern rows under `expect.unresolved`, not SMART gap rows. Run `check`. Gold must score 1.0.
 
 ## Host wiring
 

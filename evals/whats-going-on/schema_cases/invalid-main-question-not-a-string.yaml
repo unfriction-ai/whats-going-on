@@ -10,6 +10,8 @@ body: |
       confidence: high
       why: "Latency estimation needs quantitative data."
       next_method: "Estimate from production telemetry."
+  smart_question: "What p99 latency estimates for the checkout API should inform the Q1 hardware budget?"
+  smart_gaps: []
   unresolved: []
   applied: []
   stop: true

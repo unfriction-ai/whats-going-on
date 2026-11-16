@@ -1,0 +1,42 @@
+readme: L
+turns:
+  - input: |
+      Earlier ask, from a teammate after a messy on-call week:
+      "We hired three new people onto the platform squad.
+      How do we build a healthy on-call culture over the next year?"
+
+      Answers to the Ask-yourself questions:
+      Healthy means nobody carries more than one week of pages a month. The platform lead decides.
+    restatement: "A teammate asks how to build a healthy on-call culture over the next year, where healthy means nobody carries more than one week of pages a month. The platform squad hired three new people after a messy on-call week, and the platform lead decides."
+    expect:
+      kind: classify
+      statuses: [classified]
+      problems:
+        - anchor: ["on-call|oncall", "culture"]
+          quadrants: [conceptual-divergent]
+      unresolved: []
+      smart:
+        proposal: proposed
+        gaps: []
+    tripwires:
+      invented: ["two weeks of pages", "follow-the-sun"]
+      methodNotProblem: []
+      solveLeak: ["rotate every", "pagerduty", "hire an SRE"]
+    gold: |
+      ```yaml
+      status: classified
+      main_question: "What approaches could build a healthy on-call culture on the platform squad over the next year?"
+      problems:
+        - statement: "What approaches could build a healthy on-call culture on the platform squad over the next year?"
+          classification:
+            nature: conceptual
+            direction: divergent
+          confidence: high
+          why: "Culture and norms are conceptual. The ask invites many possible moves. No short list of options is fixed yet."
+          next_method: "Broad exploration of approaches before any narrowing. Do not brainstorm the list in this slice."
+      smart_question: "What approaches could the platform lead adopt so nobody on the platform squad carries more than one week of pages a month within the next year?"
+      smart_gaps: []
+      unresolved: []
+      applied: []
+      stop: true
+      ```

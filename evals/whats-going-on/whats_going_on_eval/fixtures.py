@@ -5,11 +5,20 @@ from __future__ import annotations
 import re
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Any, Literal
+from typing import Any, Literal, assert_never
 
 import yaml
 
 from .parse import PREAMBLE_BUDGET, AtMostOne, Response, parse_response
+from .smart import (
+    REQUIRED_TO_PROPOSE,
+    NoPrimary,
+    Proposed,
+    SmartLetter,
+    SmartProposal,
+    Withheld,
+    in_card_order,
+)
 
 Kind = Literal["abstain", "classify"]
 Split = Literal["seed", "holdout"]
@@ -38,12 +47,31 @@ class ExpectedUnresolved:
 
 
 @dataclass(frozen=True)
+class SmartExpect:
+    proposal: Literal["proposed", "withheld"]
+    gaps: tuple[SmartLetter, ...]
+
+
+@dataclass(frozen=True)
 class Expectation:
     kind: Kind
     statuses: tuple[str, ...]
     problems: AtMostOne[ExpectedProblem]
     unresolved: tuple[ExpectedUnresolved, ...]
     asks: tuple[tuple[re.Pattern[str], ...], ...]
+    smart: SmartExpect | None
+
+
+def smart_matches(expect: SmartExpect | None, proposal: SmartProposal) -> bool:
+    match proposal:
+        case NoPrimary():
+            return expect is None
+        case Withheld(gaps=gaps):
+            return expect == SmartExpect("withheld", gaps)
+        case Proposed(gaps=gaps):
+            return expect == SmartExpect("proposed", gaps)
+        case _ as unreachable:
+            assert_never(unreachable)
 
 
 @dataclass(frozen=True)
@@ -158,6 +186,8 @@ def _parse_expectation(raw: dict[str, Any]) -> Expectation:
             raise ValueError(f"unresolved[{i}] must be {{anchor: [...]}}")
 
     if kind == "abstain":
+        if "smart" in raw:
+            raise ValueError("abstain expect must not set smart; the smart step needs a primary")
         asks_raw = raw.get("asks") or []
         asks: list[tuple[re.Pattern[str], ...]] = []
         for i, item in enumerate(asks_raw):
@@ -168,6 +198,7 @@ def _parse_expectation(raw: dict[str, Any]) -> Expectation:
             problems=(),
             unresolved=tuple(unresolved),
             asks=tuple(asks),
+            smart=None,
         )
 
     problems_raw = raw.get("problems")
@@ -189,7 +220,22 @@ def _parse_expectation(raw: dict[str, Any]) -> Expectation:
         problems=(primary,),
         unresolved=tuple(unresolved),
         asks=(),
+        smart=_parse_smart_expect(raw.get("smart")),
     )
+
+
+def _parse_smart_expect(raw: Any) -> SmartExpect:
+    if not isinstance(raw, dict) or set(raw) != {"proposal", "gaps"}:
+        raise ValueError("classify expect.smart must be {proposal, gaps}")
+    proposal = raw["proposal"]
+    gaps = raw["gaps"]
+    if proposal not in ("proposed", "withheld"):
+        raise ValueError("expect.smart.proposal must be proposed or withheld")
+    if not isinstance(gaps, list) or not in_card_order(gaps):
+        raise ValueError("expect.smart.gaps must be distinct SMART letters in card order")
+    if (proposal == "withheld") != bool(REQUIRED_TO_PROPOSE.intersection(gaps)):
+        raise ValueError("expect.smart.proposal is withheld exactly when a required letter is open")
+    return SmartExpect(proposal=proposal, gaps=tuple(gaps))
 
 
 def _parse_tripwires(raw: Any) -> Tripwires:

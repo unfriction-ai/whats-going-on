@@ -8,12 +8,12 @@ from typing import Literal
 from .manifest import REPORTS_DIR
 from .parse import (
     NO_ASK,
-    ContractViolation,
     Quadrant,
     Status,
     Verdict,
     parse_response,
 )
+from .wire import ContractViolation
 
 CONTRACT_FAIL: Literal["contract_fail"] = "contract_fail"
 TurnKey = tuple[str, int]
@@ -197,6 +197,8 @@ problems:
     confidence: high
     why: "A measured change with a timeframe."
     next_method: "Compare telemetry before and after the change."
+smart_question: "Why did checkout latency rise?"
+smart_gaps: []
 unresolved: []
 applied: []
 stop: true

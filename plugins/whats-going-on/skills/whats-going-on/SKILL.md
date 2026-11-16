@@ -32,7 +32,7 @@ Select one stage, run its playbook, emit its Output, stop.
 | The message asks to continue from the latest result | the stage after the one that produced that result |
 | Anything else | define-the-problem |
 
-The latest result is the last fenced `yaml` block you emitted that has a `status` key. A block with a `status` key comes from define-the-problem. Continue carries its one primary problem forward. New material restarts at define-the-problem. Prior classifications do not advance on their own.
+The latest result is the last fenced `yaml` block you emitted that has a `status` key. A block with a `status` key comes from define-the-problem. Continue carries its one primary problem forward. New material restarts at define-the-problem. Prior classifications do not advance on their own. Answers to `Ask yourself:` questions are new facts. Run define-the-problem on the earlier ask plus those answers.
 
 ## Principles
 
@@ -41,6 +41,7 @@ Read each principle below before any playbook step. The file is `<name>/SKILL.md
 - principle-dont-invent-problems — deciding whether a concern is a problem, whether to classify it, or how sure to be.
 - principle-read-the-room — deciding which problem comes next, and classifying it as it stands now.
 - principle-dont-solve-yet — deciding to stop at identification instead of diagnosing or recommending.
+- principle-make-it-smart — deciding which SMART letters the input meets, and whether to propose the SMART question.
 
 ## Run
 
@@ -69,9 +70,10 @@ stop: true
 | `problems[0]` | `problem` |
 | `problems[0].classification` | `classification` |
 | `problems[0].confidence` | `confidence` |
+| `smart_question` | `smart_question` |
 | `unresolved[<i>]` | `unresolved` |
 
-Point only at a row you emitted. Cite a principle only at a kind its `governs` list names. `changed` says in one line of at most 200 characters what the principle made you choose. It does not diagnose or recommend.
+Point only at a row you emitted, and at `smart_question` only when there is a primary. Cite a principle only at a kind its `governs` list names. `changed` says in one line of at most 200 characters what the principle made you choose. It does not diagnose or recommend.
 
 ## Halt
 
