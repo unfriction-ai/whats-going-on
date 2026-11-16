@@ -16,6 +16,9 @@ turns:
       smart:
         proposal: proposed
         gaps: []
+      worksheet:
+        stop: asking
+        cells: {}
     tripwires:
       invented: ["revenue", "\\$\\d"]
       methodNotProblem: []

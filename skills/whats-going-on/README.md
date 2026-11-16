@@ -108,7 +108,7 @@ After the primary is picked and before it is classified, the `smart` step checks
 - `main_question` stays the primary's statement. The 2×2 classifies the primary, not the SMART question.
 - With no primary (Cases A and I), `smart_question` is `null` and `smart_gaps` is `[]`.
 
-To answer the Ask-yourself questions, reply with the answers in the same chat. The next run treats them as new facts, derives the SMART question again from the earlier ask plus the answers, and carries nothing over (Case L). In a fresh chat, paste the earlier ask along with the answers.
+Reply in the same chat to answer an Ask-yourself question, as in Case L, or a worksheet probe. The next run treats those replies as new facts. It derives the SMART question and the worksheet again from the earlier ask plus the replies. It carries nothing over from the earlier fence. In a fresh chat, paste the earlier ask, then each probe line and the reply under it.
 
 ## Output contract
 
@@ -145,7 +145,7 @@ applied:
 stop: true
 ```
 
-`problems` holds at most one item, the primary. An empty `problems` list is valid when status is `needs_clarification` or `not_a_problem`. Always emit `main_question`. Copy the primary's `statement` into it exactly. Write `null` when `problems` is empty. Always emit `smart_question` and `smart_gaps`. Write `null` and `[]` when there is no primary. Always emit `unresolved`, with any gap rows last. Write `[]` when it is empty. Always emit `applied`. Write `[]` when no principle decided a value.
+`problems` holds at most one item, the primary. An empty `problems` list is valid when status is `needs_clarification` or `not_a_problem`. Always emit `main_question`. Copy the primary's `statement` into it exactly. Write `null` when `problems` is empty. Always emit `smart_question` and `smart_gaps`. Write `null` and `[]` when there is no primary. Always emit `unresolved`. Put concerns first, then the worksheet ask row, then gap rows. Write `[]` when it is empty. Always emit `applied`. Write `[]` when no principle decided a value.
 
 ## Install
 
