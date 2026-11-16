@@ -1,0 +1,288 @@
+turns:
+  - input: |
+      From the data platform lead:
+      "Need an estimate of how much warehouse storage the events pipeline will use by June,
+      before the March 14 budget review. Finance will use it to size next year's warehouse contract."
+    restatement: "The data platform lead asks for an estimate of how much warehouse storage the events pipeline will use by June, before the March 14 budget review. Finance will use the estimate to size next year's warehouse contract."
+    expect:
+      kind: classify
+      statuses: [partial]
+      problems:
+        - anchor: ["storage|warehouse", "events pipeline|pipeline"]
+          quadrants: [analytical-convergent]
+      unresolved: []
+      smart:
+        proposal: proposed
+        gaps: []
+      worksheet:
+        stop: asking
+        cells: {}
+    tripwires:
+      invented: ["\\b\\d+ ?(TB|PB|GB)\\b", "terabyte|petabyte"]
+      methodNotProblem: []
+      solveLeak: ["will use (about|around|roughly) \\d"]
+    gold: |
+      ```yaml
+      status: partial
+      main_question: "How much warehouse storage will the events pipeline use by June?"
+      problems:
+        - statement: "How much warehouse storage will the events pipeline use by June?"
+          classification:
+            nature: analytical
+            direction: convergent
+          confidence: high
+          why: "A storage estimate needs quantitative data. The objective is one figure for a defined contract decision."
+          next_method: "Estimate from current pipeline volumes and growth. Do not size the contract in this slice."
+      smart_question: "How much warehouse storage will the events pipeline use by June, to size the next warehouse contract at the March 14 budget review?"
+      smart_gaps: []
+      worksheet: {}
+      unresolved:
+        - observation: 'The worksheet has no context or constraints yet.'
+          reason: 'Context and constraints is the next open worksheet area.'
+          clarification: 'Context and constraints: Around "How much warehouse storage will the events pipeline use by June, to size the next warehouse contract at the March 14 budget review?", what background or pressures shape how you solve it, and what cannot change?'
+      applied: []
+      stop: true
+      ```
+  - input: |
+      From the data platform lead:
+      "Need an estimate of how much warehouse storage the events pipeline will use by June,
+      before the March 14 budget review. Finance will use it to size next year's warehouse contract."
+
+      Context and constraints: Around "How much warehouse storage will the events pipeline use by June, to size the next warehouse contract at the March 14 budget review?", what background or pressures shape how you solve it, and what cannot change?
+      The contract terms lock at the March 14 budget review. We cannot change the event schema before June.
+    restatement: "The data platform lead asks for an estimate of how much warehouse storage the events pipeline will use by June, before the March 14 budget review. Finance will use the estimate to size next year's warehouse contract."
+    expect:
+      kind: classify
+      statuses: [partial]
+      problems:
+        - anchor: ["storage|warehouse", "events pipeline|pipeline"]
+          quadrants: [analytical-convergent]
+      unresolved: []
+      smart:
+        proposal: proposed
+        gaps: []
+      worksheet:
+        stop: asking
+        cells:
+          context_constraints: filled
+    tripwires:
+      invented: ["\\b\\d+ ?(TB|PB|GB)\\b", "terabyte|petabyte"]
+      methodNotProblem: []
+      solveLeak: ["will use (about|around|roughly) \\d"]
+    gold: |
+      ```yaml
+      status: partial
+      main_question: "How much warehouse storage will the events pipeline use by June?"
+      problems:
+        - statement: "How much warehouse storage will the events pipeline use by June?"
+          classification:
+            nature: analytical
+            direction: convergent
+          confidence: high
+          why: "A storage estimate needs quantitative data. The objective is one figure for a defined contract decision."
+          next_method: "Estimate from current pipeline volumes and growth. Do not size the contract in this slice."
+      smart_question: "How much warehouse storage will the events pipeline use by June, to size the next warehouse contract at the March 14 budget review?"
+      smart_gaps: []
+      worksheet:
+        context_constraints:
+          status: filled
+          text: "The contract terms lock at the March 14 budget review. We cannot change the event schema before June."
+      unresolved:
+        - observation: 'The worksheet has no success criteria yet.'
+          reason: 'Success criteria is the next open worksheet area.'
+          clarification: 'Success criteria: For "How much warehouse storage will the events pipeline use by June, to size the next warehouse contract at the March 14 budget review?", what has to be true for the answer to count as success, and what would make it fail?'
+      applied: []
+      stop: true
+      ```
+  - input: |
+      From the data platform lead:
+      "Need an estimate of how much warehouse storage the events pipeline will use by June,
+      before the March 14 budget review. Finance will use it to size next year's warehouse contract."
+
+      Context and constraints: Around "How much warehouse storage will the events pipeline use by June, to size the next warehouse contract at the March 14 budget review?", what background or pressures shape how you solve it, and what cannot change?
+      The contract terms lock at the March 14 budget review. We cannot change the event schema before June.
+
+      Success criteria: For "How much warehouse storage will the events pipeline use by June, to size the next warehouse contract at the March 14 budget review?", what has to be true for the answer to count as success, and what would make it fail?
+      Success is a figure Finance will sign without a second review. Failure is a figure that forces a mid-year contract change.
+    restatement: "The data platform lead asks for an estimate of how much warehouse storage the events pipeline will use by June, before the March 14 budget review. Finance will use the estimate to size next year's warehouse contract."
+    expect:
+      kind: classify
+      statuses: [partial]
+      problems:
+        - anchor: ["storage|warehouse", "events pipeline|pipeline"]
+          quadrants: [analytical-convergent]
+      unresolved: []
+      smart:
+        proposal: proposed
+        gaps: []
+      worksheet:
+        stop: asking
+        cells:
+          context_constraints: filled
+          success_criteria: filled
+    tripwires:
+      invented: ["\\b\\d+ ?(TB|PB|GB)\\b", "terabyte|petabyte"]
+      methodNotProblem: []
+      solveLeak: ["will use (about|around|roughly) \\d"]
+    gold: |
+      ```yaml
+      status: partial
+      main_question: "How much warehouse storage will the events pipeline use by June?"
+      problems:
+        - statement: "How much warehouse storage will the events pipeline use by June?"
+          classification:
+            nature: analytical
+            direction: convergent
+          confidence: high
+          why: "A storage estimate needs quantitative data. The objective is one figure for a defined contract decision."
+          next_method: "Estimate from current pipeline volumes and growth. Do not size the contract in this slice."
+      smart_question: "How much warehouse storage will the events pipeline use by June, to size the next warehouse contract at the March 14 budget review?"
+      smart_gaps: []
+      worksheet:
+        context_constraints:
+          status: filled
+          text: "The contract terms lock at the March 14 budget review. We cannot change the event schema before June."
+        success_criteria:
+          status: filled
+          text: "Success is a figure Finance will sign without a second review. Failure is a figure that forces a mid-year contract change."
+      unresolved:
+        - observation: 'The worksheet has no stakeholders yet.'
+          reason: 'Stakeholders is the next open worksheet area.'
+          clarification: 'Stakeholders: Who can make or block the decision behind "How much warehouse storage will the events pipeline use by June, to size the next warehouse contract at the March 14 budget review?", and who must agree? Say "I am the decider" if that is you.'
+      applied: []
+      stop: true
+      ```
+  - input: |
+      From the data platform lead:
+      "Need an estimate of how much warehouse storage the events pipeline will use by June,
+      before the March 14 budget review. Finance will use it to size next year's warehouse contract."
+
+      Context and constraints: Around "How much warehouse storage will the events pipeline use by June, to size the next warehouse contract at the March 14 budget review?", what background or pressures shape how you solve it, and what cannot change?
+      The contract terms lock at the March 14 budget review. We cannot change the event schema before June.
+
+      Success criteria: For "How much warehouse storage will the events pipeline use by June, to size the next warehouse contract at the March 14 budget review?", what has to be true for the answer to count as success, and what would make it fail?
+      Success is a figure Finance will sign without a second review. Failure is a figure that forces a mid-year contract change.
+
+      Stakeholders: Who can make or block the decision behind "How much warehouse storage will the events pipeline use by June, to size the next warehouse contract at the March 14 budget review?", and who must agree? Say "I am the decider" if that is you.
+      Finance signs the contract. The data platform lead owns the estimate. Analytics has to agree on the event volumes.
+    restatement: "The data platform lead asks for an estimate of how much warehouse storage the events pipeline will use by June, before the March 14 budget review. Finance will use the estimate to size next year's warehouse contract."
+    expect:
+      kind: classify
+      statuses: [partial]
+      problems:
+        - anchor: ["storage|warehouse", "events pipeline|pipeline"]
+          quadrants: [analytical-convergent]
+      unresolved: []
+      smart:
+        proposal: proposed
+        gaps: []
+      worksheet:
+        stop: asking
+        cells:
+          context_constraints: filled
+          success_criteria: filled
+          stakeholders: filled
+    tripwires:
+      invented: ["\\b\\d+ ?(TB|PB|GB)\\b", "terabyte|petabyte"]
+      methodNotProblem: []
+      solveLeak: ["will use (about|around|roughly) \\d"]
+    gold: |
+      ```yaml
+      status: partial
+      main_question: "How much warehouse storage will the events pipeline use by June?"
+      problems:
+        - statement: "How much warehouse storage will the events pipeline use by June?"
+          classification:
+            nature: analytical
+            direction: convergent
+          confidence: high
+          why: "A storage estimate needs quantitative data. The objective is one figure for a defined contract decision."
+          next_method: "Estimate from current pipeline volumes and growth. Do not size the contract in this slice."
+      smart_question: "How much warehouse storage will the events pipeline use by June, to size the next warehouse contract at the March 14 budget review?"
+      smart_gaps: []
+      worksheet:
+        context_constraints:
+          status: filled
+          text: "The contract terms lock at the March 14 budget review. We cannot change the event schema before June."
+        success_criteria:
+          status: filled
+          text: "Success is a figure Finance will sign without a second review. Failure is a figure that forces a mid-year contract change."
+        stakeholders:
+          status: filled
+          text: "Finance signs the contract. The data platform lead owns the estimate. Analytics has to agree on the event volumes."
+      unresolved:
+        - observation: 'The worksheet has no scope and sources yet.'
+          reason: 'Scope and sources is the next open worksheet area.'
+          clarification: 'Scope and sources: For "How much warehouse storage will the events pipeline use by June, to size the next warehouse contract at the March 14 budget review?", what is in and out of scope, and where does evidence already exist?'
+      applied: []
+      stop: true
+      ```
+  - input: |
+      From the data platform lead:
+      "Need an estimate of how much warehouse storage the events pipeline will use by June,
+      before the March 14 budget review. Finance will use it to size next year's warehouse contract."
+
+      Context and constraints: Around "How much warehouse storage will the events pipeline use by June, to size the next warehouse contract at the March 14 budget review?", what background or pressures shape how you solve it, and what cannot change?
+      The contract terms lock at the March 14 budget review. We cannot change the event schema before June.
+
+      Success criteria: For "How much warehouse storage will the events pipeline use by June, to size the next warehouse contract at the March 14 budget review?", what has to be true for the answer to count as success, and what would make it fail?
+      Success is a figure Finance will sign without a second review. Failure is a figure that forces a mid-year contract change.
+
+      Stakeholders: Who can make or block the decision behind "How much warehouse storage will the events pipeline use by June, to size the next warehouse contract at the March 14 budget review?", and who must agree? Say "I am the decider" if that is you.
+      Finance signs the contract. The data platform lead owns the estimate. Analytics has to agree on the event volumes.
+
+      Scope and sources: For "How much warehouse storage will the events pipeline use by June, to size the next warehouse contract at the March 14 budget review?", what is in and out of scope, and where does evidence already exist?
+      In scope is the events pipeline only. Out of scope is the logs pipeline. Evidence lives in the warehouse billing export and the storage dashboard.
+    restatement: "The data platform lead asks for an estimate of how much warehouse storage the events pipeline will use by June, before the March 14 budget review. Finance will use the estimate to size next year's warehouse contract."
+    expect:
+      kind: classify
+      statuses: [classified]
+      problems:
+        - anchor: ["storage|warehouse", "events pipeline|pipeline"]
+          quadrants: [analytical-convergent]
+      unresolved: []
+      smart:
+        proposal: proposed
+        gaps: []
+      worksheet:
+        stop: complete
+        cells:
+          context_constraints: filled
+          success_criteria: filled
+          stakeholders: filled
+          scope_sources: filled
+    tripwires:
+      invented: ["\\b\\d+ ?(TB|PB|GB)\\b", "terabyte|petabyte"]
+      methodNotProblem: []
+      solveLeak: ["will use (about|around|roughly) \\d"]
+    gold: |
+      ```yaml
+      status: classified
+      main_question: "How much warehouse storage will the events pipeline use by June?"
+      problems:
+        - statement: "How much warehouse storage will the events pipeline use by June?"
+          classification:
+            nature: analytical
+            direction: convergent
+          confidence: high
+          why: "A storage estimate needs quantitative data. The objective is one figure for a defined contract decision."
+          next_method: "Estimate from current pipeline volumes and growth. Do not size the contract in this slice."
+      smart_question: "How much warehouse storage will the events pipeline use by June, to size the next warehouse contract at the March 14 budget review?"
+      smart_gaps: []
+      worksheet:
+        context_constraints:
+          status: filled
+          text: "The contract terms lock at the March 14 budget review. We cannot change the event schema before June."
+        success_criteria:
+          status: filled
+          text: "Success is a figure Finance will sign without a second review. Failure is a figure that forces a mid-year contract change."
+        stakeholders:
+          status: filled
+          text: "Finance signs the contract. The data platform lead owns the estimate. Analytics has to agree on the event volumes."
+        scope_sources:
+          status: filled
+          text: "In scope is the events pipeline only. Out of scope is the logs pipeline. Evidence lives in the warehouse billing export and the storage dashboard."
+      unresolved: []
+      applied: []
+      stop: true
+      ```

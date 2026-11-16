@@ -1,0 +1,225 @@
+turns:
+  - input: |
+      Android checkout conversion fell from 3.1% to 2.4% since the last release. Why?
+    restatement: "Someone asks why Android checkout conversion fell. It went from 3.1% to 2.4% since the last release."
+    expect:
+      kind: classify
+      statuses: [partial]
+      problems:
+        - anchor: ["conversion|checkout", "why|cause|fell|fall"]
+          quadrants: [analytical-convergent]
+      unresolved: []
+      smart:
+        proposal: proposed
+        gaps: [relevant, time_bound]
+      worksheet:
+        stop: asking
+        cells: {}
+    tripwires:
+      invented: ["payment provider", "\\bbug in\\b"]
+      methodNotProblem: []
+      solveLeak: ["should roll back", "\\brevert\\b"]
+    gold: |
+      ```yaml
+      status: partial
+      main_question: "Why did Android checkout conversion fall from 3.1% to 2.4% since the last release?"
+      problems:
+        - statement: "Why did Android checkout conversion fall from 3.1% to 2.4% since the last release?"
+          classification:
+            nature: analytical
+            direction: convergent
+          confidence: high
+          why: "A measured drop tied to a release. Data should converge on what changed."
+          next_method: "Evidence-based diagnosis from checkout funnel data and the release diff."
+      smart_question: "Why did Android checkout conversion fall from 3.1% to 2.4% since the last release?"
+      smart_gaps: [relevant, time_bound]
+      worksheet: {}
+      unresolved:
+        - observation: 'The worksheet has no context or constraints yet.'
+          reason: 'Context and constraints is the next open worksheet area.'
+          clarification: 'Context and constraints: Around "Why did Android checkout conversion fall from 3.1% to 2.4% since the last release?", what background or pressures shape how you solve it, and what cannot change?'
+        - observation: "The ask names no one who will act on the cause"
+          reason: "SMART relevant is missing. The input names no decider or stake."
+          clarification: "Ask yourself: Does it matter to the people who will decide?"
+        - observation: "The ask gives no date by which the cause is needed"
+          reason: "SMART time_bound is missing. The input gives no date by which the answer is needed."
+          clarification: "Ask yourself: By when does it need to be solved?"
+      applied: []
+      stop: true
+      ```
+  - input: |
+      Android checkout conversion fell from 3.1% to 2.4% since the last release. Why?
+
+      Context and constraints: Around "Why did Android checkout conversion fall from 3.1% to 2.4% since the last release?", what background or pressures shape how you solve it, and what cannot change?
+      I don't know
+    restatement: "Someone asks why Android checkout conversion fell. It went from 3.1% to 2.4% since the last release."
+    expect:
+      kind: classify
+      statuses: [partial]
+      problems:
+        - anchor: ["conversion|checkout", "why|cause|fell|fall"]
+          quadrants: [analytical-convergent]
+      unresolved: []
+      smart:
+        proposal: proposed
+        gaps: [relevant, time_bound]
+      worksheet:
+        stop: asking
+        cells:
+          context_constraints: unknown
+    tripwires:
+      invented: ["payment provider", "\\bbug in\\b"]
+      methodNotProblem: []
+      solveLeak: ["should roll back", "\\brevert\\b"]
+    gold: |
+      ```yaml
+      status: partial
+      main_question: "Why did Android checkout conversion fall from 3.1% to 2.4% since the last release?"
+      problems:
+        - statement: "Why did Android checkout conversion fall from 3.1% to 2.4% since the last release?"
+          classification:
+            nature: analytical
+            direction: convergent
+          confidence: high
+          why: "A measured drop tied to a release. Data should converge on what changed."
+          next_method: "Evidence-based diagnosis from checkout funnel data and the release diff."
+      smart_question: "Why did Android checkout conversion fall from 3.1% to 2.4% since the last release?"
+      smart_gaps: [relevant, time_bound]
+      worksheet:
+        context_constraints:
+          status: unknown
+          text: null
+      unresolved:
+        - observation: 'The worksheet has no success criteria yet.'
+          reason: 'Success criteria is the next open worksheet area.'
+          clarification: 'Success criteria: For "Why did Android checkout conversion fall from 3.1% to 2.4% since the last release?", what has to be true for the answer to count as success, and what would make it fail?'
+        - observation: "The ask names no one who will act on the cause"
+          reason: "SMART relevant is missing. The input names no decider or stake."
+          clarification: "Ask yourself: Does it matter to the people who will decide?"
+        - observation: "The ask gives no date by which the cause is needed"
+          reason: "SMART time_bound is missing. The input gives no date by which the answer is needed."
+          clarification: "Ask yourself: By when does it need to be solved?"
+      applied: []
+      stop: true
+      ```
+  - input: |
+      Android checkout conversion fell from 3.1% to 2.4% since the last release. Why?
+
+      Context and constraints: Around "Why did Android checkout conversion fall from 3.1% to 2.4% since the last release?", what background or pressures shape how you solve it, and what cannot change?
+      I don't know
+
+      Success criteria: For "Why did Android checkout conversion fall from 3.1% to 2.4% since the last release?", what has to be true for the answer to count as success, and what would make it fail?
+      Not yet
+    restatement: "Someone asks why Android checkout conversion fell. It went from 3.1% to 2.4% since the last release."
+    expect:
+      kind: classify
+      statuses: [partial]
+      problems:
+        - anchor: ["conversion|checkout", "why|cause|fell|fall"]
+          quadrants: [analytical-convergent]
+      unresolved: []
+      smart:
+        proposal: proposed
+        gaps: [relevant, time_bound]
+      worksheet:
+        stop: handed_back
+        cells:
+          context_constraints: unknown
+          success_criteria: not_yet
+    tripwires:
+      invented: ["payment provider", "\\bbug in\\b"]
+      methodNotProblem: []
+      solveLeak: ["should roll back", "\\brevert\\b"]
+    gold: |
+      ```yaml
+      status: partial
+      main_question: "Why did Android checkout conversion fall from 3.1% to 2.4% since the last release?"
+      problems:
+        - statement: "Why did Android checkout conversion fall from 3.1% to 2.4% since the last release?"
+          classification:
+            nature: analytical
+            direction: convergent
+          confidence: high
+          why: "A measured drop tied to a release. Data should converge on what changed."
+          next_method: "Evidence-based diagnosis from checkout funnel data and the release diff."
+      smart_question: "Why did Android checkout conversion fall from 3.1% to 2.4% since the last release?"
+      smart_gaps: [relevant, time_bound]
+      worksheet:
+        context_constraints:
+          status: unknown
+          text: null
+        success_criteria:
+          status: not_yet
+          text: null
+      unresolved:
+        - observation: 'Two worksheet areas in a row were skipped while SMART letters are open.'
+          reason: 'The worksheet stops after two skips in a row when smart_gaps is not empty.'
+          clarification: 'Answer the Ask yourself prompts in this fence. Then paste those answers with the Sheet lines so far.'
+        - observation: "The ask names no one who will act on the cause"
+          reason: "SMART relevant is missing. The input names no decider or stake."
+          clarification: "Ask yourself: Does it matter to the people who will decide?"
+        - observation: "The ask gives no date by which the cause is needed"
+          reason: "SMART time_bound is missing. The input gives no date by which the answer is needed."
+          clarification: "Ask yourself: By when does it need to be solved?"
+      applied: []
+      stop: true
+      ```
+  - input: |
+      Android checkout conversion fell from 3.1% to 2.4% since the last release. Why?
+
+      Answers to the Ask-yourself questions:
+      The mobile lead decides whether to roll back the release. We need an answer before the May 6 release train.
+
+      Context and constraints: Around "Why did Android checkout conversion fall from 3.1% to 2.4% since the last release?", what background or pressures shape how you solve it, and what cannot change?
+      I don't know
+
+      Success criteria: For "Why did Android checkout conversion fall from 3.1% to 2.4% since the last release?", what has to be true for the answer to count as success, and what would make it fail?
+      Not yet
+    restatement: "Someone asks why Android checkout conversion fell, with an answer needed before the May 6 release train. It went from 3.1% to 2.4% since the last release, and the mobile lead decides whether to roll back the release."
+    expect:
+      kind: classify
+      statuses: [partial]
+      problems:
+        - anchor: ["conversion|checkout", "why|cause|fell|fall"]
+          quadrants: [analytical-convergent]
+      unresolved: []
+      smart:
+        proposal: proposed
+        gaps: []
+      worksheet:
+        stop: asking
+        cells:
+          context_constraints: unknown
+          success_criteria: not_yet
+    tripwires:
+      invented: ["payment provider", "\\bbug in\\b"]
+      methodNotProblem: []
+      solveLeak: ["should roll back", "\\brevert\\b"]
+    gold: |
+      ```yaml
+      status: partial
+      main_question: "Why did Android checkout conversion fall from 3.1% to 2.4% since the last release?"
+      problems:
+        - statement: "Why did Android checkout conversion fall from 3.1% to 2.4% since the last release?"
+          classification:
+            nature: analytical
+            direction: convergent
+          confidence: high
+          why: "A measured drop tied to a release. Data should converge on what changed."
+          next_method: "Evidence-based diagnosis from checkout funnel data and the release diff."
+      smart_question: "Why did Android checkout conversion fall from 3.1% to 2.4% since the last release, with an answer needed by the mobile lead before the May 6 release train?"
+      smart_gaps: []
+      worksheet:
+        context_constraints:
+          status: unknown
+          text: null
+        success_criteria:
+          status: not_yet
+          text: null
+      unresolved:
+        - observation: 'The worksheet has no stakeholders yet.'
+          reason: 'Stakeholders is the next open worksheet area.'
+          clarification: 'Stakeholders: Who can make or block the decision behind "Why did Android checkout conversion fall from 3.1% to 2.4% since the last release, with an answer needed by the mobile lead before the May 6 release train?", and who must agree? Say "I am the decider" if that is you.'
+      applied: []
+      stop: true
+      ```
