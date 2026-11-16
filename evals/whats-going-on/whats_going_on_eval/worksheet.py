@@ -1,6 +1,7 @@
-"""Worksheet registry. Areas, skips, stop streak, and hand-back line from the leaf.
+"""Worksheet registry and assessment.
 
-W1 ships load_registry only. assess / parse_worksheet land in later PRs.
+Areas, skips, the stop streak, and the hand-back line come from the leaf.
+Cells, stop_for, and assess encode the walk. Fence parsing comes later.
 """
 
 from __future__ import annotations
@@ -9,10 +10,10 @@ import re
 from dataclasses import dataclass
 from functools import cache
 from pathlib import Path
-from typing import Literal, get_args
+from typing import Literal, assert_never, get_args
 
 from .manifest import SKILL_DIR
-from .smart import ASK_YOURSELF
+from .smart import ASK_YOURSELF, NoPrimary, Proposed, SmartProposal, Withheld
 
 AreaId = Literal["context_constraints", "success_criteria", "stakeholders", "scope_sources"]
 AREAS: tuple[AreaId, ...] = get_args(AreaId)
@@ -165,3 +166,155 @@ def _parse_hand_back(text: str) -> str:
 @cache
 def load_registry(skill_dir: Path = SKILL_DIR) -> Registry:
     return parse_registry((skill_dir / "worksheet" / "SKILL.md").read_text(encoding="utf-8"))
+
+
+def _collapse_casefold(text: str) -> str:
+    return " ".join(text.split()).casefold()
+
+
+@dataclass(frozen=True)
+class Filled:
+    area: AreaId
+    text: str
+
+    def __post_init__(self) -> None:
+        if self.area not in AREAS:
+            raise ValueError(f"unknown worksheet area {self.area!r}")
+        if not self.text.strip():
+            raise ValueError(f"{self.area} text is blank")
+        normalized = _collapse_casefold(self.text)
+        for skip in load_registry().skips:
+            if normalized == _collapse_casefold(skip.says):
+                raise ValueError(f"{self.area} text is a skip phrase")
+
+
+@dataclass(frozen=True)
+class Skipped:
+    area: AreaId
+    status: SkipStatus
+
+    def __post_init__(self) -> None:
+        if self.area not in AREAS:
+            raise ValueError(f"unknown worksheet area {self.area!r}")
+        if self.status not in SKIP_STATUSES:
+            raise ValueError(f"unknown skip status {self.status!r}")
+        for skip in load_registry().skips:
+            if skip.status != self.status:
+                continue
+            if skip.only_at is not None and skip.only_at != self.area:
+                raise ValueError(
+                    f"skip {self.status} is only allowed on {skip.only_at}, not {self.area}"
+                )
+            return
+        raise ValueError(f"skip status {self.status} is not in the registry")
+
+
+Cell = Filled | Skipped
+
+
+def _check_prefix(cells: tuple[Cell, ...]) -> None:
+    if len(cells) > len(AREAS):
+        raise ValueError(f"worksheet has {len(cells)} cells, want at most {len(AREAS)}")
+    for index, cell in enumerate(cells):
+        want = AREAS[index]
+        if cell.area != want:
+            raise ValueError(f"worksheet cell {index} is {cell.area}, want {want}")
+
+
+@dataclass(frozen=True)
+class NotStarted:
+    """No proposed question. The wire sheet is null and there is no probe row."""
+
+
+@dataclass(frozen=True)
+class Asking:
+    """A prefix of areas, with one probe still to ask."""
+
+    cells: tuple[Cell, ...]
+    question: str
+    gaps_open: bool
+
+    def __post_init__(self) -> None:
+        if not self.question.strip():
+            raise ValueError("Asking question must be non-empty")
+        _check_prefix(self.cells)
+        got = stop_for(self.cells, self.gaps_open)
+        if got != "asking":
+            raise ValueError(f"Asking requires stop asking, got {got}")
+
+    @property
+    def next_area(self) -> AreaId:
+        return AREAS[len(self.cells)]
+
+    @property
+    def probe(self) -> str:
+        return load_registry().areas[len(self.cells)].probe(self.question)
+
+
+@dataclass(frozen=True)
+class HandedBack:
+    """Gaps are open and the last HAND_BACK_STREAK cells are skips."""
+
+    cells: tuple[Cell, ...]
+
+    def __post_init__(self) -> None:
+        _check_prefix(self.cells)
+        got = stop_for(self.cells, True)
+        if got != "handed_back":
+            raise ValueError(f"HandedBack requires stop handed_back, got {got}")
+
+    @property
+    def hand_back_line(self) -> str:
+        return load_registry().hand_back_line
+
+
+@dataclass(frozen=True)
+class Complete:
+    """Every area is filled or skipped."""
+
+    cells: tuple[Cell, ...]
+
+    def __post_init__(self) -> None:
+        _check_prefix(self.cells)
+        got = stop_for(self.cells, False)
+        if got != "complete":
+            raise ValueError(f"Complete requires stop complete, got {got}")
+
+
+WorksheetAssessment = NotStarted | Asking | HandedBack | Complete
+Stop = Literal["asking", "handed_back", "complete"]
+
+
+def stop_for(cells: tuple[Cell, ...], gaps_open: bool) -> Stop:
+    """The one stop rule. A full sheet is complete even when gaps stay open.
+
+    A skip streak stops the walk only while gaps are open. Constructors check area order.
+    """
+    if len(cells) == len(AREAS):
+        return "complete"
+    if gaps_open and len(cells) >= HAND_BACK_STREAK:
+        tail = cells[-HAND_BACK_STREAK:]
+        if all(isinstance(cell, Skipped) for cell in tail):
+            return "handed_back"
+    return "asking"
+
+
+def assess(proposal: SmartProposal, cells: tuple[Cell, ...]) -> WorksheetAssessment:
+    match proposal:
+        case NoPrimary() | Withheld():
+            if cells:
+                raise ValueError("worksheet cells require a proposed question")
+            return NotStarted()
+        case Proposed() as proposed:
+            gaps_open = bool(proposed.gaps)
+            match stop_for(cells, gaps_open):
+                case "complete":
+                    return Complete(cells)
+                case "handed_back":
+                    return HandedBack(cells)
+                case "asking":
+                    return Asking(cells, proposed.question, gaps_open)
+                case _ as unreachable:
+                    assert_never(unreachable)
+        case _ as unreachable:
+            assert_never(unreachable)
