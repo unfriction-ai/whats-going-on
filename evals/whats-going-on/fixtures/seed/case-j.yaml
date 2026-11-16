@@ -42,6 +42,9 @@ turns:
       smart:
         proposal: proposed
         gaps: [relevant, time_bound]
+      worksheet:
+        stop: asking
+        cells: {}
     tripwires:
       invented: []
       methodNotProblem: []
@@ -84,6 +87,9 @@ turns:
       smart:
         proposal: proposed
         gaps: [relevant, time_bound]
+      worksheet:
+        stop: asking
+        cells: {}
     tripwires:
       invented: []
       methodNotProblem: []
@@ -129,6 +135,9 @@ turns:
       smart:
         proposal: proposed
         gaps: [time_bound]
+      worksheet:
+        stop: asking
+        cells: {}
     tripwires:
       invented: []
       methodNotProblem: []

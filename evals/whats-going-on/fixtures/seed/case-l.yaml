@@ -18,6 +18,9 @@ turns:
       smart:
         proposal: proposed
         gaps: []
+      worksheet:
+        stop: asking
+        cells: {}
     tripwires:
       invented: ["two weeks of pages", "follow-the-sun"]
       methodNotProblem: []
