@@ -52,7 +52,7 @@ turns:
 
       Context and constraints: Around "Why did Android checkout conversion fall from 3.1% to 2.4% since the last release?", what background or pressures shape how you solve it, and what cannot change?
       I don't know
-    restatement: "Someone asks why Android checkout conversion fell. It went from 3.1% to 2.4% since the last release, and the context reply is I don't know."
+    restatement: "Someone asks why Android checkout conversion fell. It went from 3.1% to 2.4% since the last release."
     expect:
       kind: classify
       statuses: [partial]
@@ -110,7 +110,7 @@ turns:
 
       Success criteria: For "Why did Android checkout conversion fall from 3.1% to 2.4% since the last release?", what has to be true for the answer to count as success, and what would make it fail?
       Not yet
-    restatement: "Someone asks why Android checkout conversion fell. It went from 3.1% to 2.4% since the last release, with no context reply and no success criteria yet."
+    restatement: "Someone asks why Android checkout conversion fell. It went from 3.1% to 2.4% since the last release."
     expect:
       kind: classify
       statuses: [partial]

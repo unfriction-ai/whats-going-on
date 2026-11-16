@@ -50,7 +50,7 @@ turns:
 
       Context and constraints: Around "How much warehouse storage will the events pipeline use by June, to size the next warehouse contract at the March 14 budget review?", what background or pressures shape how you solve it, and what cannot change?
       The contract terms lock at the March 14 budget review. We cannot change the event schema before June.
-    restatement: "The data platform lead asks how much warehouse storage the events pipeline will use by June, before the March 14 budget review. Finance sizes next year's warehouse contract from it, the terms lock at that review, and the event schema cannot change before June."
+    restatement: "The data platform lead asks for an estimate of how much warehouse storage the events pipeline will use by June, before the March 14 budget review. Finance will use the estimate to size next year's warehouse contract."
     expect:
       kind: classify
       statuses: [partial]
@@ -104,7 +104,7 @@ turns:
 
       Success criteria: For "How much warehouse storage will the events pipeline use by June, to size the next warehouse contract at the March 14 budget review?", what has to be true for the answer to count as success, and what would make it fail?
       Success is a figure Finance will sign without a second review. Failure is a figure that forces a mid-year contract change.
-    restatement: "The data platform lead asks how much warehouse storage the events pipeline will use by June, before the March 14 budget review. Finance sizes next year's warehouse contract from it at that review, and success is a figure Finance signs without a second review."
+    restatement: "The data platform lead asks for an estimate of how much warehouse storage the events pipeline will use by June, before the March 14 budget review. Finance will use the estimate to size next year's warehouse contract."
     expect:
       kind: classify
       statuses: [partial]
@@ -165,7 +165,7 @@ turns:
 
       Stakeholders: Who can make or block the decision behind "How much warehouse storage will the events pipeline use by June, to size the next warehouse contract at the March 14 budget review?", and who must agree? Say "I am the decider" if that is you.
       Finance signs the contract. The data platform lead owns the estimate. Analytics has to agree on the event volumes.
-    restatement: "The data platform lead asks how much warehouse storage the events pipeline will use by June, before the March 14 budget review. Finance sizes and signs next year's warehouse contract from it, and Analytics has to agree on the event volumes."
+    restatement: "The data platform lead asks for an estimate of how much warehouse storage the events pipeline will use by June, before the March 14 budget review. Finance will use the estimate to size next year's warehouse contract."
     expect:
       kind: classify
       statuses: [partial]
@@ -233,7 +233,7 @@ turns:
 
       Scope and sources: For "How much warehouse storage will the events pipeline use by June, to size the next warehouse contract at the March 14 budget review?", what is in and out of scope, and where does evidence already exist?
       In scope is the events pipeline only. Out of scope is the logs pipeline. Evidence lives in the warehouse billing export and the storage dashboard.
-    restatement: "The data platform lead asks how much warehouse storage the events pipeline will use by June, before the March 14 budget review. Finance signs next year's warehouse contract from it, and only the events pipeline is in scope, with evidence in the billing export and storage dashboard."
+    restatement: "The data platform lead asks for an estimate of how much warehouse storage the events pipeline will use by June, before the March 14 budget review. Finance will use the estimate to size next year's warehouse contract."
     expect:
       kind: classify
       statuses: [classified]

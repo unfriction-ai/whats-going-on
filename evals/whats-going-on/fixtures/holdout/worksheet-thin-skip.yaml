@@ -48,7 +48,7 @@ turns:
 
       Context and constraints: Around "Why did open support tickets triple from 400 in January to 1,200 this month, with an answer needed before the April 2 staffing review?", what background or pressures shape how you solve it, and what cannot change?
       I don't know
-    restatement: "Someone asks why the support ticket backlog tripled and needs an answer before the April 2 staffing review. Open support tickets went from 400 in January to 1,200 this month, and the context reply is I don't know."
+    restatement: "Someone asks why the support ticket backlog tripled and needs an answer before the April 2 staffing review. Open support tickets went from 400 in January to 1,200 this month."
     expect:
       kind: classify
       statuses: [partial]
@@ -101,7 +101,7 @@ turns:
 
       Success criteria: For "Why did open support tickets triple from 400 in January to 1,200 this month, with an answer needed before the April 2 staffing review?", what has to be true for the answer to count as success, and what would make it fail?
       Not yet
-    restatement: "Someone asks why the support ticket backlog tripled and needs an answer before the April 2 staffing review. Open support tickets went from 400 in January to 1,200 this month, with no context reply and no success criteria yet."
+    restatement: "Someone asks why the support ticket backlog tripled and needs an answer before the April 2 staffing review. Open support tickets went from 400 in January to 1,200 this month."
     expect:
       kind: classify
       statuses: [partial]
@@ -161,7 +161,7 @@ turns:
 
       Stakeholders: Who can make or block the decision behind "Why did open support tickets triple from 400 in January to 1,200 this month, with an answer needed before the April 2 staffing review?", and who must agree? Say "I am the decider" if that is you.
       I'm the decider
-    restatement: "Someone asks why the support ticket backlog tripled and needs an answer before the April 2 staffing review. Open support tickets went from 400 in January to 1,200 this month, and the person asking is the decider."
+    restatement: "Someone asks why the support ticket backlog tripled and needs an answer before the April 2 staffing review. Open support tickets went from 400 in January to 1,200 this month."
     expect:
       kind: classify
       statuses: [partial]
