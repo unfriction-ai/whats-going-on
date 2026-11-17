@@ -1,0 +1,27 @@
+expect_ok: false
+expect_kind: smart_gap_rows
+body: |
+  status: partial
+  main_question: "What approaches could build a healthy on-call culture on the platform squad over the next year?"
+  problems:
+    - statement: "What approaches could build a healthy on-call culture on the platform squad over the next year?"
+      classification: { nature: conceptual, direction: divergent }
+      confidence: high
+      why: "Culture and norms are conceptual. The ask invites many possible moves."
+      next_method: "Broad exploration of approaches before any narrowing."
+  smart_question: null
+  smart_gaps: [actionable]
+  worksheet: null
+  challenge: null
+  unresolved:
+    - observation: "The ask says healthy but not what healthy looks like"
+      reason: "SMART measurable is missing. The input gives no sign of done."
+      clarification: "Ask yourself: How will we know it's solved?"
+    - observation: "The ask names nothing the team would do with the answer"
+      reason: "SMART actionable is missing. The input points to no move of ours."
+      clarification: "Ask yourself: Does it point to something we can do?"
+  applied:
+    - name: principle-make-it-smart
+      at: smart_question
+      changed: "Withheld the SMART question because the ask points to nothing we can do yet."
+  stop: true

@@ -143,6 +143,11 @@ def parse_smart(
 
     row_letters = tuple(gap_letter(row.clarification) for row in unresolved)
     gap_rows = tuple(letter for letter in row_letters if letter is not None)
+    for row, letter in zip(unresolved, row_letters, strict=True):
+        if letter is None and row.clarification.casefold().startswith(ASK_YOURSELF.casefold().rstrip()):
+            return ContractViolation(
+                "smart_gap_rows", f"Ask-yourself row matches no card prompt: {row.clarification!r}"
+            )
 
     if not has_primary:
         if question is not None or gaps or gap_rows:
