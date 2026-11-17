@@ -251,7 +251,7 @@ def _case_blocks(readme: str) -> dict[str, dict[str, str]]:
         body = parts[i + 1]
         input_m = re.search(r"\*\*Input\*\*\s*\n\n```text\n(.*?)```", body, re.DOTALL)
         yaml_m = re.search(
-            r"\*\*Expected result(?: \(typical\))?\*\*\s*\n\n```yaml\n(.*?)```",
+            r"\*\*Debug view(?: \(typical\))?\*\*\s*\n\n```yaml\n(.*?)```",
             body,
             re.DOTALL,
         )

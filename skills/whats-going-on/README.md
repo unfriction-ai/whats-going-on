@@ -2,7 +2,7 @@
 
 Tagline: Understand the situation before deciding what to solve.
 
-`/whats-going-on` examines an ask, message, or described situation. Stage 1 (`define-the-problem`) finds what needs resolving in that input, picks at most one primary problem, names it as the `main_question` to answer first, proposes one SMART version of it as `smart_question`, decides whether it is defined enough to classify, and maps it onto a 2×2. Each SMART letter the input leaves open becomes an `Ask yourself:` question. It cites principles under `applied` when they decided a value. It stops before diagnosis, brainstorming, or solutions.
+`/whats-going-on` examines an ask, message, or described situation. Stage 1 (`define-the-problem`) finds what needs resolving in that input, picks at most one primary problem, names it as the `main_question` to answer first, proposes one SMART version of it as `smart_question`, decides whether it is defined enough to classify, and maps it onto a 2×2. Each SMART letter the input leaves open becomes an `Ask yourself:` question. A debug reply cites principles under `applied` when they decided a value. It stops before diagnosis, brainstorming, or solutions.
 
 Works with Cursor Agent Skills, Claude Code skills, and Codex skills. Same `SKILL.md` body. Install path differs by tool.
 
@@ -110,7 +110,23 @@ After the primary is picked and before it is classified, the `smart` step checks
 
 Reply in the same chat to answer an Ask-yourself question, as in Case L, or a worksheet probe. The next run treats those replies as new facts. It derives the SMART question and the worksheet again from the earlier ask plus the replies. It carries nothing over from the earlier fence. In a fresh chat, paste the earlier ask, then each probe line and the reply under it.
 
-## Output contract
+## What you see
+
+A default reply contains no YAML fence. It has three parts.
+
+1. The title line `What's going on`, as its own paragraph.
+2. The two restatement sentences, as the next paragraph.
+3. The view from the playbook View table.
+
+The view leads with the question. When there is no question, the line is `There is no question yet.` When the SMART question differs from the main question, the next line has no heading. That line starts with `Stated more sharply.` and states the SMART question.
+
+When a primary exists, `What it means` is one compact list. Status is one fixed phrase from the View table. When one ask is open, that clarification is a bare line after Status. The view does not include `applied`, `stop`, or a worksheet progress line.
+
+The examples in cases A and B use markdown headings. On a plain host, the same labels are capital letters on their own lines. When the host says nothing about formatting, each label is bold on its own line.
+
+## Debug view
+
+Debug mode writes the default reply, then exactly one fenced `yaml` block of this Verdict, then nothing. When the host passes arguments on a slash command, add `--debug` after the command. When it does not, put `debug` on its own line, or write `show debug`, in the message.
 
 ```yaml
 status: classified | partial | needs_clarification | not_a_problem
@@ -177,7 +193,7 @@ If you pass a link the agent cannot open, classify from the pasted context and s
 
 ## Worked cases
 
-Each case shows the input, what the skill should notice, and the expected stage 1 result. Scenarios are original. They are not copied from a training course.
+Each case shows the input, what the skill should notice, and the debug Verdict. Cases A and B also show the default reply. Scenarios are original. They are not copied from a training course.
 
 ### Case A. Vague concern (abstain)
 
@@ -193,7 +209,25 @@ Can you help me figure out where we should even look first?"
 
 "Rough place" is a symptom, not a problem. Competing theories are noise until you know what changed, by how much, and since when. Do not invent crash rates, retention drops, or store-ranking theories.
 
-**Expected result**
+**What you see**
+
+```text
+What's going on
+
+A product owner asks for help figuring out where to look first. They say mobile is in a rough place and every eng has a different theory.
+
+## The question
+
+There is no question yet.
+
+## Status
+
+Not defined yet. A problem cannot be named until the next ask is answered.
+
+What changed, by how much, and since when? What decision are you trying to make?
+```
+
+**Debug view**
 
 ```yaml
 status: needs_clarification
@@ -228,7 +262,35 @@ We'll use them to set the Q1 hardware budget."
 
 One estimate for one review. Data does the work. One answer.
 
-**Expected result**
+**What you see**
+
+```text
+What's going on
+
+An engineering manager asks for p99 latency estimates for the checkout API before Friday's capacity review. Those estimates are for the Q1 hardware budget.
+
+## The question
+
+What p99 latency estimates for the checkout API should inform the Q1 hardware budget?
+
+Stated more sharply. What p99 latency estimates for the checkout API should inform the Q1 hardware budget at Friday's capacity review?
+
+## What it means
+
+- This is a why or what question.
+- The work should narrow to one answer.
+- Confidence is high.
+- Latency estimation needs quantitative data. The objective is one figure for a defined capacity decision.
+- How to work it. Estimate from production telemetry and load assumptions. Do not open an architecture redesign workshop.
+
+## Status
+
+Partly defined. One question is ready. Other points wait.
+
+Context and constraints: Around "What p99 latency estimates for the checkout API should inform the Q1 hardware budget at Friday's capacity review?", what background or pressures shape how you solve it, and what cannot change?
+```
+
+**Debug view**
 
 ```yaml
 status: partial
@@ -269,7 +331,7 @@ Let's lock one or two handoff changes this sprint so the bounce stops."
 
 The topic is a way of working, not a number. "One or two handoff changes" already narrows. The proposed approach is not proof that handoff process is the only cause. Classify the asked-for decision, not a diagnosis you invent.
 
-**Expected result**
+**Debug view**
 
 ```yaml
 status: partial
@@ -308,7 +370,7 @@ How do we build a healthy on-call culture over the next year?"
 
 Culture and norms are conceptual. "How do we" over a year leaves many approaches open. A desired change counts as a valid problem even when nothing is on fire right now. "Healthy" is not a sign of done, and nobody is named as the decider, so measurable and relevant become Ask-yourself rows. The primary is classified anyway. The status is `partial` only because of those rows and the first worksheet probe.
 
-**Expected result**
+**Debug view**
 
 ```yaml
 status: partial
@@ -359,7 +421,7 @@ Can we settle on one or two UI changes to cut the clutter before the demo on the
 
 Simplifying an interface is design judgment, not a dataset. "Settle on one or two" by a fixed date is convergent.
 
-**Expected result**
+**Debug view**
 
 ```yaml
 status: partial
@@ -398,7 +460,7 @@ ways to stop this class of failure, ranked by how likely they are to work."
 
 Two questions in one sentence. "Why staging went down" is diagnosis. "How to stop this class of failure" is option generation, and it depends on the answer to the first. The why is the primary problem. The prevention ask waits in `unresolved` until the why is answered. Finding the cause of an outage in our own staging is something we can do, so the why meets actionable. "Last night" is when staging failed, not when the answer is due, so time_bound is open.
 
-**Expected result**
+**Debug view**
 
 ```yaml
 status: partial
@@ -449,7 +511,7 @@ The fight is about product strategy and customer impact, not code volume.
 
 The proposed deliverable (LOC spreadsheet) is not the problem. The unresolved question is how to prioritize sunsets. Metrics cannot settle a strategy fight by themselves.
 
-**Expected result**
+**Debug view**
 
 ```yaml
 status: partial
@@ -494,7 +556,7 @@ Someone mentioned the connection pool max was lowered in yesterday's config chan
 
 Timeouts are a symptom. The workshop is a proposed method. A recent pool-size change suggests an analytical path that may converge on a factual cause. Do not classify "run an architecture workshop" as the problem.
 
-**Expected result (typical)**
+**Debug view (typical)**
 
 ```yaml
 status: partial
@@ -536,7 +598,7 @@ stop: true
 FYI, the Friday deploy window moved to Saturday 10:00 UTC.
 ```
 
-**Expected result**
+**Debug view**
 
 ```yaml
 status: not_a_problem
@@ -578,7 +640,7 @@ What are they up to?"
 
 The why is defined and gets a quadrant. It is about another company's motive, and the input names nothing we would do with the answer, so actionable is open. Without actionable, a SMART question would be a guess, so `smart_question` stays `null` and the gap rows ask. Do not invent a pricing response to make it actionable.
 
-**Expected result**
+**Debug view**
 
 ```yaml
 status: partial
@@ -632,7 +694,7 @@ Healthy means nobody carries more than one week of pages a month. The platform l
 
 This answers Case D's two gap rows. The answers are new facts, so the run starts over from the ask plus the answers. `main_question` does not move. `smart_question` now carries the sign of done and the decider, so no letter is open. The worksheet has not started, so its first probe keeps the status `partial`.
 
-**Expected result**
+**Debug view**
 
 ```yaml
 status: partial
