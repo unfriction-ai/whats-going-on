@@ -58,7 +58,7 @@ Hard fails gate the run. Score is informational. The report splits seed and hold
 
 ## Adding a fixture
 
-Copy the nearest file under `fixtures/holdout/`. Do not store a `family` field. Families are derived from expectation shape. A classify turn sets `expect.smart` to `{proposal: proposed | withheld, gaps: [...]}`, and the gold must agree with it. An abstain turn has no `smart` block. List only concern rows under `expect.unresolved`, not SMART gap rows. Run `check`. Gold must score 1.0.
+Copy the nearest file under `fixtures/holdout/`. Do not store a `family` field. Families are derived from expectation shape. A classify turn sets `expect.smart` to `{proposal: proposed | withheld, gaps: [...]}`, and the gold must agree with it. An abstain turn has no `smart` block. List only concern rows under `expect.unresolved`, not SMART gap rows. A structure turn sets `expect.kind` to `structure` and `command` to `/where-to-focus`. Put `structured`, `needs_split`, or `blocked` in `statuses`. Run `check`. Gold must score 1.0.
 
 ## Host wiring
 

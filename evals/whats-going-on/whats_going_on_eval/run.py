@@ -326,13 +326,14 @@ def cmd_run(args: argparse.Namespace) -> int:
                                 skill_src=skill_src,
                                 session_workspace=workspace,
                                 mode=args.mode,
+                                command=turn.command,
                             ).text
                             write_transcript(
                                 run_id,
                                 fixture.id,
                                 rep,
                                 turn_i,
-                                prompt=build_prompt(turn.input, args.mode),
+                                prompt=build_prompt(turn.input, args.mode, turn.command),
                                 response=text,
                             )
                         responses.append(text)
