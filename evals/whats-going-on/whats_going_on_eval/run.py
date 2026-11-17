@@ -17,11 +17,12 @@ from .agents import (
     invoke,
     materialize_skill,
     nested_leaf_rels,
+    prompt_problems,
 )
 from .chain import load_chain
 from .drift import check_suite
 from .fixtures import load_suite
-from .grade import FixtureRunResult, grade_run, summarize
+from .grade import FixtureRunResult, grade_run, presentation_problems, summarize
 from .invariance import InvarianceError, compare, invariance_payload, preamble_outcome_problems
 from .manifest import (
     AGENTS,
@@ -38,6 +39,7 @@ from .manifest import (
     skill_view_hash,
 )
 from .parse import Halt, Response, describe_violation, parse_response
+from .view import Mode, View, parse_view
 from .challenge import load_registry as load_challenge_registry
 from .smart import NoPrimary, Proposed, Withheld
 from .wire import ContractViolation
@@ -76,6 +78,8 @@ def cmd_check() -> int:
     schema_problems = _check_schema_cases()
     problems_text = [f"{p.kind}: {p.detail}" for p in problems] + schema_problems
     problems_text.extend(preamble_outcome_problems())
+    problems_text.extend(presentation_problems(fixtures))
+    problems_text.extend(prompt_problems())
     problems_text.extend(host_load_problems(SKILL_DIR, REPO_ROOT))
 
     if problems_text:
@@ -190,6 +194,19 @@ def _worksheet_assess_self_check() -> None:
         raise ValueError("a full sheet stays complete while gaps are open")
 
 
+def _view_case(name: str, doc: dict[str, object], text: str) -> list[str]:
+    parsed = parse_view(text)
+    ok = isinstance(parsed, View)
+    if bool(doc["expect_ok"]) != ok:
+        detail = "parsed_view" if isinstance(parsed, View) else parsed.kind
+        return [f"schema_cases/{name}: expect_ok={doc['expect_ok']} got {detail}"]
+    if isinstance(parsed, ContractViolation) and doc.get("expect_kind", parsed.kind) != parsed.kind:
+        return [
+            f"schema_cases/{name}: expect_kind {doc['expect_kind']} got {describe_violation(parsed)}"
+        ]
+    return []
+
+
 def _schema_case_count() -> int:
     return len(list(SCHEMA_CASES_DIR.glob("*.yaml"))) + len(
         list(SCHEMA_CASES_DIR.glob("*.yml"))
@@ -208,6 +225,9 @@ def _check_schema_cases() -> list[str]:
             problems.append(f"schema_cases/{path.name}: need expect_ok and body")
             continue
         text = doc["body"]
+        if doc.get("wire") == "view":
+            problems.extend(_view_case(path.name, doc, str(text)))
+            continue
         if "```" not in str(text):
             text = f"```yaml\n{text}\n```"
         parsed = parse_response(str(text))
@@ -281,6 +301,7 @@ def cmd_run(args: argparse.Namespace) -> int:
             "only": args.only,
             "judge": bool(args.judge),
             "skill": str(skill_src) if skill_src else "none",
+            "presentation": args.mode,
         },
         skill_src,
     )
@@ -302,19 +323,20 @@ def cmd_run(args: argparse.Namespace) -> int:
                                 user_input=turn.input,
                                 skill_src=skill_src,
                                 session_workspace=workspace,
+                                mode=args.mode,
                             ).text
                             write_transcript(
                                 run_id,
                                 fixture.id,
                                 rep,
                                 turn_i,
-                                prompt=build_prompt(turn.input),
+                                prompt=build_prompt(turn.input, args.mode),
                                 response=text,
                             )
                         responses.append(text)
                 finally:
                     shutil.rmtree(workspace, ignore_errors=True)
-                results.append(grade_run(fixture, rep, responses))
+                results.append(grade_run(fixture, rep, responses, mode=args.mode))
     except HostNotWired as exc:
         print(str(exc), file=sys.stderr)
         print(
@@ -346,6 +368,18 @@ def cmd_run(args: argparse.Namespace) -> int:
     return 0 if report.passed else 1
 
 
+def _stored_mode(run_id: str) -> Mode:
+    from .runs import run_dir
+
+    path = run_dir(run_id) / "manifest.json"
+    raw = "debug"
+    if path.exists():
+        raw = json.loads(path.read_text()).get("presentation", "debug")
+    if raw == "default" or raw == "debug":
+        return raw
+    raise ValueError(f"presentation {raw!r} in {run_id}")
+
+
 def cmd_grade(run_id: str) -> int:
     from .runs import run_dir
 
@@ -353,6 +387,11 @@ def cmd_grade(run_id: str) -> int:
     tdir = run_dir(run_id) / "transcripts"
     if not tdir.exists():
         print(f"no transcripts for {run_id}", file=sys.stderr)
+        return 2
+    try:
+        mode = _stored_mode(run_id)
+    except ValueError as exc:
+        print(str(exc), file=sys.stderr)
         return 2
 
     grouped: dict[tuple[str, int], dict[int, str]] = {}
@@ -365,7 +404,7 @@ def cmd_grade(run_id: str) -> int:
     for (fixture_id, rep), turns in sorted(grouped.items()):
         fixture = fixtures[fixture_id]
         responses = [turns[i] for i in range(len(fixture.turns))]
-        results.append(grade_run(fixture, rep, responses))
+        results.append(grade_run(fixture, rep, responses, mode=mode))
 
     report = summarize(results, fixtures)
     write_report(
@@ -450,6 +489,12 @@ def build_parser() -> argparse.ArgumentParser:
 
     run_p = sub.add_parser("run", help="Invoke an agent host and grade")
     run_p.add_argument("--agent", choices=AGENTS, default="cursor")
+    run_p.add_argument(
+        "--mode",
+        choices=("default", "debug"),
+        default="debug",
+        help="Presentation mode. debug grades the Verdict fence. default grades the human view.",
+    )
     run_p.add_argument("--only", default="", help="Comma-separated fixture ids")
     run_p.add_argument("--repeat", type=int, default=1)
     run_p.add_argument("--judge", action="store_true")

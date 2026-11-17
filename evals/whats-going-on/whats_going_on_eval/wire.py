@@ -4,6 +4,8 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 
+PREAMBLE_BUDGET = 400
+
 
 @dataclass(frozen=True)
 class ContractViolation:

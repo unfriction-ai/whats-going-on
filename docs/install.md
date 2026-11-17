@@ -93,3 +93,7 @@ bash scripts/assert-canonical-skill.sh
 ```
 
 That script fails if any `whats-going-on/SKILL.md` drifts from the canonical hash, or if a host manifest references `evals/`. Identical-hash copies are allowed.
+
+## Debug view
+
+When the host passes arguments on a slash command, add `--debug` after the command. When it does not, put `debug` on its own line, or write `show debug`, in the message.

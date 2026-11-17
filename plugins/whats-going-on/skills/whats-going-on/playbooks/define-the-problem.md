@@ -47,11 +47,9 @@ Fill `problems` and `unresolved` first. Set `status` last from this table:
 | one | empty | `classified` |
 | one | some | `partial` |
 
-## Output
+## Verdict
 
-Exactly two sentences of restatement, then exactly one fenced `yaml` block, then nothing.
-
-Render the primary and its classification as the one `problems` item. Render every Unresolved row under `unresolved`. Drop internal ids.
+Render the primary and its classification as the one `problems` item. Render every Unresolved row under `unresolved`. Drop internal ids. The fields stay as written.
 
 ```yaml
 status: classified | partial | needs_clarification | not_a_problem
@@ -90,6 +88,40 @@ stop: true
 
 `problems` holds at most one item, the primary. An empty `problems` list is valid when status is `needs_clarification` or `not_a_problem`. Always emit `main_question`. Copy the primary's `statement` into it exactly. Write `null` when `problems` is empty. Always emit `smart_question` and `smart_gaps`. Write `null` and `[]` when there is no primary. Always emit `unresolved`. Put concerns first, then the one ask row (the worksheet probe or the Challenge line), then gap rows. Write `[]` when it is empty. Always emit `challenge`. Write `null` unless the worksheet is complete. On a complete worksheet write `round: clear`, `open`, or `answered`. `clear` has empty `findings` and `reply: null`. `open` and `answered` map each evidenced bias to one paste quote. `open` has `reply: null` and one Challenge row. `answered` copies the text under the Challenge line into `reply`, or `null`, and adds no row. Always emit `applied`. Write `[]` when no principle decided a value.
 
+## View
+
+Write the view from this map. Copy a Phrase sentence as written. A `{field}` in a Phrase is that field's value, copied word for word. Do not print the field name or the enum token. Label is the heading. When the label cell says no label, write no heading.
+
+| Field | Label | When | Phrase |
+|---|---|---|---|
+| `main_question` | The question | it is text | {main_question} |
+| `main_question` | The question | it is null | There is no question yet. |
+| `smart_question` | no label | it differs from `main_question` | Stated more sharply. {smart_question} |
+| `problems[0].classification.nature` | What it means | nature is `analytical` | This is a why or what question. |
+| `problems[0].classification.nature` | What it means | nature is `conceptual` | This is a should or which question. |
+| `problems[0].classification.direction` | What it means | direction is `convergent` | The work should narrow to one answer. |
+| `problems[0].classification.direction` | What it means | direction is `divergent` | The work should keep several answers in play. |
+| `problems[0].confidence` | What it means | confidence is `high` | Confidence is high. |
+| `problems[0].confidence` | What it means | confidence is `medium` | Confidence is medium. |
+| `problems[0].confidence` | What it means | confidence is `low` | Confidence is low. |
+| `problems[0].why` | What it means | a primary exists | {why} |
+| `problems[0].next_method` | What it means | a primary exists | How to work it. {next_method} |
+| ask row `clarification` | no label | there is one open ask | {clarification} |
+| `status` | Status | `needs_clarification` | Not defined yet. A problem cannot be named until the next ask is answered. |
+| `status` | Status | `partial` | Partly defined. One question is ready. Other points wait. |
+| `status` | Status | `classified` | Defined. One question is ready to work. |
+| `status` | Status | `not_a_problem` | Not a problem. Do not treat this note as a problem. |
+
+Lead with the question. Then write What it means, when a primary exists, as one compact list. Then write Status. Then, when there is one open ask, write that clarification as a bare line. The ask is the worksheet probe, the hand-back line, or the Challenge line. Do not add a worksheet progress line. Do not print `applied` or `stop` in the view.
+
+## Output
+
+In the default mode, write the title line `What's going on` as its own paragraph. Then write the two restatement sentences as one paragraph. Then write the view. Do not write a YAML fence.
+
+In debug mode, write that same reply, then exactly one fenced `yaml` block of the Verdict, then nothing.
+
+Use compact lists, never a table. Style each label as Present says. The ask line stays bare.
+
 ## Never
 
 - Put a second item in `problems`.
@@ -97,4 +129,7 @@ stop: true
 - Put `smart_question` in `main_question`, or classify `smart_question`.
 - Write a cell the paste did not answer.
 - Write a gap row without its card prompt word for word.
+- Write a YAML block outside debug.
 - Write anything after the YAML block.
+- Wrap the ask line, `Ask yourself:`, or `Challenge:` in bold, quotes, or a bullet.
+- Print `applied` or `stop` in the default view.

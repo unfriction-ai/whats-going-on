@@ -12,7 +12,7 @@ disable-model-invocation: true
 
 # What's going on
 
-Select one stage, run its playbook, emit its Output, stop.
+Select one stage, run its playbook, present its Output, stop.
 
 ## Chain
 
@@ -32,7 +32,11 @@ Select one stage, run its playbook, emit its Output, stop.
 | The message asks to continue from the latest result | the stage after the one that produced that result |
 | Anything else | define-the-problem |
 
-The latest result is the last fenced `yaml` block you emitted that has a `status` key. A block with a `status` key comes from define-the-problem. Continue carries its one primary problem forward. New material restarts at define-the-problem. Prior classifications do not advance on their own. Answers to `Ask yourself:` questions, worksheet probes, and Challenge replies are new facts. Run define-the-problem on the earlier ask plus those answers.
+The latest result is the last define-the-problem view you wrote, or the last debug fence that has a `status` key.
+
+A define-the-problem view opens with the title line `What's going on`, then a restatement. It includes the label `The question` or the label `Main question`. A fence with a `status` key is from define-the-problem.
+
+Continue carries that main question forward word for word. New material restarts at define-the-problem. Prior classifications do not advance on their own. Answers to `Ask yourself:` questions, worksheet probes, and Challenge replies are new facts. Run define-the-problem on the earlier ask plus those answers.
 
 ## Principles
 
@@ -48,11 +52,41 @@ Read each principle below before any playbook step. The file is `<name>/SKILL.md
 1. Read each principle named above.
 2. Look for `playbooks/<stage>.md` next to this file. If it is missing, follow Halt and stop.
 3. Read the playbook. Read each skill its `skills` list names at `<skill>/SKILL.md` next to this file.
-4. Work through the playbook steps silently. Emit only the playbook's Output, closed by the Output envelope.
+4. Work through the playbook steps silently. Write only the playbook's Output, following Present.
+
+## Present
+
+Read the invocation once, before the reply.
+
+Treat the mode as debug in any of these cases.
+
+- The invocation includes `--debug`.
+- One line is only the word `debug`.
+- The message says `show debug`.
+
+Otherwise the mode is default. An unknown flag is default.
+
+Pick the layout from formatting instructions already in the context. Do not branch on a product name.
+
+- When those instructions say that markdown is rendered, use markdown. Write each label as a `##` heading. Use `-` lists. Do not use a table.
+- When those instructions say plain text or a terminal, use plain. Write each label in capital letters on its own line. Use `-` lists. Do not use a table.
+- When they say nothing about formatting, use portable. Write each label in bold on its own line. Use `-` lists. Do not use a table, HTML, or a heading marker. The ask line stays a bare line.
+
+Do not use ANSI color on the status phrase or the ask line. Use ANSI elsewhere in the plain layout only when the instructions say color is on. When color is unknown or off, use no ANSI.
+
+Write the reply in this order.
+
+1. The title line `What's going on`, as its own paragraph. It is the continue marker.
+2. The restatement, as the next paragraph.
+3. The view from the playbook view map. Lead with the question. Keep the view compact.
+4. In the default mode, stop. Do not write a YAML fence. Do not write `applied` or `stop`.
+5. In debug mode, add exactly one fenced `yaml` block of the Verdict, then nothing.
+
+The one open ask is a bare line. Copy its clarification exactly. Do not wrap that line, `Ask yourself:`, or `Challenge:` in bold, quotes, or a bullet.
 
 ## Output envelope
 
-Every playbook Output `yaml` block ends with `applied`, then `stop: true`. List each principle that decided a value you emit. Cite nothing you did not apply. Write `applied: []` when no principle decided a value.
+In debug, every Verdict `yaml` block ends with `applied`, then `stop: true`. List each principle that decided a value in the Verdict. Cite nothing you did not apply. Write `applied: []` when no principle decided a value. The default view does not include this block.
 
 ```yaml
 applied:
@@ -77,7 +111,11 @@ Point only at a row you emitted, and at `smart_question` only when there is a pr
 
 ## Halt
 
-When the selected stage has no playbook file, write one plain sentence that says the stage is not available yet. Then write exactly one fenced `yaml` block with `next_stage` set to that stage, then nothing:
+When the selected stage has no playbook file, write one plain sentence that says the stage is not available yet. Give no diagnosis, options, or recommendations.
+
+In the default mode, stop after that sentence.
+
+In debug mode, add exactly one fenced `yaml` block, then nothing:
 
 ```yaml
 next_stage: structure-the-problem
@@ -85,10 +123,13 @@ available: false
 stop: true
 ```
 
-Give no diagnosis, options, or recommendations. A Halt block has no `applied` key.
+A debug Halt block has no `applied` key.
 
 ## Never
 
 - Run more than one playbook in one reply.
 - Write the restatement outside the `restate` skill.
+- Write a YAML block outside debug.
 - Write anything after the YAML block.
+- Write `applied` or `stop` in the default view.
+- Wrap `Ask yourself:` or `Challenge:` in bold, quotes, or a bullet.
