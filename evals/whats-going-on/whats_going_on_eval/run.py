@@ -38,7 +38,7 @@ from .manifest import (
     read_mount,
     skill_view_hash,
 )
-from .parse import Halt, Response, describe_violation, parse_response
+from .parse import Halt, Response, StructureResponse, describe_violation, parse_response
 from .view import Mode, View, parse_view
 from .challenge import load_registry as load_challenge_registry
 from .smart import NoPrimary, Proposed, Withheld
@@ -235,10 +235,12 @@ def _check_schema_cases() -> list[str]:
         if want_halt:
             ok = isinstance(parsed, Halt)
         else:
-            ok = isinstance(parsed, Response)
+            ok = isinstance(parsed, (Response, StructureResponse))
         if bool(doc["expect_ok"]) != ok:
             if isinstance(parsed, Response):
                 detail = "parsed_response"
+            elif isinstance(parsed, StructureResponse):
+                detail = "parsed_structure"
             elif isinstance(parsed, Halt):
                 detail = "parsed_halt"
             else:
@@ -260,7 +262,7 @@ def _check_schema_cases() -> list[str]:
                     f"schema_cases/{path.name}: next_stage want {doc['next_stage']} got {parsed.next_stage}"
                 )
         elif ok and "derived_status" in doc:
-            assert isinstance(parsed, Response)
+            assert isinstance(parsed, (Response, StructureResponse))
             if parsed.verdict.status != doc["derived_status"]:
                 problems.append(
                     f"schema_cases/{path.name}: derived_status want {doc['derived_status']} got {parsed.verdict.status}"

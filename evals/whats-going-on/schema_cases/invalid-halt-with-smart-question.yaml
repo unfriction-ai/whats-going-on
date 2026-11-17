@@ -2,7 +2,7 @@ expect_ok: false
 expect_kind: schema
 wire: halt
 body: |
-  next_stage: structure-the-problem
+  next_stage: prioritize-the-issues
   available: false
   smart_question: null
   stop: true

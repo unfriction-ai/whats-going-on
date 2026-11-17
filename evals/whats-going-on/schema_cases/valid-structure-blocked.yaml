@@ -1,0 +1,19 @@
+expect_ok: true
+derived_status: blocked
+body: |
+  status: blocked
+  root_question: null
+  main_question: null
+  smart_question: null
+  classification: null
+  breakdowns: []
+  selected:
+    breakdown_ids: []
+    branch_ids: []
+    parallel: false
+  unresolved:
+    - observation: "The paste has no problem statement."
+      reason: "Structure needs a main or SMART question."
+      clarification: "State the main or SMART problem first."
+  applied: []
+  stop: true

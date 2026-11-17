@@ -1,4 +1,4 @@
-"""Boundary: raw agent text -> Response | Halt, or a ContractViolation."""
+"""Boundary: raw agent text -> Response | StructureResponse | Halt, or a ContractViolation."""
 
 from __future__ import annotations
 
@@ -13,6 +13,7 @@ from .challenge import ChallengeAssessment, operator_ask, parse_challenge
 from .manifest import SKILL_DIR
 from .principles import WireKind, load_principles
 from .smart import Proposed, SmartProposal, parse_smart, partition_unresolved
+from .structure import STRUCTURE_STATUSES, StructureResponse, parse_structure
 from .view import View, read_view, split_human
 from .wire import PREAMBLE_BUDGET, ContractViolation, Unresolved
 from .worksheet import WorksheetAssessment, parse_worksheet
@@ -127,7 +128,7 @@ class Halt:
     stop: Literal[True]
 
 
-Outcome = Response | Halt
+Outcome = Response | StructureResponse | Halt
 
 
 def derive_status(problems: Problems, unresolved: tuple[Unresolved, ...]) -> Status:
@@ -191,7 +192,14 @@ def parse_response(text: str) -> Outcome | ContractViolation:
             return ContractViolation("preamble_over_budget", str(len(preamble)))
         return _validate_halt_wire(raw, preamble)
 
-    return _validate_wire(raw, read_view(restatement, body))
+    view = read_view(restatement, body)
+    if _is_structure_wire(raw):
+        return parse_structure(raw, view)
+    return _validate_wire(raw, view)
+
+
+def _is_structure_wire(raw: dict[str, Any]) -> bool:
+    return "breakdowns" in raw or raw.get("status") in STRUCTURE_STATUSES
 
 
 def _nonblank(value: Any, path: str) -> str | ContractViolation:
