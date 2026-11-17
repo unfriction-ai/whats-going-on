@@ -13,14 +13,20 @@ Propose one or more hypothesis-driven breakdowns of the defined problem. Drive e
 
 ## Gate
 
-Read the latest define-the-problem result (view or debug Verdict).
+Entry needs only a problem statement. Stage-1 status does not matter.
 
-| Prior result | Action |
+Collect a governing statement from, in order:
+
+1. Prior define-the-problem `smart_question` when it is a non-null string.
+2. Else prior `main_question` when it is a non-null string.
+3. Else a problem statement the current paste states outright (the asker's question, or a line labeled `The question` / `Main question`).
+
+| Governing statement | Action |
 |---|---|
-| `classified` or `partial`, with non-null `main_question` | Continue |
-| `needs_clarification`, `not_a_problem`, missing primary, or no prior result | Refuse. One sentence: define the problem first. Do not build a tree. |
+| Non-blank string from any source above | Continue |
+| None | Refuse. One sentence: state the main or SMART problem first. Do not build a tree. |
 
-Continue carries `main_question` word for word. Prefer `smart_question` as the tree root when it is a non-null string. Otherwise root on `main_question`. Never invent a new governing question.
+On continue, set `main_question` to the prior `main_question` when present, else to that governing statement. Set `smart_question` to the prior SMART string when present, else `null`. Prefer `smart_question` as `root_question` when it is non-null. Otherwise root on `main_question`. Never invent or sharpen a new governing question in this stage.
 
 When the paste answers a prior selection ask (names breakdown ids and optional branch ids), fill `selected` from that answer and keep the prior `breakdowns` unless the paste also brings a new ask or new facts that restart define-the-problem.
 
@@ -65,9 +71,7 @@ root_question: "SMART question if present, else main_question"
 main_question: "carried word for word"
 smart_question: "carried" | null
 
-classification:
-  nature: analytical | conceptual
-  direction: convergent | divergent
+classification: null | { nature: analytical | conceptual, direction: convergent | divergent }
 
 breakdowns:
   - id: A
@@ -108,7 +112,7 @@ applied:
 stop: true
 ```
 
-Always emit `root_question`, `main_question`, `smart_question`, `classification`, `breakdowns`, `selected`, `unresolved`, `applied`, and `stop`. On `blocked`, write `breakdowns: []`, empty `selected`, `classification` null when none was carried, and one Unresolved row that points back to define-the-problem. On `structured` with empty `selected`, put exactly one selection ask in `unresolved` (ask slot). Its `clarification` is exactly: `Which breakdowns (and optional branch ids) do you want to work in parallel?` When the paste answers that ask, fill `selected.breakdown_ids` and optional `branch_ids`, set `parallel` true when more than one breakdown id or more than one branch id is chosen, and write `unresolved: []` for the ask. Keep MECE-cut rows if any breakdown is still `needs_split`.
+Always emit `root_question`, `main_question`, `smart_question`, `classification`, `breakdowns`, `selected`, `unresolved`, `applied`, and `stop`. Write `classification: null` when none was carried. On `blocked`, write `breakdowns: []`, empty `selected`, and one Unresolved row that asks for the main or SMART problem statement. On `structured` with empty `selected`, put exactly one selection ask in `unresolved` (ask slot). Its `clarification` is exactly: `Which breakdowns (and optional branch ids) do you want to work in parallel?` When the paste answers that ask, fill `selected.breakdown_ids` and optional `branch_ids`, set `parallel` true when more than one breakdown id or more than one branch id is chosen, and write `unresolved: []` for the ask. Keep MECE-cut rows if any breakdown is still `needs_split`.
 
 `applied` lists only principles from the coordinator index that decided a value. Write `[]` when none did. Prefer citing `principle-dont-invent-problems` and `principle-dont-solve-yet` when they changed a node or blocked an answer.
 
@@ -122,7 +126,7 @@ Always emit `root_question`, `main_question`, `smart_question`, `classification`
 | failing `mece` note | MECE | any `fail` | Breakdown {id}, set {path}: {note} |
 | `status` | Status | `structured` | Structured. Pick which breakdowns or branches to run in parallel. |
 | `status` | Status | `needs_split` | Not MECE yet. One cut is still open. |
-| `status` | Status | `blocked` | Define the problem first. |
+| `status` | Status | `blocked` | State the main or SMART problem first. |
 | ask row `clarification` | no label | one open ask | {clarification} |
 
 Lead with the question. Then each breakdown. Then any MECE fail lines. Then Status. Then, when there is one open ask, write that clarification as a bare line. Do not print `applied` or `stop` in the view.
