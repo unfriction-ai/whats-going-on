@@ -1,11 +1,11 @@
 expect_ok: true
 wire: halt
-next_stage: structure-the-problem
+next_stage: prioritize-the-issues
 body: |
-  The next stage, structure the problem, is not available yet.
+  The next stage, prioritize the issues, is not available yet.
 
   ```yaml
-  next_stage: structure-the-problem
+  next_stage: prioritize-the-issues
   available: false
   stop: true
   ```

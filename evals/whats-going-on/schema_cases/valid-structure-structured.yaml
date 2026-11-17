@@ -1,0 +1,72 @@
+expect_ok: true
+derived_status: structured
+body: |
+  status: structured
+  root_question: "Which checkout timeout cause should we test first?"
+  main_question: "Why are checkout API calls timing out?"
+  smart_question: "Which checkout timeout cause should we test first?"
+  classification:
+    nature: analytical
+    direction: divergent
+  breakdowns:
+    - id: A
+      frame: "By layer"
+      depth_max_used: 1
+      status: mece_pass
+      tree:
+        id: root
+        question: "Which checkout timeout cause should we test first?"
+        level: 0
+        children:
+          - id: A.1
+            question: "Is the pool rejecting connections?"
+            level: 1
+            hypothesis: "The lowered pool max is dropping checkout calls."
+            children: []
+          - id: A.2
+            question: "Is the upstream service slow?"
+            level: 1
+            hypothesis: "Checkout waits on a slow dependency."
+            children: []
+      mece:
+        - path: A.tree.children
+          mutually_exclusive: pass
+          collectively_exhaustive: pass
+          note: "Layer cuts do not overlap and cover the call path."
+    - id: B
+      frame: "By symptom"
+      depth_max_used: 1
+      status: mece_pass
+      tree:
+        id: root
+        question: "Which checkout timeout cause should we test first?"
+        level: 0
+        children:
+          - id: B.1
+            question: "Do timeouts cluster on one endpoint?"
+            level: 1
+            hypothesis: "One route accounts for the timeouts."
+            children: []
+          - id: B.2
+            question: "Do timeouts spread across endpoints?"
+            level: 1
+            hypothesis: "The failures are not route-specific."
+            children: []
+      mece:
+        - path: B.tree.children
+          mutually_exclusive: pass
+          collectively_exhaustive: pass
+          note: "Clustered and spread cover the symptom split."
+  selected:
+    breakdown_ids: []
+    branch_ids: []
+    parallel: false
+  unresolved:
+    - observation: "No breakdown or branch has been chosen."
+      reason: "Parallel work needs the solver's pick."
+      clarification: "Which breakdowns (and optional branch ids) do you want to work in parallel?"
+  applied:
+    - name: principle-dont-solve-yet
+      at: breakdowns[0]
+      changed: "Kept the layer cut as subquestions instead of naming a cause."
+  stop: true
