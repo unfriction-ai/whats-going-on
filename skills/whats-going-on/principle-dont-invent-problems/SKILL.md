@@ -18,6 +18,8 @@ Missing data to *solve* does not block a problem. Missing data to *identify* doe
 
 Never add a fact, a metric, a timeframe, a cause, or a quadrant the input does not give. Never add a problem so that the restatement, the primary, and `unresolved` agree.
 
+A challenge finding quotes the paste word for word. Never name a bias the paste does not show.
+
 ## When
 
 Each time a concern could become a Defined row, and each time you are about to classify.

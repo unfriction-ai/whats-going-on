@@ -1,0 +1,85 @@
+turns:
+  - input: |
+      Refund tickets are taking two days. In the note, the support leads all agree the ticket form should stay. They want to know why the wait is that long.
+      
+      Context and constraints: Around "Why are refund tickets taking two days?", what background or pressures shape how you solve it, and what cannot change?
+      
+      Refund tickets sit with the support leads until a form change ships.
+      
+      Success criteria: For "Why are refund tickets taking two days?", what has to be true for the answer to count as success, and what would make it fail?
+      
+      Success is a cause we can see in the ticket timestamps. Failure is a guess about the form.
+      
+      Stakeholders: Who can make or block the decision behind "Why are refund tickets taking two days?", and who must agree? Say "I am the decider" if that is you.
+      
+      The support leads own the form. Billing has to live with the wait.
+      
+      Scope and sources: For "Why are refund tickets taking two days?", what is in and out of scope, and where does evidence already exist?
+      
+      In scope is refund tickets. Out of scope is shipping tickets. Evidence is the ticket export.
+      
+      Challenge: "the support leads all agree the ticket form should stay" leans on agreement. Who would disagree, and what would they say? Reply under this line, or say "I hold this framing."
+    restatement: "Someone asks why refund tickets are taking two days. The note says the support leads all agree the ticket form should stay."
+    expect:
+      kind: classify
+      statuses: [classified]
+      problems:
+        - anchor: [refund, two days]
+          quadrants: [analytical-convergent]
+      unresolved: []
+      smart:
+        proposal: proposed
+        gaps: []
+      worksheet:
+        stop: complete
+        cells:
+          context_constraints: filled
+          success_criteria: filled
+          stakeholders: filled
+          scope_sources: filled
+      challenge:
+        round: answered
+        biases: [groupthink]
+    tripwires:
+      invented:
+        - "chatbot"
+        - "macro"
+      methodNotProblem: []
+      solveLeak:
+        - "\\brewrite the form\\b"
+    gold: |
+      ```yaml
+      status: classified
+      main_question: "Why are refund tickets taking two days?"
+      problems:
+        - statement: "Why are refund tickets taking two days?"
+          classification:
+            nature: analytical
+            direction: convergent
+          confidence: high
+          why: "A stated wait on one ticket type. The timestamps should converge on where the two days go."
+          next_method: "Compare refund ticket timestamps with the form steps. Do not redesign the form in this slice."
+      smart_question: "Why are refund tickets taking two days?"
+      smart_gaps: []
+      worksheet:
+        context_constraints:
+          status: filled
+          text: "Refund tickets sit with the support leads until a form change ships."
+        success_criteria:
+          status: filled
+          text: "Success is a cause we can see in the ticket timestamps. Failure is a guess about the form."
+        stakeholders:
+          status: filled
+          text: "The support leads own the form. Billing has to live with the wait."
+        scope_sources:
+          status: filled
+          text: "In scope is refund tickets. Out of scope is shipping tickets. Evidence is the ticket export."
+      challenge:
+        round: answered
+        findings:
+          groupthink: "the support leads all agree the ticket form should stay"
+        reply: null
+      unresolved: []
+      applied: []
+      stop: true
+      ```
