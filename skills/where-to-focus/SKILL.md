@@ -1,16 +1,19 @@
 ---
 name: where-to-focus
 description: >-
-  Structure a defined whats-going-on problem into MECE hypothesis-driven
-  issue-tree breakdowns. The solver picks which breakdowns or branches to run
-  in parallel. Use for /where-to-focus after define-the-problem, or when the
-  user wants to break down where to look next without solving yet.
+  Structure a problem into MECE hypothesis-driven issue-tree breakdowns. Needs
+  only a main or SMART problem statement (from a prior whats-going-on result or
+  stated in the paste). The solver picks which breakdowns or branches to run in
+  parallel. Use for /where-to-focus when the user wants to break down where to
+  look next without solving yet.
 disable-model-invocation: true
 ---
 
 # Where to focus
 
 Run whats-going-on stage `structure-the-problem`.
+
+Entry needs only the main or SMART problem statement. A finished stage-1 status is not required.
 
 1. Read `../whats-going-on/SKILL.md`.
 2. Force Select to `structure-the-problem` for this turn.
