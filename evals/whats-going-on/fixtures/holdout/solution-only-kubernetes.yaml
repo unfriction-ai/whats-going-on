@@ -22,6 +22,7 @@ turns:
       smart_question: null
       smart_gaps: []
       worksheet: null
+      challenge: null
       unresolved:
         - observation: "VP wants a Kubernetes migration plan"
           reason: "A proposed platform move is not yet a defined problem. No pain, goal, or decision criteria are stated."

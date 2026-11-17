@@ -37,6 +37,7 @@ turns:
       smart_question: "Which one or two handoff changes should Design and Eng lock this sprint so tickets stop bouncing for missing acceptance criteria?"
       smart_gaps: []
       worksheet: {}
+      challenge: null
       unresolved:
         - observation: 'The worksheet has no context or constraints yet.'
           reason: 'Context and constraints is the next open worksheet area.'

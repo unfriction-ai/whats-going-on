@@ -1,16 +1,18 @@
-"""Challenge bias registry. Wire parse lands in a later PR."""
+"""Challenge bias registry and the idle or clear wire."""
 
 from __future__ import annotations
 
 import re
+from collections.abc import Mapping
 from dataclasses import dataclass
 from functools import cache
 from pathlib import Path
-from typing import Literal, get_args
+from typing import Any, Literal, assert_never, get_args
 
 from .manifest import SKILL_DIR
 from .smart import ASK_YOURSELF
-from .worksheet import load_registry as load_sheet_registry
+from .wire import ContractViolation
+from .worksheet import Complete, WorksheetAssessment, ask_row, load_registry as load_sheet_registry
 
 BiasId = Literal["anchoring", "confirmation_bias", "sunk_cost", "groupthink"]
 BIASES: tuple[BiasId, ...] = get_args(BiasId)
@@ -157,3 +159,64 @@ def _check_cross_registry(biases: tuple[Bias, ...]) -> None:
 @cache
 def load_registry(skill_dir: Path = SKILL_DIR) -> Registry:
     return parse_registry((skill_dir / "challenge" / "SKILL.md").read_text(encoding="utf-8"))
+
+
+@dataclass(frozen=True)
+class NotRun:
+    """The sheet is not complete, so the wire value is null."""
+
+
+@dataclass(frozen=True)
+class Clear:
+    """The sheet is complete and the round found nothing."""
+
+
+ChallengeAssessment = NotRun | Clear
+
+_CLEAR_KEYS = frozenset({"round", "findings", "reply"})
+_REJECTED_ROUNDS = frozenset({"open", "answered"})
+
+
+def operator_ask(sheet: WorksheetAssessment, challenge: ChallengeAssessment) -> str | None:
+    """Clarification of the one operator-ask row, if any."""
+    match challenge:
+        case NotRun() | Clear():
+            return ask_row(sheet)
+        case _ as unreachable:
+            assert_never(unreachable)
+
+
+def parse_challenge(
+    raw: Mapping[str, Any],
+    sheet: WorksheetAssessment,
+) -> ChallengeAssessment | ContractViolation:
+    if "challenge" not in raw:
+        return ContractViolation("challenge_schema", "challenge is required")
+    value = raw["challenge"]
+    complete = isinstance(sheet, Complete)
+    if value is None:
+        if complete:
+            return ContractViolation(
+                "challenge_null_when_complete",
+                "worksheet is complete, so challenge is the clear round",
+            )
+        return NotRun()
+    if not isinstance(value, dict):
+        return ContractViolation("challenge_schema", "challenge must be null or a mapping")
+    round_name = value.get("round")
+    if round_name in _REJECTED_ROUNDS:
+        return ContractViolation("challenge_round", f"round {round_name} is rejected")
+    if set(value) != _CLEAR_KEYS:
+        return ContractViolation("challenge_schema", "challenge keys must be round, findings, reply")
+    if round_name != "clear":
+        return ContractViolation("challenge_schema", "round must be clear")
+    if not complete:
+        return ContractViolation(
+            "challenge_before_complete",
+            "challenge is clear only when the worksheet is complete",
+        )
+    if value["findings"] != {}:
+        return ContractViolation("challenge_schema", "clear findings must be empty")
+    if value["reply"] is not None:
+        return ContractViolation("challenge_schema", "clear reply must be null")
+    return Clear()

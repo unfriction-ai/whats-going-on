@@ -38,6 +38,7 @@ turns:
       smart_question: "Why exactly did staging go down last night?"
       smart_gaps: [time_bound]
       worksheet: {}
+      challenge: null
       unresolved:
         - observation: "The director also wants three realistic ways to stop this class of failure, ranked by likelihood"
           reason: "Deferred until the primary problem is answered. Prevention options depend on why staging went down."

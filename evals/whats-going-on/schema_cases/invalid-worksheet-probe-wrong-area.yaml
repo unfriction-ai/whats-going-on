@@ -13,6 +13,7 @@ body: |
   smart_gaps: []
   worksheet:
     context_constraints: { status: filled, text: "Three new people joined after a messy on-call week." }
+  challenge: null
   unresolved:
     - observation: 'The worksheet has no stakeholders yet.'
       reason: 'Stakeholders is the next open worksheet area.'

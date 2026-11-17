@@ -37,6 +37,7 @@ turns:
       smart_question: "How should the two directors decide which services to sunset first, weighing product strategy and customer impact?"
       smart_gaps: [time_bound]
       worksheet: {}
+      challenge: null
       unresolved:
         - observation: 'The worksheet has no context or constraints yet.'
           reason: 'Context and constraints is the next open worksheet area.'

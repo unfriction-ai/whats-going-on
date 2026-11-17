@@ -12,6 +12,7 @@ body: |
   smart_question: "What approaches could build a healthy on-call culture on the platform squad over the next year?"
   smart_gaps: [measurable]
   worksheet: {}
+  challenge: null
   unresolved:
     - observation: "The ask says healthy but not what healthy looks like"
       reason: "SMART measurable is missing. The input gives no sign of done."

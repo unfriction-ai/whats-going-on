@@ -1,0 +1,12 @@
+expect_ok: false
+expect_kind: challenge_schema
+body: |
+  status: not_a_problem
+  main_question: null
+  problems: []
+  smart_question: null
+  smart_gaps: []
+  worksheet: null
+  unresolved: []
+  applied: []
+  stop: true

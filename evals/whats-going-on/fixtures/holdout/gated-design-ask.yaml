@@ -38,6 +38,7 @@ turns:
       smart_question: "Should offline mode ship in the March release, as leadership decides on Friday?"
       smart_gaps: []
       worksheet: {}
+      challenge: null
       unresolved:
         - observation: "The product manager asks design to mock up how offline mode would be featured on the pricing page"
           reason: "Deferred until the primary problem is answered. How to feature offline mode depends on whether it ships in March."

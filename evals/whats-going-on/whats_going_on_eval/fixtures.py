@@ -9,6 +9,7 @@ from typing import Any, Literal, assert_never
 
 import yaml
 
+from .challenge import ChallengeAssessment, Clear, NotRun
 from .parse import PREAMBLE_BUDGET, AtMostOne, Response, parse_response
 from .smart import (
     REQUIRED_TO_PROPOSE,
@@ -73,6 +74,11 @@ class WorksheetExpect:
 
 
 @dataclass(frozen=True)
+class ChallengeExpect:
+    round: Literal["clear"] | None
+
+
+@dataclass(frozen=True)
 class Expectation:
     kind: Kind
     statuses: tuple[str, ...]
@@ -81,6 +87,15 @@ class Expectation:
     asks: tuple[tuple[re.Pattern[str], ...], ...]
     smart: SmartExpect | None
     worksheet: WorksheetExpect | None
+    challenge: ChallengeExpect | None = None
+
+
+def challenge_matches(expect: ChallengeExpect | None, assessment: ChallengeAssessment) -> bool:
+    if expect is None:
+        return True
+    if expect.round is None:
+        return isinstance(assessment, NotRun)
+    return isinstance(assessment, Clear)
 
 
 def worksheet_matches(expect: WorksheetExpect | None, assessment: WorksheetAssessment) -> bool:
@@ -226,6 +241,7 @@ def _parse_expectation(raw: dict[str, Any]) -> Expectation:
         else:
             raise ValueError(f"unresolved[{i}] must be {{anchor: [...]}}")
 
+    challenge = _parse_challenge_expect(raw)
     if kind == "abstain":
         if "smart" in raw:
             raise ValueError("abstain expect must not set smart; the smart step needs a primary")
@@ -243,6 +259,7 @@ def _parse_expectation(raw: dict[str, Any]) -> Expectation:
             asks=tuple(asks),
             smart=None,
             worksheet=None,
+            challenge=challenge,
         )
 
     problems_raw = raw.get("problems")
@@ -267,7 +284,19 @@ def _parse_expectation(raw: dict[str, Any]) -> Expectation:
         asks=(),
         smart=smart,
         worksheet=_parse_worksheet_expect(raw, smart),
+        challenge=challenge,
     )
+
+
+def _parse_challenge_expect(raw: dict[str, Any]) -> ChallengeExpect | None:
+    if "challenge" not in raw:
+        return None
+    value = raw["challenge"]
+    if value is None:
+        return ChallengeExpect(None)
+    if isinstance(value, dict) and value.get("round") == "clear":
+        return ChallengeExpect("clear")
+    raise ValueError("expect.challenge must be null or {round: clear}")
 
 
 def _parse_stop(raw: Any) -> Stop:

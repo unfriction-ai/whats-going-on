@@ -35,6 +35,7 @@ turns:
       smart_question: "Why did the nightly billing batch fail?"
       smart_gaps: [time_bound]
       worksheet: {}
+      challenge: null
       unresolved:
         - observation: "The on-call lead also asks how to stop the nightly billing batch from failing again"
           reason: "Deferred until the primary problem is answered. Prevention approaches depend on why the batch failed."

@@ -40,6 +40,7 @@ turns:
       smart_question: "What approaches could the platform lead adopt so nobody on the platform squad carries more than one week of pages a month within the next year?"
       smart_gaps: []
       worksheet: {}
+      challenge: null
       unresolved:
         - observation: 'The worksheet has no context or constraints yet.'
           reason: 'Context and constraints is the next open worksheet area.'
