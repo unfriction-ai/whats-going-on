@@ -1,0 +1,43 @@
+expect_ok: false
+expect_kind: status_mismatch
+body: |
+  status: structured
+  root_question: "Why are checkout API calls timing out?"
+  main_question: "Why are checkout API calls timing out?"
+  smart_question: null
+  classification: null
+  breakdowns:
+    - id: A
+      frame: "By team"
+      depth_max_used: 1
+      status: needs_split
+      tree:
+        id: root
+        question: "Why are checkout API calls timing out?"
+        level: 0
+        children:
+          - id: A.1
+            question: "Is payments the source?"
+            level: 1
+            hypothesis: "Payment calls are the slow part."
+            children: []
+          - id: A.2
+            question: "Is the client the source?"
+            level: 1
+            hypothesis: "The app retries until the client times out."
+            children: []
+      mece:
+        - path: A.tree.children
+          mutually_exclusive: fail
+          collectively_exhaustive: pass
+          note: "Payments and the client both touch the same timeout."
+  selected:
+    breakdown_ids: []
+    branch_ids: []
+    parallel: false
+  unresolved:
+    - observation: "The team cut overlaps."
+      reason: "A second pass still left a shared cause."
+      clarification: "How should we cut payments versus the client?"
+  applied: []
+  stop: true

@@ -1,0 +1,35 @@
+expect_ok: false
+expect_kind: schema
+body: |
+  status: structured
+  root_question: "Why are checkout API calls timing out?"
+  main_question: "Why are checkout API calls timing out?"
+  smart_question: null
+  classification: null
+  breakdowns:
+    - id: A
+      frame: "By layer"
+      depth_max_used: 1
+      status: mece_pass
+      tree:
+        id: root
+        question: "Why are checkout API calls timing out?"
+        level: 0
+        children:
+          - id: A.1
+            question: "Is the pool rejecting connections?"
+            level: 1
+            hypothesis: "The lowered pool max is dropping checkout calls."
+            children: []
+      mece:
+        - path: A.tree.children
+          mutually_exclusive: pass
+          collectively_exhaustive: pass
+          note: "The layer cut covers the call path."
+  selected:
+    breakdown_ids: []
+    branch_ids: []
+    parallel: false
+  unresolved: []
+  applied: []
+  stop: true
