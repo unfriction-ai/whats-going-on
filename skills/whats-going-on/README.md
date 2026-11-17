@@ -132,7 +132,7 @@ smart_gaps: [specific | measurable | actionable | relevant | time_bound]
 
 worksheet: null | { <id>: { status: filled | unknown | not_yet | i_am_decider, text: "The reply, verbatim" | null } }
 
-challenge: null | { round: clear, findings: {}, reply: null }
+challenge: null | { round: clear|open|answered, findings: { <bias>: "…" }, reply: "…"|null }
 
 unresolved:
   - observation: "What was said"
@@ -147,7 +147,7 @@ applied:
 stop: true
 ```
 
-`problems` holds at most one item, the primary. An empty `problems` list is valid when status is `needs_clarification` or `not_a_problem`. Always emit `main_question`. Copy the primary's `statement` into it exactly. Write `null` when `problems` is empty. Always emit `smart_question` and `smart_gaps`. Write `null` and `[]` when there is no primary. Always emit `unresolved`. Put concerns first, then the worksheet ask row, then gap rows. Write `[]` when it is empty. Always emit `challenge`. Write `null` unless the worksheet is complete. When the worksheet is complete, write `round: clear`, empty `findings`, and `reply: null`. Always emit `applied`. Write `[]` when no principle decided a value.
+`problems` holds at most one item, the primary. An empty `problems` list is valid when status is `needs_clarification` or `not_a_problem`. Always emit `main_question`. Copy the primary's `statement` into it exactly. Write `null` when `problems` is empty. Always emit `smart_question` and `smart_gaps`. Write `null` and `[]` when there is no primary. Always emit `unresolved`. Put concerns first, then the one ask row (the worksheet probe or the Challenge line), then gap rows. Write `[]` when it is empty. Always emit `challenge`. Write `null` unless the worksheet is complete. On a complete worksheet write `round: clear`, `open`, or `answered`. `clear` has empty `findings` and `reply: null`. `open` and `answered` map each evidenced bias to one paste quote. `open` has `reply: null` and one Challenge row. `answered` copies the text under the Challenge line into `reply`, or `null`, and adds no row. Always emit `applied`. Write `[]` when no principle decided a value.
 
 ## Install
 

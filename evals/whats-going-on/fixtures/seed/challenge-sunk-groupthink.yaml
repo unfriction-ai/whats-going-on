@@ -1,0 +1,222 @@
+turns:
+  - input: |
+      From the platform lead:
+      Consumer lag spikes every Monday before the Q3 cutover, and we've already sunk four months into the Kafka migration. The lead adds that the whole team agrees we should finish it.
+    restatement: "The platform lead asks why consumer lag spikes every Monday before the Q3 cutover. The lead has already put four months into the Kafka migration and says the whole team agrees it should finish."
+    expect:
+      kind: classify
+      statuses: [partial]
+      problems:
+        - anchor: [lag, Kafka|cutover]
+          quadrants: [analytical-convergent]
+      unresolved: []
+      smart:
+        proposal: proposed
+        gaps: []
+      worksheet:
+        stop: asking
+        cells: {}
+    tripwires:
+      invented:
+        - "Pulsar"
+        - "RabbitMQ"
+      methodNotProblem: []
+      solveLeak:
+        - "\\babandon the migration\\b"
+    gold: |
+      ```yaml
+      status: partial
+      main_question: "Why does consumer lag spike every Monday before the Q3 cutover, given we've already sunk four months into the Kafka migration?"
+      problems:
+        - statement: "Why does consumer lag spike every Monday before the Q3 cutover, given we've already sunk four months into the Kafka migration?"
+          classification:
+            nature: analytical
+            direction: convergent
+          confidence: high
+          why: "A repeated Monday spike before a named cutover. The lag data should converge on what changed in that window."
+          next_method: "Compare Monday consumer metrics with the prior weekday. Do not pick a broker in this slice."
+      smart_question: "Why does consumer lag spike every Monday before the Q3 cutover, given we've already sunk four months into the Kafka migration?"
+      smart_gaps: []
+      worksheet: {}
+      challenge: null
+      unresolved:
+        - observation: "The worksheet has no context or constraints yet."
+          reason: "Context and constraints is the next open worksheet area."
+          clarification: "Context and constraints: Around \"Why does consumer lag spike every Monday before the Q3 cutover, given we've already sunk four months into the Kafka migration?\", what background or pressures shape how you solve it, and what cannot change?"
+      applied: []
+      stop: true
+      ```
+  - input: |
+      From the platform lead:
+      Consumer lag spikes every Monday before the Q3 cutover, and we've already sunk four months into the Kafka migration. The lead adds that the whole team agrees we should finish it.
+      
+      Context and constraints: Around "Why does consumer lag spike every Monday before the Q3 cutover, given we've already sunk four months into the Kafka migration?", what background or pressures shape how you solve it, and what cannot change?
+      
+      The lag shows up in the Monday deploy window, and the migration cannot slip past the Q3 cutover.
+      
+      Success criteria: For "Why does consumer lag spike every Monday before the Q3 cutover, given we've already sunk four months into the Kafka migration?", what has to be true for the answer to count as success, and what would make it fail?
+      
+      Success is a cause we can check in the consumer metrics. Failure is a guess we cannot trace to a deploy.
+      
+      Stakeholders: Who can make or block the decision behind "Why does consumer lag spike every Monday before the Q3 cutover, given we've already sunk four months into the Kafka migration?", and who must agree? Say "I am the decider" if that is you.
+      
+      The platform lead owns the migration. The on-call rotation must sign off before a topic change.
+      
+      Scope and sources: For "Why does consumer lag spike every Monday before the Q3 cutover, given we've already sunk four months into the Kafka migration?", what is in and out of scope, and where does evidence already exist?
+      
+      In scope is consumer lag on the billing topic. Out of scope is producer throughput. Evidence is the lag dashboard.
+    restatement: "The platform lead asks why consumer lag spikes every Monday before the Q3 cutover. The lead has already put four months into the Kafka migration and says the whole team agrees it should finish."
+    expect:
+      kind: classify
+      statuses: [partial]
+      problems:
+        - anchor: [lag, Kafka|cutover]
+          quadrants: [analytical-convergent]
+      unresolved: []
+      smart:
+        proposal: proposed
+        gaps: []
+      worksheet:
+        stop: complete
+        cells:
+          context_constraints: filled
+          success_criteria: filled
+          stakeholders: filled
+          scope_sources: filled
+      challenge:
+        round: open
+        biases: [sunk_cost, groupthink]
+    tripwires:
+      invented:
+        - "Pulsar"
+        - "RabbitMQ"
+      methodNotProblem: []
+      solveLeak:
+        - "\\babandon the migration\\b"
+    gold: |
+      ```yaml
+      status: partial
+      main_question: "Why does consumer lag spike every Monday before the Q3 cutover, given we've already sunk four months into the Kafka migration?"
+      problems:
+        - statement: "Why does consumer lag spike every Monday before the Q3 cutover, given we've already sunk four months into the Kafka migration?"
+          classification:
+            nature: analytical
+            direction: convergent
+          confidence: high
+          why: "A repeated Monday spike before a named cutover. The lag data should converge on what changed in that window."
+          next_method: "Compare Monday consumer metrics with the prior weekday. Do not pick a broker in this slice."
+      smart_question: "Why does consumer lag spike every Monday before the Q3 cutover, given we've already sunk four months into the Kafka migration?"
+      smart_gaps: []
+      worksheet:
+        context_constraints:
+          status: filled
+          text: "The lag shows up in the Monday deploy window, and the migration cannot slip past the Q3 cutover."
+        success_criteria:
+          status: filled
+          text: "Success is a cause we can check in the consumer metrics. Failure is a guess we cannot trace to a deploy."
+        stakeholders:
+          status: filled
+          text: "The platform lead owns the migration. The on-call rotation must sign off before a topic change."
+        scope_sources:
+          status: filled
+          text: "In scope is consumer lag on the billing topic. Out of scope is producer throughput. Evidence is the lag dashboard."
+      challenge:
+        round: open
+        findings:
+          sunk_cost: "we've already sunk four months into the Kafka migration"
+          groupthink: "the whole team agrees we should finish it"
+        reply: null
+      unresolved:
+        - observation: "The definition rests on framings the paste does not test."
+          reason: "The challenge round is open."
+          clarification: "Challenge: \"we've already sunk four months into the Kafka migration\" counts what is already spent. If you were starting today, would you still choose this? \"the whole team agrees we should finish it\" leans on agreement. Who would disagree, and what would they say? Reply under this line, or say \"I hold this framing.\""
+      applied: []
+      stop: true
+      ```
+  - input: |
+      From the platform lead:
+      Consumer lag spikes every Monday before the Q3 cutover, and we've already sunk four months into the Kafka migration. The lead adds that the whole team agrees we should finish it.
+      
+      Context and constraints: Around "Why does consumer lag spike every Monday before the Q3 cutover, given we've already sunk four months into the Kafka migration?", what background or pressures shape how you solve it, and what cannot change?
+      
+      The lag shows up in the Monday deploy window, and the migration cannot slip past the Q3 cutover.
+      
+      Success criteria: For "Why does consumer lag spike every Monday before the Q3 cutover, given we've already sunk four months into the Kafka migration?", what has to be true for the answer to count as success, and what would make it fail?
+      
+      Success is a cause we can check in the consumer metrics. Failure is a guess we cannot trace to a deploy.
+      
+      Stakeholders: Who can make or block the decision behind "Why does consumer lag spike every Monday before the Q3 cutover, given we've already sunk four months into the Kafka migration?", and who must agree? Say "I am the decider" if that is you.
+      
+      The platform lead owns the migration. The on-call rotation must sign off before a topic change.
+      
+      Scope and sources: For "Why does consumer lag spike every Monday before the Q3 cutover, given we've already sunk four months into the Kafka migration?", what is in and out of scope, and where does evidence already exist?
+      
+      In scope is consumer lag on the billing topic. Out of scope is producer throughput. Evidence is the lag dashboard.
+      
+      Challenge: "we've already sunk four months into the Kafka migration" counts what is already spent. If you were starting today, would you still choose this? "the whole team agrees we should finish it" leans on agreement. Who would disagree, and what would they say? Reply under this line, or say "I hold this framing."
+      I would still ask why the lag spikes before the cutover.
+    restatement: "The platform lead asks why consumer lag spikes every Monday before the Q3 cutover. The lead has already put four months into the Kafka migration and says the whole team agrees it should finish."
+    expect:
+      kind: classify
+      statuses: [classified]
+      problems:
+        - anchor: [lag, Kafka|cutover]
+          quadrants: [analytical-convergent]
+      unresolved: []
+      smart:
+        proposal: proposed
+        gaps: []
+      worksheet:
+        stop: complete
+        cells:
+          context_constraints: filled
+          success_criteria: filled
+          stakeholders: filled
+          scope_sources: filled
+      challenge:
+        round: answered
+        biases: [sunk_cost, groupthink]
+    tripwires:
+      invented:
+        - "Pulsar"
+        - "RabbitMQ"
+      methodNotProblem: []
+      solveLeak:
+        - "\\babandon the migration\\b"
+    gold: |
+      ```yaml
+      status: classified
+      main_question: "Why does consumer lag spike every Monday before the Q3 cutover, given we've already sunk four months into the Kafka migration?"
+      problems:
+        - statement: "Why does consumer lag spike every Monday before the Q3 cutover, given we've already sunk four months into the Kafka migration?"
+          classification:
+            nature: analytical
+            direction: convergent
+          confidence: high
+          why: "A repeated Monday spike before a named cutover. The lag data should converge on what changed in that window."
+          next_method: "Compare Monday consumer metrics with the prior weekday. Do not pick a broker in this slice."
+      smart_question: "Why does consumer lag spike every Monday before the Q3 cutover, given we've already sunk four months into the Kafka migration?"
+      smart_gaps: []
+      worksheet:
+        context_constraints:
+          status: filled
+          text: "The lag shows up in the Monday deploy window, and the migration cannot slip past the Q3 cutover."
+        success_criteria:
+          status: filled
+          text: "Success is a cause we can check in the consumer metrics. Failure is a guess we cannot trace to a deploy."
+        stakeholders:
+          status: filled
+          text: "The platform lead owns the migration. The on-call rotation must sign off before a topic change."
+        scope_sources:
+          status: filled
+          text: "In scope is consumer lag on the billing topic. Out of scope is producer throughput. Evidence is the lag dashboard."
+      challenge:
+        round: answered
+        findings:
+          sunk_cost: "we've already sunk four months into the Kafka migration"
+          groupthink: "the whole team agrees we should finish it"
+        reply: "I would still ask why the lag spikes before the cutover."
+      unresolved: []
+      applied: []
+      stop: true
+      ```

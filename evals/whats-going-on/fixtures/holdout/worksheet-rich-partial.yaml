@@ -255,6 +255,9 @@ turns:
           success_criteria: filled
           stakeholders: filled
           scope_sources: filled
+      challenge:
+        round: clear
+        biases: []
     tripwires:
       invented: ["\\b\\d+ ?(TB|PB|GB)\\b", "terabyte|petabyte"]
       methodNotProblem: []

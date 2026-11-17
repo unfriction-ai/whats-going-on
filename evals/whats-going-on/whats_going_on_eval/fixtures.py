@@ -9,7 +9,16 @@ from typing import Any, Literal, assert_never
 
 import yaml
 
-from .challenge import ChallengeAssessment, Clear, NotRun
+from .challenge import (
+    Answered,
+    BIASES,
+    BiasId,
+    ChallengeAssessment,
+    Clear,
+    Finding,
+    NotRun,
+    Open,
+)
 from .parse import PREAMBLE_BUDGET, AtMostOne, Response, parse_response
 from .smart import (
     REQUIRED_TO_PROPOSE,
@@ -43,6 +52,7 @@ REQUIRED_FAMILIES = frozenset(
         "solution_without_problem",
         "compound",
         "successive_asks",
+        "challenged",
     }
 )
 
@@ -75,7 +85,25 @@ class WorksheetExpect:
 
 @dataclass(frozen=True)
 class ChallengeExpect:
-    round: Literal["clear"] | None
+    round: Literal["clear", "open", "answered"] | None
+    biases: tuple[BiasId, ...] = ()
+
+    def __post_init__(self) -> None:
+        if self.round is None:
+            if self.biases:
+                raise ValueError("a null challenge expect has no biases")
+            return
+        if self.round == "clear":
+            if self.biases:
+                raise ValueError("a clear challenge expect has no biases")
+            return
+        if not self.biases:
+            raise ValueError(f"{self.round} challenge expect needs biases")
+        if any(bias not in BIASES for bias in self.biases):
+            raise ValueError("expect.challenge.biases names an unknown bias")
+        indexes = [BIASES.index(bias) for bias in self.biases]
+        if indexes != sorted(set(indexes)):
+            raise ValueError("expect.challenge.biases must be distinct and in table order")
 
 
 @dataclass(frozen=True)
@@ -90,12 +118,24 @@ class Expectation:
     challenge: ChallengeExpect | None = None
 
 
+def _bias_ids(findings: tuple[Finding, ...]) -> tuple[BiasId, ...]:
+    return tuple(finding.bias for finding in findings)
+
+
 def challenge_matches(expect: ChallengeExpect | None, assessment: ChallengeAssessment) -> bool:
-    if expect is None:
-        return True
-    if expect.round is None:
+    if expect is None or expect.round is None:
         return isinstance(assessment, NotRun)
-    return isinstance(assessment, Clear)
+    match assessment:
+        case Clear():
+            return expect.round == "clear"
+        case Open(findings=findings):
+            return expect.round == "open" and _bias_ids(findings) == expect.biases
+        case Answered(findings=findings):
+            return expect.round == "answered" and _bias_ids(findings) == expect.biases
+        case NotRun():
+            return False
+        case _ as unreachable:
+            assert_never(unreachable)
 
 
 def worksheet_matches(expect: WorksheetExpect | None, assessment: WorksheetAssessment) -> bool:
@@ -212,6 +252,10 @@ def derive_families(fixture_id: str, turns: tuple[Turn, ...]) -> frozenset[str]:
         families.add("solution_without_problem")
     if "ordinary" in fixture_id or "rename" in fixture_id or "fyi" in fixture_id:
         families.add("ordinary_or_fyi")
+    for turn in turns:
+        challenge = turn.expect.challenge
+        if challenge is not None and challenge.round in ("open", "answered"):
+            families.add("challenged")
 
     return frozenset(families)
 
@@ -241,7 +285,6 @@ def _parse_expectation(raw: dict[str, Any]) -> Expectation:
         else:
             raise ValueError(f"unresolved[{i}] must be {{anchor: [...]}}")
 
-    challenge = _parse_challenge_expect(raw)
     if kind == "abstain":
         if "smart" in raw:
             raise ValueError("abstain expect must not set smart; the smart step needs a primary")
@@ -259,7 +302,7 @@ def _parse_expectation(raw: dict[str, Any]) -> Expectation:
             asks=tuple(asks),
             smart=None,
             worksheet=None,
-            challenge=challenge,
+            challenge=_parse_challenge_expect(raw, None),
         )
 
     problems_raw = raw.get("problems")
@@ -276,6 +319,7 @@ def _parse_expectation(raw: dict[str, Any]) -> Expectation:
         quadrants=tuple(str(q) for q in quads),
     )
     smart = _parse_smart_expect(raw.get("smart"))
+    worksheet = _parse_worksheet_expect(raw, smart)
     return Expectation(
         kind="classify",
         statuses=tuple(str(s) for s in statuses),
@@ -283,20 +327,33 @@ def _parse_expectation(raw: dict[str, Any]) -> Expectation:
         unresolved=tuple(unresolved),
         asks=(),
         smart=smart,
-        worksheet=_parse_worksheet_expect(raw, smart),
-        challenge=challenge,
+        worksheet=worksheet,
+        challenge=_parse_challenge_expect(raw, worksheet),
     )
 
 
-def _parse_challenge_expect(raw: dict[str, Any]) -> ChallengeExpect | None:
+def _parse_challenge_expect(
+    raw: dict[str, Any], worksheet: WorksheetExpect | None
+) -> ChallengeExpect | None:
+    complete = worksheet is not None and worksheet.stop == "complete"
     if "challenge" not in raw:
+        if complete:
+            raise ValueError("expect.challenge is required when worksheet.stop is complete")
         return None
     value = raw["challenge"]
-    if value is None:
-        return ChallengeExpect(None)
-    if isinstance(value, dict) and value.get("round") == "clear":
-        return ChallengeExpect("clear")
-    raise ValueError("expect.challenge must be null or {round: clear}")
+    if not complete:
+        if value is None:
+            return ChallengeExpect(None)
+        raise ValueError("expect.challenge is set only when worksheet.stop is complete")
+    if not isinstance(value, dict) or set(value) != {"round", "biases"}:
+        raise ValueError("complete expect.challenge must be {round, biases}")
+    round_name = value["round"]
+    biases = value["biases"]
+    if not isinstance(biases, list) or not all(isinstance(bias, str) for bias in biases):
+        raise ValueError("expect.challenge.biases must be a list of bias ids")
+    if round_name not in ("clear", "open", "answered"):
+        raise ValueError("expect.challenge.round must be clear, open, or answered")
+    return ChallengeExpect(round_name, tuple(biases))
 
 
 def _parse_stop(raw: Any) -> Stop:

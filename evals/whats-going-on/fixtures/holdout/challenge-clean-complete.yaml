@@ -1,0 +1,82 @@
+turns:
+  - input: |
+      The billing on-call wants a written handoff before the June launch review. What should the handoff include so the next person can take an incident?
+      
+      Context and constraints: Around "What should the billing handoff include before the June launch review?", what background or pressures shape how you solve it, and what cannot change?
+      
+      The billing service changes hands at the launch review. The channel history is the only current handoff.
+      
+      Success criteria: For "What should the billing handoff include before the June launch review?", what has to be true for the answer to count as success, and what would make it fail?
+      
+      Success is a handoff the next person can use on an incident without rereading the channel.
+      
+      Stakeholders: Who can make or block the decision behind "What should the billing handoff include before the June launch review?", and who must agree? Say "I am the decider" if that is you.
+      
+      The billing on-call writes the handoff. The launch reviewer reads it.
+      
+      Scope and sources: For "What should the billing handoff include before the June launch review?", what is in and out of scope, and where does evidence already exist?
+      
+      In scope is the billing service handoff. Out of scope is the payments service. Evidence is the on-call channel.
+    restatement: "The billing on-call asks what a written handoff should include before the June launch review. The next person should be able to take an incident from it."
+    expect:
+      kind: classify
+      statuses: [classified]
+      problems:
+        - anchor: [handoff, billing]
+          quadrants: [conceptual-divergent]
+      unresolved: []
+      smart:
+        proposal: proposed
+        gaps: []
+      worksheet:
+        stop: complete
+        cells:
+          context_constraints: filled
+          success_criteria: filled
+          stakeholders: filled
+          scope_sources: filled
+      challenge:
+        round: clear
+        biases: []
+    tripwires:
+      invented:
+        - "PagerDuty"
+        - "runbook template"
+      methodNotProblem: []
+      solveLeak:
+        - "\\byou should include\\b"
+    gold: |
+      ```yaml
+      status: classified
+      main_question: "What should the billing handoff include before the June launch review?"
+      problems:
+        - statement: "What should the billing handoff include before the June launch review?"
+          classification:
+            nature: conceptual
+            direction: divergent
+          confidence: high
+          why: "The ask invites several possible contents for a handoff. Norms and the reader are conceptual."
+          next_method: "List candidate handoff contents before narrowing. Do not draft the handoff in this slice."
+      smart_question: "What should the billing handoff include before the June launch review?"
+      smart_gaps: []
+      worksheet:
+        context_constraints:
+          status: filled
+          text: "The billing service changes hands at the launch review. The channel history is the only current handoff."
+        success_criteria:
+          status: filled
+          text: "Success is a handoff the next person can use on an incident without rereading the channel."
+        stakeholders:
+          status: filled
+          text: "The billing on-call writes the handoff. The launch reviewer reads it."
+        scope_sources:
+          status: filled
+          text: "In scope is the billing service handoff. Out of scope is the payments service. Evidence is the on-call channel."
+      challenge:
+        round: clear
+        findings: {}
+        reply: null
+      unresolved: []
+      applied: []
+      stop: true
+      ```
