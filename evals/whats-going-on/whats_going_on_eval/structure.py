@@ -447,7 +447,7 @@ def _parse_mece_note(item: Any, path: str) -> MeceNote | ContractViolation:
 def _sibling_set_paths(
     breakdown_id: str, root: TreeNode
 ) -> dict[str, tuple[TreeNode, ...]]:
-    """Map wire path → children for every parent that has children."""
+    """Map each wire path to the children of that parent."""
     out: dict[str, tuple[TreeNode, ...]] = {}
 
     def walk(node: TreeNode, path: str) -> None:
@@ -507,7 +507,7 @@ def _grow_revenue_ce_lint(
     return ContractViolation(
         "mece_ce_scope",
         f"{where}: grow-revenue CE cannot pass on price|volume alone; "
-        "keep acquisition/new markets as open branches (see mece.md)",
+        "keep acquisition/new markets as open branches (see mece/SKILL.md)",
     )
 
 
