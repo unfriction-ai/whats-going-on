@@ -38,6 +38,7 @@ from .manifest import (
     skill_view_hash,
 )
 from .parse import Halt, Response, describe_violation, parse_response
+from .challenge import load_registry as load_challenge_registry
 from .smart import NoPrimary, Proposed, Withheld
 from .wire import ContractViolation
 from .worksheet import (
@@ -92,6 +93,12 @@ def cmd_check() -> int:
         print(f"  worksheet_registry: {exc}")
         return 2
     try:
+        challenge_registry = load_challenge_registry(SKILL_DIR)
+    except ValueError as exc:
+        print("check FAILED")
+        print(f"  challenge_registry: {exc}")
+        return 2
+    try:
         _worksheet_assess_self_check()
     except ValueError as exc:
         print("check FAILED")
@@ -105,6 +112,7 @@ def cmd_check() -> int:
     print(f"  nested_leaves: {', '.join(Path(rel).parent.as_posix() for rel in leaves)}")
     print(f"  worksheet_areas: {', '.join(area.id for area in registry.areas)}")
     print("  worksheet_assess: ok")
+    print(f"  challenge_biases: {', '.join(bias.id for bias in challenge_registry.biases)}")
     return 0
 
 
