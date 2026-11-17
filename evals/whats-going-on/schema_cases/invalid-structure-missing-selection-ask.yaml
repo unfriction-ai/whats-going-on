@@ -21,6 +21,11 @@ body: |
             level: 1
             hypothesis: "The lowered pool max is dropping checkout calls."
             children: []
+          - id: A.2
+            question: "Is the upstream service slow?"
+            level: 1
+            hypothesis: "Checkout waits on a slow dependency."
+            children: []
       mece:
         - path: A.tree.children
           mutually_exclusive: pass
