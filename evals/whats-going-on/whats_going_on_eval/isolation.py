@@ -37,7 +37,7 @@ def _stream(workspace: Path, home: Path | None) -> tuple[str, list[str]]:
     proc = subprocess.run(
         [
             "agent", "-p", "--trust", "--workspace", str(workspace), "--mode", "ask",
-            "--output-format", "stream-json", build_prompt(ASK),
+            "--output-format", "stream-json", build_prompt(ASK, "default"),
         ],
         env=env,
         capture_output=True,

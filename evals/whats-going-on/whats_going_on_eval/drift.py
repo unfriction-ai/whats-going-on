@@ -251,7 +251,7 @@ def _case_blocks(readme: str) -> dict[str, dict[str, str]]:
         body = parts[i + 1]
         input_m = re.search(r"\*\*Input\*\*\s*\n\n```text\n(.*?)```", body, re.DOTALL)
         yaml_m = re.search(
-            r"\*\*Expected result(?: \(typical\))?\*\*\s*\n\n```yaml\n(.*?)```",
+            r"\*\*Debug view(?: \(typical\))?\*\*\s*\n\n```yaml\n(.*?)```",
             body,
             re.DOTALL,
         )
@@ -524,7 +524,7 @@ def _restatement_guard_self_test(cases_dir: Path) -> list[DriftProblem]:
             continue
         kinds = [
             fail.kind
-            for fail in _restatement_fails(_guard_turn(user_input), parsed.preamble)
+            for fail in _restatement_fails(_guard_turn(user_input), parsed.view.restatement)
         ]
         want = [] if expected is None else [expected]
         if kinds != want:

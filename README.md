@@ -42,6 +42,8 @@ Product contract and worked cases. `skills/whats-going-on/README.md`.
 
 Claude Code plugin sessions use `/whats-going-on:whats-going-on`.
 
+When the host passes arguments on a slash command, add `--debug` after the command. When it does not, put `debug` on its own line, or write `show debug`, in the message.
+
 ## Evals
 
 Executable suite. `evals/whats-going-on/`. Sibling of the skill. Never installed with it.
