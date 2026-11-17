@@ -7,8 +7,10 @@ import tempfile
 from collections.abc import Callable
 from dataclasses import dataclass
 from pathlib import Path
+from typing import assert_never
 
 from .manifest import HOST_SKILL_DIR, INSTALL_SKILL_DIR, agent_mount
+from .view import Mode
 
 INVOKE_TIMEOUT_S = 600
 
@@ -151,8 +153,26 @@ def _mount_file_problems(
     return problems
 
 
-def build_prompt(user_input: str) -> str:
-    return f"/whats-going-on\n\n{user_input.strip()}\n"
+def prompt_problems() -> list[str]:
+    debug = build_prompt("Checkout latency rose.", "debug")
+    default = build_prompt("Checkout latency rose.", "default")
+    problems: list[str] = []
+    if debug != "/whats-going-on --debug\n\nCheckout latency rose.\n":
+        problems.append(f"debug prompt {debug!r}")
+    if default != "/whats-going-on\n\nCheckout latency rose.\n":
+        problems.append(f"default prompt {default!r}")
+    return problems
+
+
+def build_prompt(user_input: str, mode: Mode = "debug") -> str:
+    match mode:
+        case "debug":
+            command = "/whats-going-on --debug"
+        case "default":
+            command = "/whats-going-on"
+        case _ as unreachable:
+            assert_never(unreachable)
+    return f"{command}\n\n{user_input.strip()}\n"
 
 
 def invoke(
@@ -161,11 +181,12 @@ def invoke(
     user_input: str,
     skill_src: Path | None,
     session_workspace: Path | None = None,
+    mode: Mode = "debug",
 ) -> InvokeResult:
     if agent not in HOST_SKILL_DIR:
         raise ValueError(f"unknown agent {agent!r}; choose from {sorted(HOST_SKILL_DIR)}")
     workspace = session_workspace or materialize_skill(skill_src)
-    prompt = build_prompt(user_input)
+    prompt = build_prompt(user_input, mode)
     build_argv = _HOST_ARGV.get(agent)
     if build_argv is None:
         raise HostNotWired(

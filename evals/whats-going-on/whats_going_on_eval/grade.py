@@ -3,9 +3,10 @@
 from __future__ import annotations
 
 import re
-from dataclasses import dataclass
+from dataclasses import dataclass, replace
 from typing import Literal, assert_never
 
+from .challenge import challenge_prose, operator_ask, restated_line, ungrounded_findings
 from .fixtures import Expectation, ExpectedProblem, Fixture, Turn, _gold_response_text
 from .parse import (
     ClassifiedProblem,
@@ -16,8 +17,8 @@ from .parse import (
     parse_restatement,
 )
 from .smart import NoPrimary, Proposed, Withheld
+from .view import STATUS_PHRASE, default_mode_problems, view_agrees
 from .wire import ContractViolation
-from .challenge import challenge_prose, restated_line, ungrounded_findings
 from .worksheet import ungrounded_cells, worksheet_prose
 
 RUBRIC: dict[str, float] = {
@@ -167,7 +168,7 @@ def _hard_fails(turn: Turn, response: Response, text: str) -> list[HardFail]:
             fails.append(HardFail("invented_detail", pat.pattern))
 
     prose_fields = {
-        "preamble": response.preamble,
+        "preamble": response.view.restatement,
         "why": " ".join(p.why for p in verdict.problems),
         "next_method": " ".join(p.next_method for p in verdict.problems),
         "clarification": " ".join(u.clarification for u in verdict.unresolved),
@@ -197,12 +198,15 @@ def _hard_fails(turn: Turn, response: Response, text: str) -> list[HardFail]:
         fails.append(HardFail("challenge_ungrounded", bias))
     if restated_line(verdict.challenge, turn.input) is False:
         fails.append(HardFail("challenge_restated"))
-    fails.extend(_restatement_fails(turn, response.preamble))
+    fails.extend(_restatement_fails(turn, response.view.restatement))
+    fails.extend(
+        HardFail(fail.kind, fail.detail) for fail in view_agrees(response.view, response.verdict)
+    )
     return fails
 
 
-def _restatement_fails(turn: Turn, preamble: str) -> list[HardFail]:
-    text = preamble.strip()
+def _restatement_fails(turn: Turn, restatement: str) -> list[HardFail]:
+    text = restatement.strip()
     if not text:
         return [HardFail("restatement_missing")]
     fails: list[HardFail] = []
@@ -214,7 +218,7 @@ def _restatement_fails(turn: Turn, preamble: str) -> list[HardFail]:
 
 
 def restatement_agreement(turn: Turn, response: Response) -> Literal["agree", "disagree", "n/a"]:
-    parsed = parse_restatement(response.preamble)
+    parsed = parse_restatement(response.view.restatement)
     if parsed is None:
         return "n/a"
     status = response.verdict.status
@@ -223,6 +227,112 @@ def restatement_agreement(turn: Turn, response: Response) -> Literal["agree", "d
     if status == "not_a_problem" and parsed.ask_stated:
         return "disagree"
     return "agree"
+
+
+def presentation_problems(fixtures: list[Fixture]) -> list[str]:
+    problems = list(default_mode_problems())
+    problems.extend(_split_problems(fixtures))
+    problems.extend(_agreement_problems(fixtures))
+    return problems
+
+
+def _split_problems(fixtures: list[Fixture]) -> list[str]:
+    turn = next(
+        (
+            item
+            for fixture in fixtures
+            for item in fixture.turns
+            if not any(pat.search(item.restatement) for pat in RESTATEMENT_CLASSIFIES)
+        ),
+        None,
+    )
+    if turn is None:
+        return ["no gold restatement is free of classifying words"]
+    parsed = parse_response(
+        _gold_response_text(
+            f"{turn.restatement}\n\nThe real problem is the pool.",
+            turn.gold_text,
+        )
+    )
+    if not isinstance(parsed, Response):
+        detail = parsed.kind if isinstance(parsed, ContractViolation) else type(parsed).__name__
+        return [f"view split sample did not parse ({detail})"]
+    problems: list[str] = []
+    if parsed.view.restatement != turn.restatement:
+        problems.append(f"view split restatement {parsed.view.restatement!r}")
+    if parsed.view.body != "The real problem is the pool.":
+        problems.append(f"view split body {parsed.view.body!r}")
+    opening = [fail.kind for fail in _restatement_fails(turn, parsed.view.restatement)]
+    if "restatement_classifies" in opening:
+        problems.append("restatement grader read the view body")
+    whole = [
+        fail.kind
+        for fail in _restatement_fails(
+            turn, f"{parsed.view.restatement}\n\n{parsed.view.body}"
+        )
+    ]
+    if "restatement_classifies" not in whole:
+        problems.append("classifying view body did not trip the grader when it was included")
+    return problems
+
+
+def _agreement_problems(fixtures: list[Fixture]) -> list[str]:
+    problems: list[str] = []
+    for fixture in fixtures:
+        for turn in fixture.turns:
+            fails = view_agrees(turn.gold.view, turn.gold.verdict)
+            if fails:
+                problems.append(f"{fixture.id} gold view disagrees: {fails[0].kind}")
+                return problems
+
+    turn = fixtures[0].turns[0]
+    verdict = turn.gold.verdict
+    expected = STATUS_PHRASE[verdict.status]
+    wrong = next(phrase for phrase in STATUS_PHRASE.values() if phrase != expected)
+    if not any(
+        fail.kind == "view_status"
+        for fail in view_agrees(replace(turn.gold.view, status_phrase=wrong), verdict)
+    ):
+        problems.append("view_agrees accepted a status phrase that disagrees")
+
+    if verdict.main_question is None:
+        matching = "There is no question yet."
+        differing = "Why did checkout latency rise?"
+    else:
+        matching = verdict.main_question
+        differing = "A different question than the verdict."
+    if view_agrees(replace(turn.gold.view, main_question=matching), verdict):
+        problems.append("view_agrees rejected a main question that matches")
+    if not any(
+        fail.kind == "view_main_question"
+        for fail in view_agrees(replace(turn.gold.view, main_question=differing), verdict)
+    ):
+        problems.append("view_agrees accepted a main question that disagrees")
+
+    asked = next(
+        (
+            item
+            for fixture in fixtures
+            for item in fixture.turns
+            if operator_ask(item.gold.verdict.worksheet, item.gold.verdict.challenge)
+        ),
+        None,
+    )
+    if asked is None:
+        problems.append("no gold turn has an ask line to agree with")
+        return problems
+    ask = operator_ask(asked.gold.verdict.worksheet, asked.gold.verdict.challenge)
+    if view_agrees(replace(asked.gold.view, ask_line=ask), asked.gold.verdict):
+        problems.append("view_agrees rejected an ask line that matches")
+    if not any(
+        fail.kind == "view_ask"
+        for fail in view_agrees(
+            replace(asked.gold.view, ask_line="Ask yourself: This is not the verdict ask."),
+            asked.gold.verdict,
+        )
+    ):
+        problems.append("view_agrees accepted an ask line that disagrees")
+    return problems
 
 
 def _score_axes(

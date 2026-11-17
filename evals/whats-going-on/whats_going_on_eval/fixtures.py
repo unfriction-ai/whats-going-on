@@ -436,8 +436,8 @@ def _parse_turn(raw: dict[str, Any]) -> Turn:
     parsed = parse_response(gold_response_text)
     if not isinstance(parsed, Response):
         raise ValueError(f"gold does not parse: {parsed.kind} {parsed.detail}")
-    if len(parsed.preamble) > PREAMBLE_BUDGET:
-        raise ValueError("gold preamble over budget")
+    if len(parsed.view.restatement) > PREAMBLE_BUDGET:
+        raise ValueError("gold restatement over budget")
     return Turn(
         input=input_text,
         expect=_parse_expectation(raw["expect"]),

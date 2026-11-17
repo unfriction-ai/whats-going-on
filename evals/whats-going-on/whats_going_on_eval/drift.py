@@ -524,7 +524,7 @@ def _restatement_guard_self_test(cases_dir: Path) -> list[DriftProblem]:
             continue
         kinds = [
             fail.kind
-            for fail in _restatement_fails(_guard_turn(user_input), parsed.preamble)
+            for fail in _restatement_fails(_guard_turn(user_input), parsed.view.restatement)
         ]
         want = [] if expected is None else [expected]
         if kinds != want:

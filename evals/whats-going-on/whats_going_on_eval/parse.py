@@ -13,7 +13,8 @@ from .challenge import ChallengeAssessment, operator_ask, parse_challenge
 from .manifest import SKILL_DIR
 from .principles import WireKind, load_principles
 from .smart import Proposed, SmartProposal, parse_smart, partition_unresolved
-from .wire import ContractViolation, Unresolved
+from .view import View, read_view, split_human
+from .wire import PREAMBLE_BUDGET, ContractViolation, Unresolved
 from .worksheet import WorksheetAssessment, parse_worksheet
 
 NATURES = ("analytical", "conceptual")
@@ -31,8 +32,6 @@ Quadrant = Literal[
     "conceptual-convergent",
     "conceptual-divergent",
 ]
-
-PREAMBLE_BUDGET = 400
 
 NO_ASK = "No ask is stated."
 
@@ -112,7 +111,9 @@ class Restatement:
 
 @dataclass(frozen=True)
 class Response:
-    preamble: str
+    """Debug reply: the human view, then one Verdict fence."""
+
+    view: View
     verdict: Verdict
 
 
@@ -167,12 +168,14 @@ def parse_response(text: str) -> Outcome | ContractViolation:
         return ContractViolation("multiple_yaml_blocks", str(len(matches)))
 
     match = matches[0]
-    preamble = text[: match.start()]
+    pre_fence = text[: match.start()]
     trailing = text[match.end() :]
     if trailing.strip():
         return ContractViolation("content_after_stop", trailing.strip()[:80])
-    if len(preamble.strip()) > PREAMBLE_BUDGET:
-        return ContractViolation("preamble_over_budget", str(len(preamble.strip())))
+
+    restatement, body = split_human(pre_fence)
+    if len(restatement) > PREAMBLE_BUDGET:
+        return ContractViolation("preamble_over_budget", str(len(restatement)))
 
     try:
         raw = yaml.safe_load(match.group(1))
@@ -182,7 +185,13 @@ def parse_response(text: str) -> Outcome | ContractViolation:
     if not isinstance(raw, dict):
         return ContractViolation("schema", "root must be a mapping")
 
-    return _validate_wire(raw, preamble.strip())
+    if "next_stage" in raw:
+        preamble = pre_fence.strip()
+        if len(preamble) > PREAMBLE_BUDGET:
+            return ContractViolation("preamble_over_budget", str(len(preamble)))
+        return _validate_halt_wire(raw, preamble)
+
+    return _validate_wire(raw, read_view(restatement, body))
 
 
 def _nonblank(value: Any, path: str) -> str | ContractViolation:
@@ -191,14 +200,15 @@ def _nonblank(value: Any, path: str) -> str | ContractViolation:
     return value.strip()
 
 
-def _validate_wire(raw: dict[str, Any], preamble: str) -> Outcome | ContractViolation:
-    keys = set(raw)
-    if "next_stage" in keys:
-        unknown_halt = keys - HALT_KEYS
-        if unknown_halt:
-            return ContractViolation("schema", f"unknown keys: {sorted(unknown_halt)}")
-        return _validate_halt(raw, preamble)
+def _validate_halt_wire(raw: dict[str, Any], preamble: str) -> Halt | ContractViolation:
+    unknown_halt = set(raw) - HALT_KEYS
+    if unknown_halt:
+        return ContractViolation("schema", f"unknown keys: {sorted(unknown_halt)}")
+    return _validate_halt(raw, preamble)
 
+
+def _validate_wire(raw: dict[str, Any], view: View) -> Response | ContractViolation:
+    keys = set(raw)
     unknown = keys - VERDICT_KEYS
     if unknown:
         return ContractViolation("schema", f"unknown keys: {sorted(unknown)}")
@@ -272,7 +282,7 @@ def _validate_wire(raw: dict[str, Any], preamble: str) -> Outcome | ContractViol
         return applied
 
     return Response(
-        preamble=preamble,
+        view=view,
         verdict=Verdict(
             status=derived,
             main_question=main_question,

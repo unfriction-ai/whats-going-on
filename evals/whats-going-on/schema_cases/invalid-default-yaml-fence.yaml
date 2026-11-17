@@ -1,0 +1,10 @@
+wire: view
+expect_ok: false
+expect_kind: yaml_fence
+body: |
+  Someone asks why latency rose.
+
+  ```yaml
+  status: classified
+  stop: true
+  ```
