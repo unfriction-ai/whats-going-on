@@ -17,7 +17,7 @@ from .parse import (
     parse_restatement,
 )
 from .smart import NoPrimary, Proposed, Withheld
-from .view import STATUS_PHRASE, default_mode_problems, view_agrees
+from .view import STATUS_PHRASE, Mode, default_mode_problems, parse_view, view_agrees
 from .wire import ContractViolation
 from .worksheet import ungrounded_cells, worksheet_prose
 
@@ -87,7 +87,24 @@ def describe_hard_fail(h: HardFail) -> str:
 
 
 def grade_turn(
-    turn: Turn, text: str, judgment: Judgment | None = None
+    turn: Turn,
+    text: str,
+    judgment: Judgment | None = None,
+    *,
+    mode: Mode = "debug",
+) -> TurnResult:
+    """Debug grades the Verdict fence. Default grades the human view."""
+    match mode:
+        case "debug":
+            return _grade_debug_turn(turn, text, judgment)
+        case "default":
+            return _grade_default_turn(turn, text, judgment)
+        case _ as unreachable:
+            assert_never(unreachable)
+
+
+def _grade_debug_turn(
+    turn: Turn, text: str, judgment: Judgment | None
 ) -> TurnResult:
     parsed = parse_response(text)
     if isinstance(parsed, ContractViolation):
@@ -117,18 +134,37 @@ def grade_turn(
     )
 
 
+def _grade_default_turn(
+    turn: Turn, text: str, judgment: Judgment | None
+) -> TurnResult:
+    """Accept a human view. A fence is a contract fail. Outcome axes stay unscored."""
+    parsed = parse_view(text)
+    if isinstance(parsed, ContractViolation):
+        hard_fails = (HardFail("contract", f"{parsed.kind} {parsed.detail}".strip()),)
+    else:
+        hard_fails = tuple(_restatement_fails(turn, parsed.restatement))
+    return TurnResult(
+        hard_fails=hard_fails,
+        axes={k: None for k in RUBRIC},
+        score=0.0,
+        judgment=judgment,
+    )
+
+
 def grade_run(
     fixture: Fixture,
     repetition: int,
     responses: list[str],
     judgments: list[Judgment | None] | None = None,
+    *,
+    mode: Mode = "debug",
 ) -> FixtureRunResult:
     if judgments is None:
         judgments = [None] * len(responses)
     if len(responses) != len(fixture.turns):
         raise ValueError("response count must equal turn count")
     turns = tuple(
-        grade_turn(turn, text, judgment)
+        grade_turn(turn, text, judgment, mode=mode)
         for turn, text, judgment in zip(fixture.turns, responses, judgments, strict=True)
     )
     score = sum(t.score for t in turns) / len(turns) if turns else 0.0
@@ -231,8 +267,63 @@ def restatement_agreement(turn: Turn, response: Response) -> Literal["agree", "d
 
 def presentation_problems(fixtures: list[Fixture]) -> list[str]:
     problems = list(default_mode_problems())
+    problems.extend(_default_grade_problems(fixtures))
     problems.extend(_split_problems(fixtures))
     problems.extend(_agreement_problems(fixtures))
+    return problems
+
+
+def _default_grade_problems(fixtures: list[Fixture]) -> list[str]:
+    """Default grading accepts a human view and still rejects a fence."""
+    turn = next((item for fixture in fixtures for item in fixture.turns), None)
+    if turn is None:
+        return ["no turn to grade in default mode"]
+    shown = next(
+        phrase
+        for phrase in STATUS_PHRASE.values()
+        if phrase != STATUS_PHRASE[turn.gold.verdict.status]
+    )
+    human = (
+        "What's going on\n\n"
+        "Someone asks why checkout latency rose.\n\n"
+        "The question\n"
+        "A different question than the verdict.\n\n"
+        "Status\n"
+        f"{shown}.\n\n"
+        "The real problem is the pool.\n"
+    )
+    problems: list[str] = []
+    default = grade_turn(turn, human, mode="default")
+    kinds = [fail.kind for fail in default.hard_fails]
+    if "contract" in kinds:
+        problems.append(f"default grade rejected a human reply ({kinds})")
+    if "restatement_classifies" in kinds:
+        problems.append("default grade read a classifying phrase in the view body")
+    if any(kind.startswith("view_") for kind in kinds):
+        problems.append(f"default grade pinned a view field without a verdict ({kinds})")
+    fenced = grade_turn(turn, human + "\n```yaml\nstatus: classified\n```\n", mode="default")
+    if not any(
+        fail.kind == "contract" and fail.detail.startswith("yaml_fence")
+        for fail in fenced.hard_fails
+    ):
+        problems.append(
+            "default grade accepted a yaml fence ("
+            + ", ".join(fail.kind for fail in fenced.hard_fails)
+            + ")"
+        )
+    classifying = grade_turn(
+        turn,
+        "What's going on\n\nThe real problem is the pool.\n\nStatus\nNot defined yet.\n",
+        mode="default",
+    )
+    if not any(fail.kind == "restatement_classifies" for fail in classifying.hard_fails):
+        problems.append("default grade missed a classifying restatement")
+    debug = grade_turn(turn, human, mode="debug")
+    if not any(
+        fail.kind == "contract" and fail.detail.startswith("no_yaml_block")
+        for fail in debug.hard_fails
+    ):
+        problems.append("debug grade did not require a yaml fence")
     return problems
 
 

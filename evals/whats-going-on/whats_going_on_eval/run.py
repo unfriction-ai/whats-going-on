@@ -39,7 +39,7 @@ from .manifest import (
     skill_view_hash,
 )
 from .parse import Halt, Response, describe_violation, parse_response
-from .view import View, parse_view
+from .view import Mode, View, parse_view
 from .challenge import load_registry as load_challenge_registry
 from .smart import NoPrimary, Proposed, Withheld
 from .wire import ContractViolation
@@ -336,7 +336,7 @@ def cmd_run(args: argparse.Namespace) -> int:
                         responses.append(text)
                 finally:
                     shutil.rmtree(workspace, ignore_errors=True)
-                results.append(grade_run(fixture, rep, responses))
+                results.append(grade_run(fixture, rep, responses, mode=args.mode))
     except HostNotWired as exc:
         print(str(exc), file=sys.stderr)
         print(
@@ -368,6 +368,18 @@ def cmd_run(args: argparse.Namespace) -> int:
     return 0 if report.passed else 1
 
 
+def _stored_mode(run_id: str) -> Mode:
+    from .runs import run_dir
+
+    path = run_dir(run_id) / "manifest.json"
+    raw = "debug"
+    if path.exists():
+        raw = json.loads(path.read_text()).get("presentation", "debug")
+    if raw == "default" or raw == "debug":
+        return raw
+    raise ValueError(f"presentation {raw!r} in {run_id}")
+
+
 def cmd_grade(run_id: str) -> int:
     from .runs import run_dir
 
@@ -375,6 +387,11 @@ def cmd_grade(run_id: str) -> int:
     tdir = run_dir(run_id) / "transcripts"
     if not tdir.exists():
         print(f"no transcripts for {run_id}", file=sys.stderr)
+        return 2
+    try:
+        mode = _stored_mode(run_id)
+    except ValueError as exc:
+        print(str(exc), file=sys.stderr)
         return 2
 
     grouped: dict[tuple[str, int], dict[int, str]] = {}
@@ -387,7 +404,7 @@ def cmd_grade(run_id: str) -> int:
     for (fixture_id, rep), turns in sorted(grouped.items()):
         fixture = fixtures[fixture_id]
         responses = [turns[i] for i in range(len(fixture.turns))]
-        results.append(grade_run(fixture, rep, responses))
+        results.append(grade_run(fixture, rep, responses, mode=mode))
 
     report = summarize(results, fixtures)
     write_report(
@@ -476,7 +493,7 @@ def build_parser() -> argparse.ArgumentParser:
         "--mode",
         choices=("default", "debug"),
         default="debug",
-        help="Presentation mode. debug asks for the Verdict fence. Grading still reads that fence.",
+        help="Presentation mode. debug grades the Verdict fence. default grades the human view.",
     )
     run_p.add_argument("--only", default="", help="Comma-separated fixture ids")
     run_p.add_argument("--repeat", type=int, default=1)
