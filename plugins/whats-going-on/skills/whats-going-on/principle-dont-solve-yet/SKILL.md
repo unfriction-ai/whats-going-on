@@ -11,9 +11,11 @@ disable-model-invocation: true
 
 ## Rule
 
-State what needs resolving, then stop. Do not hunt a root cause, build an issue tree, list options, brainstorm, plan, or recommend beyond the running playbook's Output.
+State what needs resolving, then stop. Do not hunt a root cause, list options as answers, brainstorm solutions, plan, or recommend beyond the running playbook's Output.
 
-`next_method` names a kind of reasoning, not its result. An `unresolved` row asks for what is missing to identify the problem, not for a fix.
+An issue tree is allowed only when the running playbook produces one. Nodes stay hypotheses or subquestions, not settled causes or picks.
+
+`next_method` names a kind of reasoning, not its result. An `unresolved` row asks for what is missing to identify or structure the problem, not for a fix.
 
 ## When
 
@@ -25,7 +27,7 @@ Cite at `problems[0]` when this rule kept a cause, an option, or an answer out o
 
 ## Failure signature
 
-The reply names a likely cause, lists fixes or options, ranks approaches, or gives a plan. `next_method` reads as an answer, such as "roll back the deploy", instead of a kind of reasoning, such as "compare error rates before and after the deploy".
+The reply names a likely cause as fact, lists fixes or ranked options, or gives a plan. An issue-tree node states the answer instead of a subquestion. `next_method` reads as an answer, such as "roll back the deploy", instead of a kind of reasoning, such as "compare error rates before and after the deploy".
 
 ## Distinct from
 

@@ -3,10 +3,12 @@ name: whats-going-on
 description: >-
   Coordinates a problem-solving chain over a pasted ask, message, or situation.
   Runs exactly one stage playbook per invocation, then stops. Stage 1 sharpens
-  at most one primary problem and classifies it as analytical or conceptual and
-  convergent or divergent, or abstains. Use when the user invokes
-  /whats-going-on with a bug, email, Slack thread, incident notes, or similar
-  text, or with "continue" after a prior result.
+  at most one primary problem and classifies it. Stage 2
+  (/where-to-focus, /break-it-down, /where-to-start) builds MECE issue-tree
+  breakdowns for the solver to pick. Use when the user invokes /whats-going-on,
+  /where-to-focus, /break-it-down, or /where-to-start with a bug, email, Slack
+  thread, incident notes, or similar text, or with "continue" after a prior
+  result.
 disable-model-invocation: true
 ---
 
@@ -28,15 +30,16 @@ Select one stage, run its playbook, present its Output, stop.
 
 | When | Stage |
 |---|---|
+| Invocation is `/where-to-focus`, `/break-it-down`, or `/where-to-start` | structure-the-problem |
 | No prior result, or the message brings a new ask or new facts | define-the-problem |
 | The message asks to continue from the latest result | the stage after the one that produced that result |
 | Anything else | define-the-problem |
 
-The latest result is the last define-the-problem view you wrote, or the last debug fence that has a `status` key.
+The latest result is the last stage view you wrote, or the last debug fence that has a `status` key.
 
-A define-the-problem view opens with the title line `What's going on`, then a restatement. It includes the label `The question` or the label `Main question`. A fence with a `status` key is from define-the-problem.
+A define-the-problem view opens with the title line `What's going on`, then a restatement. It includes the label `The question` or the label `Main question`. A structure-the-problem view opens the same way and includes one or more `Breakdown` labels, or Status that says Structured or Not MECE yet. A fence with `breakdowns` is from structure-the-problem. A fence with a `status` key and `problems` is from define-the-problem.
 
-Continue carries that main question forward word for word. New material restarts at define-the-problem. Prior classifications do not advance on their own. Answers to `Ask yourself:` questions, worksheet probes, and Challenge replies are new facts. Run define-the-problem on the earlier ask plus those answers.
+Continue carries `main_question` forward word for word. New material that is not an answer to a structure-the-problem selection or MECE-cut ask restarts at define-the-problem. Prior classifications do not advance on their own. Answers to `Ask yourself:` questions, worksheet probes, and Challenge replies are new facts. Run define-the-problem on the earlier ask plus those answers. Answers to the structure-the-problem selection ask, or to a MECE-cut ask, continue structure-the-problem.
 
 ## Principles
 
@@ -115,10 +118,10 @@ When the selected stage has no playbook file, write one plain sentence that says
 
 In the default mode, stop after that sentence.
 
-In debug mode, add exactly one fenced `yaml` block, then nothing:
+In debug mode, add exactly one fenced `yaml` block, then nothing. Set `next_stage` to the selected stage's kebab name:
 
 ```yaml
-next_stage: structure-the-problem
+next_stage: prioritize-the-issues
 available: false
 stop: true
 ```
