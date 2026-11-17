@@ -24,6 +24,6 @@ L1 rules:
 - When classification is present: analytical roots lean toward cause, driver, or evidence branches; conceptual toward option, criterion, or constraint. Divergent keeps several live branches. Convergent still decomposes.
 - When classification is null: pick frames from the paste only. Do not invent a quadrant.
 - Neither ranks nor picks a winner here.
-- Use only facts from the paste and carried fields. Invent no metrics, causes, or options the input never gives.
+- Use only facts from the paste and carried fields for hypotheses. Invent no metrics or incidents. Open branches the **root question** implies even when the paste is silent (e.g. acquisition under grow-revenue); that is CE coverage, not invention — see `mece`.
 
 Write `depth_max_used: 1` on each draft. Leave `children: []` on every L1 node. Do not deepen here. Do not run MECE here. Do not answer the root.

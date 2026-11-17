@@ -5,7 +5,7 @@ from __future__ import annotations
 import re
 from dataclasses import dataclass
 from functools import cache
-from typing import Any, Literal
+from typing import Any, Literal, Never
 
 from .manifest import SKILL_DIR
 from .principles import load_principles
@@ -30,6 +30,20 @@ CHANGED_BUDGET = 200
 
 SELECTION_ASK = (
     "Which breakdowns (and optional branch ids) do you want to work in parallel?"
+)
+CUT_ASK_RE = re.compile(r"\bcut\b", re.IGNORECASE)
+
+# Anti-example patterns: self-attested ME/CE that the wire must reject.
+_MEALS_OVERLAP_RE = re.compile(
+    r"\b(breakfast|lunch|dinner|brunch|supper)\b", re.IGNORECASE
+)
+_MEALS_PARENT_RE = re.compile(r"\bmeals?\b", re.IGNORECASE)
+_TRAFFIC_COLOR_RE = re.compile(r"\b(red|green|yellow|amber)\b", re.IGNORECASE)
+_GROW_REVENUE_RE = re.compile(r"\bgrow\b.*\brevenue\b|\brevenue\b.*\bgrowth\b", re.IGNORECASE)
+_PRICE_VOLUME_RE = re.compile(r"\b(price|pricing|asp|arpu|volume|units|quantity)\b", re.IGNORECASE)
+_ACQUISITION_SPACE_RE = re.compile(
+    r"\b(acquir|new\s+customer|new\s+market|new\s+product|channel|segment)\b",
+    re.IGNORECASE,
 )
 
 STRUCTURE_VERDICT_KEYS = frozenset(
@@ -172,7 +186,7 @@ def parse_structure(raw: dict[str, Any], view: View) -> StructureResponse | Cont
     if isinstance(unresolved, ContractViolation):
         return unresolved
 
-    constraint = _status_constraints(derived, selected, unresolved)
+    constraint = _status_constraints(derived, selected, unresolved, breakdowns)
     if isinstance(constraint, ContractViolation):
         return constraint
 
@@ -263,10 +277,16 @@ def _parse_breakdowns(
             "schema", "root_question is required when breakdowns is non-empty"
         )
     out: list[Breakdown] = []
+    seen_ids: set[str] = set()
     for i, item in enumerate(raw):
         parsed = _parse_breakdown(item, f"breakdowns[{i}]", root_question or "")
         if isinstance(parsed, ContractViolation):
             return parsed
+        if parsed.id in seen_ids:
+            return ContractViolation(
+                "tree_ids", f"duplicate breakdown id {parsed.id!r}"
+            )
+        seen_ids.add(parsed.id)
         out.append(parsed)
     return tuple(out)
 
@@ -304,6 +324,9 @@ def _parse_breakdown(
         return ContractViolation(
             "schema", f"{path}.depth_max_used {depth} != max level {deepest}"
         )
+    lint = _validate_breakdown_mece(breakdown_id, status, tree, mece, root_question)
+    if isinstance(lint, ContractViolation):
+        return lint
     return Breakdown(
         id=breakdown_id,
         frame=frame,
@@ -377,10 +400,14 @@ def _parse_mece(
     if not isinstance(raw, list):
         return ContractViolation("schema", f"{path} must be a list")
     notes: list[MeceNote] = []
+    seen_paths: set[str] = set()
     for i, item in enumerate(raw):
         note = _parse_mece_note(item, f"{path}[{i}]")
         if isinstance(note, ContractViolation):
             return note
+        if note.path in seen_paths:
+            return ContractViolation("mece_notes", f"duplicate mece path {note.path}")
+        seen_paths.add(note.path)
         if status == "mece_pass" and (
             note.mutually_exclusive != "pass" or note.collectively_exhaustive != "pass"
         ):
@@ -415,6 +442,148 @@ def _parse_mece_note(item: Any, path: str) -> MeceNote | ContractViolation:
         collectively_exhaustive=exhaustive,
         note=note,
     )
+
+
+def _sibling_set_paths(
+    breakdown_id: str, root: TreeNode
+) -> dict[str, tuple[TreeNode, ...]]:
+    """Map each wire path to the children of that parent."""
+    out: dict[str, tuple[TreeNode, ...]] = {}
+
+    def walk(node: TreeNode, path: str) -> None:
+        if node.children:
+            out[path] = node.children
+            for child in node.children:
+                walk(child, f"{breakdown_id}.tree.{child.id}.children")
+
+    walk(root, f"{breakdown_id}.tree.children")
+    return out
+
+
+def _collect_ids(node: TreeNode) -> list[str]:
+    ids = [node.id]
+    for child in node.children:
+        ids.extend(_collect_ids(child))
+    return ids
+
+
+def _anti_example_lint(
+    children: tuple[TreeNode, ...], *, where: str
+) -> ContractViolation | None:
+    texts = [c.question for c in children]
+    has_meal_part = any(_MEALS_OVERLAP_RE.search(t) for t in texts)
+    has_meals_parent = any(_MEALS_PARENT_RE.search(t) for t in texts)
+    if has_meal_part and has_meals_parent:
+        return ContractViolation(
+            "mece_anti_example",
+            f"{where}: meal parts and 'meals' cannot share a sibling set (ME fail)",
+        )
+    colors = {
+        m.group(1).lower()
+        for t in texts
+        for m in [_TRAFFIC_COLOR_RE.search(t)]
+        if m
+    }
+    if colors and colors <= {"red", "green"} and "yellow" not in colors and "amber" not in colors:
+        return ContractViolation(
+            "mece_anti_example",
+            f"{where}: red+green without yellow/amber is not CE for a traffic light",
+        )
+    return None
+
+
+def _grow_revenue_ce_lint(
+    root_question: str, children: tuple[TreeNode, ...], *, where: str
+) -> ContractViolation | None:
+    if not _GROW_REVENUE_RE.search(root_question):
+        return None
+    texts = [c.question for c in children]
+    if not texts:
+        return None
+    if not all(_PRICE_VOLUME_RE.search(t) for t in texts):
+        return None
+    if any(_ACQUISITION_SPACE_RE.search(t) for t in texts):
+        return None
+    return ContractViolation(
+        "mece_ce_scope",
+        f"{where}: grow-revenue CE cannot pass on price|volume alone; "
+        "keep acquisition/new markets as open branches (see mece/SKILL.md)",
+    )
+
+
+def _validate_breakdown_mece(
+    breakdown_id: str,
+    status: BreakdownStatus,
+    tree: TreeNode,
+    notes: tuple[MeceNote, ...],
+    root_question: str,
+) -> ContractViolation | None:
+    if not tree.children:
+        return ContractViolation(
+            "tree_shape",
+            f"breakdown {breakdown_id}: root must have at least two children",
+        )
+
+    ids = _collect_ids(tree)
+    if len(ids) != len(set(ids)):
+        return ContractViolation(
+            "tree_ids", f"breakdown {breakdown_id}: node ids must be unique"
+        )
+
+    sibling_sets = _sibling_set_paths(breakdown_id, tree)
+    for path, kids in sibling_sets.items():
+        if len(kids) < 2:
+            return ContractViolation(
+                "tree_shape",
+                f"{path}: sibling set must have at least two children",
+            )
+        anti = _anti_example_lint(kids, where=path)
+        if anti is not None:
+            return anti
+        if path == f"{breakdown_id}.tree.children":
+            ce = _grow_revenue_ce_lint(root_question, kids, where=path)
+            if ce is not None and status == "mece_pass":
+                root_note = next((n for n in notes if n.path == path), None)
+                if (
+                    root_note is not None
+                    and root_note.collectively_exhaustive == "pass"
+                ):
+                    return ce
+
+    note_paths = {n.path for n in notes}
+    bogus = sorted(note_paths - set(sibling_sets))
+    if bogus:
+        return ContractViolation(
+            "mece_notes",
+            f"breakdown {breakdown_id}: mece path does not resolve to a sibling "
+            f"set: {bogus}",
+        )
+    missing = sorted(set(sibling_sets) - note_paths)
+    if missing:
+        return ContractViolation(
+            "mece_notes",
+            f"breakdown {breakdown_id}: every sibling set needs a mece note; "
+            f"missing {missing}",
+        )
+
+    has_fail = any(
+        n.mutually_exclusive == "fail" or n.collectively_exhaustive == "fail"
+        for n in notes
+    )
+    if status == "mece_pass":
+        if has_fail:
+            return ContractViolation(
+                "mece_status",
+                f"breakdown {breakdown_id}: mece_pass forbids a fail flag",
+            )
+    else:
+        if not has_fail:
+            return ContractViolation(
+                "mece_status",
+                f"breakdown {breakdown_id}: needs_split requires at least one "
+                "fail flag",
+            )
+    return None
 
 
 def _max_level(node: TreeNode) -> int:
@@ -466,6 +635,7 @@ def _status_constraints(
     status: StructureStatus,
     selected: Selected,
     unresolved: tuple[Unresolved, ...],
+    breakdowns: tuple[Breakdown, ...],
 ) -> ContractViolation | None:
     if status == "blocked":
         if selected.breakdown_ids or selected.branch_ids:
@@ -473,18 +643,44 @@ def _status_constraints(
         if not unresolved:
             return ContractViolation("schema", "blocked needs an unresolved row")
         return None
-    if (
-        status == "structured"
-        and not selected.breakdown_ids
-        and not selected.branch_ids
-    ):
-        clarifications = tuple(row.clarification for row in unresolved)
-        if clarifications != (SELECTION_ASK,):
+    if status == "structured":
+        if (
+            not selected.breakdown_ids
+            and not selected.branch_ids
+        ):
+            clarifications = tuple(row.clarification for row in unresolved)
+            if clarifications != (SELECTION_ASK,):
+                return ContractViolation(
+                    "schema",
+                    "structured with an empty selection needs exactly one "
+                    "selection ask",
+                )
+        return None
+    if status == "needs_split":
+        if selected.breakdown_ids or selected.branch_ids or selected.parallel:
             return ContractViolation(
-                "schema",
-                "structured with an empty selection needs exactly one selection ask",
+                "status_constraints", "needs_split forbids pre-filled selected"
             )
-    return None
+        if not unresolved:
+            return ContractViolation(
+                "status_constraints",
+                "needs_split requires an unresolved cut ask",
+            )
+        if not any(CUT_ASK_RE.search(u.clarification) for u in unresolved):
+            return ContractViolation(
+                "status_constraints",
+                "needs_split unresolved must include a cut ask "
+                "(clarification containing 'cut')",
+            )
+        if not any(b.status == "needs_split" for b in breakdowns):
+            return ContractViolation(
+                "status_constraints",
+                "needs_split requires at least one breakdown with status "
+                "needs_split",
+            )
+        return None
+    _: Never = status
+    return ContractViolation("schema", f"unknown status {status}")
 
 
 def _parse_unresolved_list(raw: Any) -> tuple[Unresolved, ...] | ContractViolation:
