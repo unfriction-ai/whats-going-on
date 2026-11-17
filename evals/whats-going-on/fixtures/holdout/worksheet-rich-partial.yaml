@@ -36,6 +36,7 @@ turns:
       smart_question: "How much warehouse storage will the events pipeline use by June, to size the next warehouse contract at the March 14 budget review?"
       smart_gaps: []
       worksheet: {}
+      challenge: null
       unresolved:
         - observation: 'The worksheet has no context or constraints yet.'
           reason: 'Context and constraints is the next open worksheet area.'
@@ -87,6 +88,7 @@ turns:
         context_constraints:
           status: filled
           text: "The contract terms lock at the March 14 budget review. We cannot change the event schema before June."
+      challenge: null
       unresolved:
         - observation: 'The worksheet has no success criteria yet.'
           reason: 'Success criteria is the next open worksheet area.'
@@ -145,6 +147,7 @@ turns:
         success_criteria:
           status: filled
           text: "Success is a figure Finance will sign without a second review. Failure is a figure that forces a mid-year contract change."
+      challenge: null
       unresolved:
         - observation: 'The worksheet has no stakeholders yet.'
           reason: 'Stakeholders is the next open worksheet area.'
@@ -210,6 +213,7 @@ turns:
         stakeholders:
           status: filled
           text: "Finance signs the contract. The data platform lead owns the estimate. Analytics has to agree on the event volumes."
+      challenge: null
       unresolved:
         - observation: 'The worksheet has no scope and sources yet.'
           reason: 'Scope and sources is the next open worksheet area.'
@@ -282,6 +286,10 @@ turns:
         scope_sources:
           status: filled
           text: "In scope is the events pipeline only. Out of scope is the logs pipeline. Evidence lives in the warehouse billing export and the storage dashboard."
+      challenge:
+        round: clear
+        findings: {}
+        reply: null
       unresolved: []
       applied: []
       stop: true

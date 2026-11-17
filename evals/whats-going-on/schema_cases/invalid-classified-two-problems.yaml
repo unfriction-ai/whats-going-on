@@ -17,6 +17,7 @@ body: |
   smart_question: "Why did checkout latency rise?"
   smart_gaps: []
   worksheet: {}
+  challenge: null
   unresolved:
     - observation: 'The worksheet has no context or constraints yet.'
       reason: 'Context and constraints is the next open worksheet area.'

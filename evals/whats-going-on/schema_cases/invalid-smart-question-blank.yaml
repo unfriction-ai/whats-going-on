@@ -12,6 +12,7 @@ body: |
   smart_question: "  "
   smart_gaps: [measurable, relevant]
   worksheet: null
+  challenge: null
   unresolved:
     - observation: "The ask says healthy but not what healthy looks like"
       reason: "SMART measurable is missing. The input gives no sign of done."

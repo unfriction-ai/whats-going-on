@@ -16,3 +16,8 @@ class Unresolved:
     observation: str
     reason: str
     clarification: str
+
+
+def ask_slot(row_count: int, gap_count: int) -> int:
+    """Index of the one operator-ask row, after concerns and before the gap tail."""
+    return row_count - gap_count - 1

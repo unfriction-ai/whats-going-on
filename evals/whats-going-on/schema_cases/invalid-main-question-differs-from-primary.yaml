@@ -12,6 +12,7 @@ body: |
   smart_question: "Should ops run a two-day architecture workshop?"
   smart_gaps: []
   worksheet: {}
+  challenge: null
   unresolved:
     - observation: "Ops wants a two-day architecture workshop"
       reason: "That is a proposed approach, not a defined problem."

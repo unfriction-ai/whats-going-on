@@ -11,7 +11,7 @@ from typing import Any, Literal, assert_never, get_args
 
 from .manifest import SKILL_DIR
 from .smart import ASK_YOURSELF, NoPrimary, Proposed, SmartProposal, Withheld
-from .wire import ContractViolation, Unresolved
+from .wire import ContractViolation, Unresolved, ask_slot
 
 AreaId = Literal["context_constraints", "success_criteria", "stakeholders", "scope_sources"]
 AREAS: tuple[AreaId, ...] = get_args(AreaId)
@@ -446,7 +446,7 @@ def _check_ask_rows(
         return ContractViolation(
             "worksheet_probe_rows", f"{state} needs one row asking {want!r}, got rows {asks}"
         )
-    place = len(unresolved) - gap_count - 1
+    place = ask_slot(len(unresolved), gap_count)
     if asks[0] != place:
         return ContractViolation(
             "worksheet_probe_place",

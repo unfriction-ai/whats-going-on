@@ -16,6 +16,7 @@ from .fixtures import (
     Tripwires,
     Turn,
     covered_families,
+    challenge_matches,
     smart_matches,
     worksheet_matches,
 )
@@ -359,6 +360,13 @@ def _gold_self_test(fixtures: list[Fixture]) -> list[DriftProblem]:
                         f"{fixture.id} turn {i}: gold worksheet vs expect {turn.expect.worksheet}",
                     )
                 )
+            if not challenge_matches(turn.expect.challenge, turn.gold.verdict.challenge):
+                out.append(
+                    DriftProblem(
+                        "gold_challenge_mismatch",
+                        f"{fixture.id} turn {i}: gold challenge vs expect {turn.expect.challenge}",
+                    )
+                )
         results = grade_gold(fixture)
         for i, result in enumerate(results):
             if result.hard_fails or result.score < 1.0 - 1e-9:
@@ -437,7 +445,8 @@ def _sentinel_sync(owner_rel: str, owner: str) -> list[DriftProblem]:
 
 _GUARD_BODY = (
     "status: not_a_problem\nmain_question: null\nproblems: []\n"
-    "smart_question: null\nsmart_gaps: []\nworksheet: null\nunresolved: []\napplied: []\nstop: true\n"
+    "smart_question: null\nsmart_gaps: []\nworksheet: null\nchallenge: null\n"
+    "unresolved: []\napplied: []\nstop: true\n"
 )
 
 

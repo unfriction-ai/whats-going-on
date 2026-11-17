@@ -12,6 +12,7 @@ body: |
   smart_question: null
   smart_gaps: [actionable]
   worksheet: {}
+  challenge: null
   unresolved:
     - observation: 'The ask names nothing we would do with the answer'
       reason: 'SMART actionable is missing.'

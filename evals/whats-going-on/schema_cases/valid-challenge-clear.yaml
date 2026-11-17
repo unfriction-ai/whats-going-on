@@ -1,0 +1,25 @@
+expect_ok: true
+derived_status: classified
+body: |
+  status: classified
+  main_question: "What approaches could build a healthy on-call culture on the platform squad over the next year?"
+  problems:
+    - statement: "What approaches could build a healthy on-call culture on the platform squad over the next year?"
+      classification: { nature: conceptual, direction: divergent }
+      confidence: high
+      why: "Culture and norms are conceptual. The ask invites many possible moves."
+      next_method: "Broad exploration of approaches before any narrowing."
+  smart_question: "What approaches could build a healthy on-call culture on the platform squad over the next year?"
+  smart_gaps: []
+  worksheet:
+    context_constraints: { status: filled, text: "Three new people joined after a messy on-call week." }
+    success_criteria: { status: unknown, text: null }
+    stakeholders: { status: i_am_decider, text: null }
+    scope_sources: { status: not_yet, text: null }
+  challenge:
+    round: clear
+    findings: {}
+    reply: null
+  unresolved: []
+  applied: []
+  stop: true

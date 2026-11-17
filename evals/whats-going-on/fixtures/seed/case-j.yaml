@@ -20,6 +20,7 @@ turns:
       smart_question: null
       smart_gaps: []
       worksheet: null
+      challenge: null
       unresolved:
         - observation: "Mobile is in a rough place"
           reason: "No measurable change, magnitude, or timeframe."
@@ -62,6 +63,7 @@ turns:
       smart_question: "Why did crash-free sessions drop 8% over four weeks?"
       smart_gaps: [relevant, time_bound]
       worksheet: {}
+      challenge: null
       unresolved:
         - observation: 'The worksheet has no context or constraints yet.'
           reason: 'Context and constraints is the next open worksheet area.'
@@ -107,6 +109,7 @@ turns:
       smart_question: "What product or eng initiatives could recover crash-free sessions?"
       smart_gaps: [relevant, time_bound]
       worksheet: {}
+      challenge: null
       unresolved:
         - observation: 'The worksheet has no context or constraints yet.'
           reason: 'Context and constraints is the next open worksheet area.'
@@ -155,6 +158,7 @@ turns:
       smart_question: "Which of the three recovery initiatives should we fund?"
       smart_gaps: [time_bound]
       worksheet: {}
+      challenge: null
       unresolved:
         - observation: 'The worksheet has no context or constraints yet.'
           reason: 'Context and constraints is the next open worksheet area.'
