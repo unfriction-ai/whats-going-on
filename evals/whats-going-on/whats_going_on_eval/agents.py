@@ -156,23 +156,28 @@ def _mount_file_problems(
 def prompt_problems() -> list[str]:
     debug = build_prompt("Checkout latency rose.", "debug")
     default = build_prompt("Checkout latency rose.", "default")
+    focus = build_prompt("Checkout latency rose.", "debug", "/where-to-focus")
     problems: list[str] = []
     if debug != "/whats-going-on --debug\n\nCheckout latency rose.\n":
         problems.append(f"debug prompt {debug!r}")
     if default != "/whats-going-on\n\nCheckout latency rose.\n":
         problems.append(f"default prompt {default!r}")
+    if focus != "/where-to-focus --debug\n\nCheckout latency rose.\n":
+        problems.append(f"where-to-focus prompt {focus!r}")
     return problems
 
 
-def build_prompt(user_input: str, mode: Mode = "debug") -> str:
+def build_prompt(
+    user_input: str, mode: Mode = "debug", command: str = "/whats-going-on"
+) -> str:
     match mode:
         case "debug":
-            command = "/whats-going-on --debug"
+            flag = " --debug"
         case "default":
-            command = "/whats-going-on"
+            flag = ""
         case _ as unreachable:
             assert_never(unreachable)
-    return f"{command}\n\n{user_input.strip()}\n"
+    return f"{command}{flag}\n\n{user_input.strip()}\n"
 
 
 def invoke(
@@ -182,11 +187,12 @@ def invoke(
     skill_src: Path | None,
     session_workspace: Path | None = None,
     mode: Mode = "debug",
+    command: str = "/whats-going-on",
 ) -> InvokeResult:
     if agent not in HOST_SKILL_DIR:
         raise ValueError(f"unknown agent {agent!r}; choose from {sorted(HOST_SKILL_DIR)}")
     workspace = session_workspace or materialize_skill(skill_src)
-    prompt = build_prompt(user_input, mode)
+    prompt = build_prompt(user_input, mode, command)
     build_argv = _HOST_ARGV.get(agent)
     if build_argv is None:
         raise HostNotWired(

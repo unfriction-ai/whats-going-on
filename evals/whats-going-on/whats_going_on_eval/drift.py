@@ -47,8 +47,10 @@ from .parse import (
     STATUSES,
     VERDICT_KEYS,
     Response,
+    StructureResponse,
     parse_response,
 )
+from .structure import SELECTION_ASK
 
 CONTRACT_RE = re.compile(
     r"```yaml\n(status: classified \| partial \| needs_clarification \| not_a_problem\n.*?)```",
@@ -352,25 +354,70 @@ def _smart_cards_drift(readme: str) -> list[DriftProblem]:
     return []
 
 
+def _structure_gold_problems(fixture_id: str, index: int, turn: Turn) -> list[DriftProblem]:
+    gold = turn.gold
+    if not isinstance(gold, StructureResponse):
+        return []
+    verdict = gold.verdict
+    out: list[DriftProblem] = []
+    if verdict.status not in turn.expect.statuses:
+        out.append(
+            DriftProblem(
+                "gold_status",
+                f"{fixture_id} turn {index}: {verdict.status} not in {list(turn.expect.statuses)}",
+            )
+        )
+    if verdict.status == "blocked":
+        if verdict.breakdowns:
+            out.append(
+                DriftProblem(
+                    "gold_breakdowns",
+                    f"{fixture_id} turn {index}: blocked gold has {len(verdict.breakdowns)} breakdowns",
+                )
+            )
+    elif len(verdict.breakdowns) < turn.expect.min_breakdowns:
+        out.append(
+            DriftProblem(
+                "gold_breakdowns",
+                f"{fixture_id} turn {index}: {len(verdict.breakdowns)} < {turn.expect.min_breakdowns}",
+            )
+        )
+    needs_selection = (
+        turn.expect.selection_ask
+        and verdict.status == "structured"
+        and not verdict.selected.breakdown_ids
+        and not verdict.selected.branch_ids
+    )
+    if needs_selection and not any(row.clarification == SELECTION_ASK for row in verdict.unresolved):
+        out.append(
+            DriftProblem("gold_selection_ask", f"{fixture_id} turn {index}: missing selection ask")
+        )
+    return out
+
+
 def _gold_self_test(fixtures: list[Fixture]) -> list[DriftProblem]:
     out: list[DriftProblem] = []
     for fixture in fixtures:
         for i, turn in enumerate(fixture.turns):
-            if not smart_matches(turn.expect.smart, turn.gold.verdict.smart):
+            gold = turn.gold
+            if isinstance(gold, StructureResponse):
+                out.extend(_structure_gold_problems(fixture.id, i, turn))
+                continue
+            if not smart_matches(turn.expect.smart, gold.verdict.smart):
                 out.append(
                     DriftProblem(
                         "gold_smart_mismatch",
-                        f"{fixture.id} turn {i}: gold SMART {turn.gold.verdict.smart} vs expect {turn.expect.smart}",
+                        f"{fixture.id} turn {i}: gold SMART {gold.verdict.smart} vs expect {turn.expect.smart}",
                     )
                 )
-            if not worksheet_matches(turn.expect.worksheet, turn.gold.verdict.worksheet):
+            if not worksheet_matches(turn.expect.worksheet, gold.verdict.worksheet):
                 out.append(
                     DriftProblem(
                         "gold_worksheet_mismatch",
                         f"{fixture.id} turn {i}: gold worksheet vs expect {turn.expect.worksheet}",
                     )
                 )
-            if not challenge_matches(turn.expect.challenge, turn.gold.verdict.challenge):
+            if not challenge_matches(turn.expect.challenge, gold.verdict.challenge):
                 out.append(
                     DriftProblem(
                         "gold_challenge_mismatch",

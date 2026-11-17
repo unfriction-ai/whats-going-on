@@ -1,0 +1,88 @@
+turns:
+  - command: /where-to-focus
+    input: |
+      Shoppers on the web checkout see API timeouts when they pay.
+      The latency sits on the checkout request, not on search.
+      One open cut is the connection pool rejecting calls versus an upstream service running slow.
+      The other open cut is timeouts that cluster on one endpoint versus timeouts that spread across endpoints.
+      Which checkout timeout cause should we test first?
+    restatement: "Shoppers on the web checkout see API timeouts when they pay, and the latency sits on that request. The note asks which checkout timeout cause to test first, and it names a layer cut and a symptom cut."
+    expect:
+      kind: structure
+      statuses: [structured]
+      root_anchor: ["checkout|timeout|latency"]
+      min_breakdowns: 1
+      selection_ask: true
+    tripwires:
+      invented: ["p99", "12.4%"]
+      methodNotProblem: []
+      solveLeak: ["raise the pool", "the root cause is"]
+    gold: |
+      ```yaml
+      status: structured
+      root_question: "Which checkout timeout cause should we test first?"
+      main_question: "Why are web checkout API calls timing out?"
+      smart_question: "Which checkout timeout cause should we test first?"
+      classification:
+        nature: analytical
+        direction: divergent
+      breakdowns:
+        - id: A
+          frame: "By layer"
+          depth_max_used: 1
+          status: mece_pass
+          tree:
+            id: root
+            question: "Which checkout timeout cause should we test first?"
+            level: 0
+            children:
+              - id: A.1
+                question: "Is the connection pool rejecting calls?"
+                level: 1
+                hypothesis: "The connection pool is rejecting checkout calls."
+                children: []
+              - id: A.2
+                question: "Is an upstream service slow?"
+                level: 1
+                hypothesis: "An upstream service is slow on the checkout path."
+                children: []
+          mece:
+            - path: A.tree.children
+              mutually_exclusive: pass
+              collectively_exhaustive: pass
+              note: "Layer cuts do not overlap and cover the call path."
+        - id: B
+          frame: "By symptom"
+          depth_max_used: 1
+          status: mece_pass
+          tree:
+            id: root
+            question: "Which checkout timeout cause should we test first?"
+            level: 0
+            children:
+              - id: B.1
+                question: "Do timeouts cluster on one endpoint?"
+                level: 1
+                hypothesis: "Timeouts cluster on one endpoint."
+                children: []
+              - id: B.2
+                question: "Do timeouts spread across endpoints?"
+                level: 1
+                hypothesis: "Timeouts spread across endpoints."
+                children: []
+          mece:
+            - path: B.tree.children
+              mutually_exclusive: pass
+              collectively_exhaustive: pass
+              note: "Clustered and spread cover the symptom split."
+      selected:
+        breakdown_ids: []
+        branch_ids: []
+        parallel: false
+      unresolved:
+        - observation: "No breakdown or branch has been chosen."
+          reason: "Parallel work needs the solver's pick."
+          clarification: "Which breakdowns (and optional branch ids) do you want to work in parallel?"
+      applied: []
+      stop: true
+      ```

@@ -1,6 +1,6 @@
 {
   "$schema": "https://agent-plugins.org/schemas/1.0.0/plugin.schema.json",
   "name": "whats-going-on",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "Define a problem on a 2x2, then structure MECE issue-tree breakdowns (/where-to-focus). Abstain when no problem is defined. Do not solve."
 }
