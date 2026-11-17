@@ -6,7 +6,7 @@ Tagline: Understand the situation before deciding what to solve.
 
 Works with Cursor Agent Skills, Claude Code skills, and Codex skills. Same `SKILL.md` body. Install path differs by tool.
 
-Stage 1 capability name: problem mapping. Method: analytical or conceptual, crossed with convergent or divergent. Stages 2–7 are named on the coordinator chain and Halt until their playbooks exist.
+Stage 1 capability name: problem mapping. Method: analytical or conceptual, crossed with convergent or divergent. Stage 2 (`structure-the-problem`, also `/where-to-focus`, `/break-it-down`, `/where-to-start`) proposes MECE issue-tree breakdowns for the solver to pick. Stages 3–7 remain named on the coordinator chain and Halt until their playbooks exist.
 
 ## What stage 1 does
 
@@ -74,7 +74,7 @@ Each judgment rule has one owner, a `principle-*` leaf the coordinator names in 
 |---|---|---|
 | `principle-dont-invent-problems` | Identify before you classify. Missing data to *solve* does not block a problem. Missing data to *identify* does, so abstain. Never invent facts, metrics, or causes. | `problem`, `unresolved`, `classification`, `smart_question` |
 | `principle-read-the-room` | One primary problem, the one the others wait on. The rest wait in `unresolved`. Research that informs a decision is that decision's `next_method`, not the primary. The quadrant is a snapshot of the current reasoning objective. | `problem`, `unresolved`, `classification` |
-| `principle-dont-solve-yet` | No root-cause hunt, issue trees, brainstorms, plans, or recommendations. `next_method` names a kind of reasoning, not its result. | `problem`, `unresolved`, `smart_question` |
+| `principle-dont-solve-yet` | No root-cause hunt, brainstorms, plans, or recommendations beyond the running playbook's Output. An issue tree is allowed only when that playbook produces one. Nodes stay hypotheses. | `problem`, `unresolved`, `smart_question` |
 | `principle-make-it-smart` | A SMART letter is met only when the input states it. Each open letter becomes an `Ask yourself:` row. No `smart_question` while specific or actionable is open. Answers are new facts for the next run. | `smart_question`, `unresolved` |
 
 ## The restatement
@@ -721,7 +721,7 @@ stop: true
 
 ## What stage 1 is not
 
-- Not root-cause analysis, issue trees, leverage scoring, or recommendations.
+- Not root-cause answers, leverage scoring, or recommendations. Stage 2 may emit issue-tree breakdowns. It still must not settle a cause or pick the work.
 - Not a full problem-solving workflow. Later stages Halt until their playbooks ship.
 - Not a permanent tag on a situation. Re-run when the ask changes.
 

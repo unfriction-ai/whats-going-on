@@ -1,0 +1,29 @@
+---
+name: issue-tree
+description: >-
+  Drafts one to three L1 breakdown frames for the whats-going-on
+  structure-the-problem playbook from the root question and classification.
+disable-model-invocation: true
+---
+
+# Issue tree
+
+Take the root question, the carried classification, and the paste.
+
+Draft **1–3** breakdowns. Prefer 2 when two frames both cut the root differently. Emit 1 when a second frame would only restate the first. Never emit more than 3.
+
+Each breakdown has:
+
+- `id` — `A`, `B`, or `C`
+- `frame` — a short label for the cut (for example by stack layer, by time behavior, by stakeholder, by decision criterion)
+- `tree` — root node at level 0 whose `question` is the root question word for word, with **L1 children only** in this skill
+
+L1 rules:
+
+- Every child is a subquestion that advances the parent.
+- Analytical roots lean toward cause, driver, or evidence branches.
+- Conceptual roots lean toward option, criterion, or constraint branches.
+- Divergent direction keeps several live branches. Convergent still decomposes. Neither ranks nor picks a winner here.
+- Use only facts from the paste and the carried stage-1 fields. Invent no metrics, causes, or options the input never gives.
+
+Write `depth_max_used: 1` on each draft. Leave `children: []` on every L1 node. Do not deepen here. Do not run MECE here. Do not answer the root.
