@@ -17,6 +17,7 @@ from .parse import (
 )
 from .smart import NoPrimary, Proposed, Withheld
 from .wire import ContractViolation
+from .challenge import challenge_prose, restated_line, ungrounded_findings
 from .worksheet import ungrounded_cells, worksheet_prose
 
 RUBRIC: dict[str, float] = {
@@ -185,12 +186,17 @@ def _hard_fails(turn: Turn, response: Response, text: str) -> list[HardFail]:
     leak_pats = list(GLOBAL_SOLVE_LEAK) + list(turn.tripwires.solve_leak)
     scanned = list(prose_fields.items())
     scanned.extend(("worksheet", content) for content in worksheet_prose(verdict.worksheet))
+    scanned.extend(("challenge", content) for content in challenge_prose(verdict.challenge))
     for field, content in scanned:
         for pat in leak_pats:
             if content and pat.search(content):
                 fails.append(HardFail("solve_leak", f"{field}: {pat.pattern}"))
     for cell in ungrounded_cells(verdict.worksheet, turn.input):
         fails.append(HardFail("worksheet_ungrounded", cell.area))
+    for bias in ungrounded_findings(verdict.challenge, turn.input):
+        fails.append(HardFail("challenge_ungrounded", bias))
+    if restated_line(verdict.challenge, turn.input) is False:
+        fails.append(HardFail("challenge_restated"))
     fails.extend(_restatement_fails(turn, response.preamble))
     return fails
 

@@ -1,0 +1,82 @@
+turns:
+  - input: |
+      Refund emails are slow. What should we look at in the send path?
+      
+      Context and constraints: Around "we've already sunk four months into the template rewrite", what background or pressures shape how you solve it, and what cannot change?
+      
+      Refund email goes out after the nightly batch. Legal owns the disclaimer.
+      
+      Success criteria: For "Why are refund emails slow?", what has to be true for the answer to count as success, and what would make it fail?
+      
+      Success is a cause we can see in the send logs. Failure is a guess about the template.
+      
+      Stakeholders: Who can make or block the decision behind "Why are refund emails slow?", and who must agree? Say "I am the decider" if that is you.
+      
+      Support owns the template. Legal has to accept a disclaimer change.
+      
+      Scope and sources: For "Why are refund emails slow?", what is in and out of scope, and where does evidence already exist?
+      
+      In scope is refund email delay. Out of scope is shipping email. Evidence is the send log.
+    restatement: "Someone asks why refund emails are slow and what to look at in the send path. The mail goes out after the nightly batch."
+    expect:
+      kind: classify
+      statuses: [classified]
+      problems:
+        - anchor: [refund, email]
+          quadrants: [analytical-convergent]
+      unresolved: []
+      smart:
+        proposal: proposed
+        gaps: []
+      worksheet:
+        stop: complete
+        cells:
+          context_constraints: filled
+          success_criteria: filled
+          stakeholders: filled
+          scope_sources: filled
+      challenge:
+        round: clear
+        biases: []
+    tripwires:
+      invented:
+        - "SMTP"
+        - "spam folder"
+      methodNotProblem: []
+      solveLeak:
+        - "\\bswitch providers\\b"
+    gold: |
+      ```yaml
+      status: classified
+      main_question: "Why are refund emails slow?"
+      problems:
+        - statement: "Why are refund emails slow?"
+          classification:
+            nature: analytical
+            direction: convergent
+          confidence: high
+          why: "A slow refund email with a named batch. The send log should converge on where the delay sits."
+          next_method: "Compare send-log timestamps around the nightly batch. Do not redraw the template in this slice."
+      smart_question: "Why are refund emails slow?"
+      smart_gaps: []
+      worksheet:
+        context_constraints:
+          status: filled
+          text: "Refund email goes out after the nightly batch. Legal owns the disclaimer."
+        success_criteria:
+          status: filled
+          text: "Success is a cause we can see in the send logs. Failure is a guess about the template."
+        stakeholders:
+          status: filled
+          text: "Support owns the template. Legal has to accept a disclaimer change."
+        scope_sources:
+          status: filled
+          text: "In scope is refund email delay. Out of scope is shipping email. Evidence is the send log."
+      challenge:
+        round: clear
+        findings: {}
+        reply: null
+      unresolved: []
+      applied: []
+      stop: true
+      ```

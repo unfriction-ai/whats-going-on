@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 import re
-from dataclasses import dataclass
+from dataclasses import dataclass, replace
 from pathlib import Path
 
 import yaml
@@ -15,12 +15,21 @@ from .fixtures import (
     Fixture,
     Tripwires,
     Turn,
-    covered_families,
+    _gold_response_text,
     challenge_matches,
+    covered_families,
     smart_matches,
     worksheet_matches,
 )
-from .grade import _restatement_fails, grade_gold, rubric_keys_match_doc
+from .challenge import (
+    Answered,
+    Finding,
+    Open,
+    render_line,
+    restated_line,
+    ungrounded_findings,
+)
+from .grade import _restatement_fails, grade_gold, grade_turn, rubric_keys_match_doc
 from .manifest import (
     RESTATEMENT_CASES_DIR,
     SKILL_DIR,
@@ -143,6 +152,7 @@ def check_suite(
     problems.extend(_tripwire_vs_input(fixtures))
     problems.extend(_skill_contamination(fixtures, mount))
     problems.extend(_restatement_guard_self_test(RESTATEMENT_CASES_DIR))
+    problems.extend(_challenge_grade_self_test(fixtures))
     return problems
 
 
@@ -527,6 +537,87 @@ def _restatement_guard_self_test(cases_dir: Path) -> list[DriftProblem]:
     return problems
 
 
+def _challenge_grade_self_test(fixtures: list[Fixture]) -> list[DriftProblem]:
+    problems: list[DriftProblem] = []
+    finding = Finding("sunk_cost", "four months already spent")
+    opened = Open((finding,))
+    line = render_line((finding,))
+    only_line = f"See the note.\n{line}\n"
+    if ungrounded_findings(opened, only_line) != ("sunk_cost",):
+        problems.append(
+            DriftProblem("challenge_grade", "a quote that exists only on the Challenge line stayed grounded")
+        )
+    if ungrounded_findings(opened, "We noted four months already spent in the plan.") != ():
+        problems.append(DriftProblem("challenge_grade", "a paste quote was marked ungrounded"))
+    probe = (
+        'Context and constraints: Around "four months already spent", what background or '
+        "pressures shape how you solve it, and what cannot change?"
+    )
+    if ungrounded_findings(opened, probe) != ("sunk_cost",):
+        problems.append(DriftProblem("challenge_grade", "a quote that exists only on a probe line stayed grounded"))
+    answered = Answered((finding,), None)
+    if restated_line(answered, f"We noted four months already spent in the plan.\n{line}\n") is not True:
+        problems.append(DriftProblem("challenge_grade", "a matching Challenge line was not idempotent"))
+    paraphrased = "We noted four months already spent in the plan.\nChallenge: rethink this.\n"
+    if restated_line(answered, paraphrased) is not False:
+        problems.append(DriftProblem("challenge_grade", "a paraphrased Challenge line was accepted"))
+    if restated_line(opened, only_line) is not None:
+        problems.append(DriftProblem("challenge_grade", "restated_line ran on an open round"))
+
+    sunk = next((fixture for fixture in fixtures if fixture.id == "challenge-sunk-groupthink"), None)
+    if sunk is None:
+        problems.append(DriftProblem("challenge_grade", "missing fixture challenge-sunk-groupthink"))
+        return problems
+    open_turn = next(
+        (turn for turn in sunk.turns if turn.expect.challenge and turn.expect.challenge.round == "open"),
+        None,
+    )
+    answered_turn = next(
+        (
+            turn
+            for turn in sunk.turns
+            if turn.expect.challenge and turn.expect.challenge.round == "answered"
+        ),
+        None,
+    )
+    if open_turn is None or not isinstance(open_turn.gold.verdict.challenge, Open):
+        problems.append(DriftProblem("challenge_grade", "sunk fixture has no open gold"))
+        return problems
+    quote = open_turn.gold.verdict.challenge.findings[0].quote
+    blanked = replace(open_turn, input=open_turn.input.replace(quote, ""))
+    blanked_kinds = [
+        fail.kind
+        for fail in grade_turn(
+            blanked, _gold_response_text(open_turn.restatement, open_turn.gold_text)
+        ).hard_fails
+    ]
+    if "challenge_ungrounded" not in blanked_kinds:
+        problems.append(
+            DriftProblem("challenge_grade", f"blanked open quote did not fail ungrounded: {blanked_kinds}")
+        )
+    if answered_turn is None or not isinstance(answered_turn.gold.verdict.challenge, Answered):
+        problems.append(DriftProblem("challenge_grade", "sunk fixture has no answered gold"))
+        return problems
+    want = render_line(answered_turn.gold.verdict.challenge.findings)
+    if want not in answered_turn.input:
+        problems.append(DriftProblem("challenge_grade", "answered input is missing its Challenge line"))
+        return problems
+    mutated = replace(
+        answered_turn, input=answered_turn.input.replace(want, "Challenge: not the rendered line")
+    )
+    mutated_kinds = [
+        fail.kind
+        for fail in grade_turn(
+            mutated, _gold_response_text(answered_turn.restatement, answered_turn.gold_text)
+        ).hard_fails
+    ]
+    if "challenge_restated" not in mutated_kinds:
+        problems.append(
+            DriftProblem("challenge_grade", f"paraphrased line did not fail restated: {mutated_kinds}")
+        )
+    return problems
+
+
 def _strip_emitted_probe_scaffold(text: str) -> str:
     scaffolds = [area.probe_template.split(QUESTION_SLOT) for area in load_registry().areas]
     lines: list[str] = []
@@ -544,6 +635,9 @@ def _skill_contamination(fixtures: list[Fixture], mount: dict[str, str]) -> list
     for fixture in fixtures:
         for turn in fixture.turns:
             chunk = _strip_emitted_probe_scaffold(turn.input.strip())
+            chunk = "\n".join(
+                line for line in chunk.splitlines() if not line.strip().startswith("Challenge: ")
+            )
             if len(chunk) < 40:
                 continue
             for rel, text in mount.items():

@@ -1,0 +1,26 @@
+expect_ok: false
+expect_kind: challenge_quote
+body: |
+  status: classified
+  main_question: "Why does consumer lag spike every Monday before the Q3 cutover, given we've already sunk four months into the Kafka migration?"
+  problems:
+    - statement: "Why does consumer lag spike every Monday before the Q3 cutover, given we've already sunk four months into the Kafka migration?"
+      classification: { nature: analytical, direction: convergent }
+      confidence: high
+      why: "A repeated Monday spike before a named cutover."
+      next_method: "Compare Monday consumer metrics with the prior weekday."
+  smart_question: "Why does consumer lag spike every Monday before the Q3 cutover, given we've already sunk four months into the Kafka migration?"
+  smart_gaps: []
+  worksheet:
+    context_constraints: { status: filled, text: "The lag shows up each Monday." }
+    success_criteria: { status: unknown, text: null }
+    stakeholders: { status: i_am_decider, text: null }
+    scope_sources: { status: not_yet, text: null }
+  challenge:
+    round: open
+    findings:
+      sunk_cost: "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
+    reply: null
+  unresolved: []
+  applied: []
+  stop: true

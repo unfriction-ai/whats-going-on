@@ -73,7 +73,7 @@ stop: true
 | `smart_question` | `smart_question` |
 | `unresolved[<i>]` | `unresolved` |
 
-Point only at a row you emitted, and at `smart_question` only when there is a primary. Never point at the worksheet ask row. Cite a principle only at a kind its `governs` list names. `changed` says in one line of at most 200 characters what the principle made you choose. It does not diagnose or recommend.
+Point only at a row you emitted, and at `smart_question` only when there is a primary. Never point at the ask row. That row is a worksheet probe or the Challenge line. Cite a principle only at a kind its `governs` list names. `changed` says in one line of at most 200 characters what the principle made you choose. It does not diagnose or recommend.
 
 ## Halt
 

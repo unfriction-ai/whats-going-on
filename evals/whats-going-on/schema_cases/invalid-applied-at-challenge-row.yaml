@@ -1,0 +1,33 @@
+expect_ok: false
+expect_kind: principle_at
+body: |
+  status: partial
+  main_question: "Why does consumer lag spike every Monday before the Q3 cutover, given we've already sunk four months into the Kafka migration?"
+  problems:
+    - statement: "Why does consumer lag spike every Monday before the Q3 cutover, given we've already sunk four months into the Kafka migration?"
+      classification: { nature: analytical, direction: convergent }
+      confidence: high
+      why: "A repeated Monday spike before a named cutover."
+      next_method: "Compare Monday consumer metrics with the prior weekday."
+  smart_question: "Why does consumer lag spike every Monday before the Q3 cutover, given we've already sunk four months into the Kafka migration?"
+  smart_gaps: []
+  worksheet:
+    context_constraints: { status: filled, text: "The lag shows up each Monday." }
+    success_criteria: { status: unknown, text: null }
+    stakeholders: { status: i_am_decider, text: null }
+    scope_sources: { status: not_yet, text: null }
+  challenge:
+    round: open
+    findings:
+      sunk_cost: "we've already sunk four months into the Kafka migration"
+      groupthink: "the whole team agrees we should finish it"
+    reply: null
+  unresolved:
+    - observation: "The definition rests on framings the paste does not test."
+      reason: "The challenge round is open."
+      clarification: 'Challenge: "we''ve already sunk four months into the Kafka migration" counts what is already spent. If you were starting today, would you still choose this? "the whole team agrees we should finish it" leans on agreement. Who would disagree, and what would they say? Reply under this line, or say "I hold this framing."'
+  applied:
+    - name: principle-dont-invent-problems
+      at: unresolved[0]
+      changed: "Cited the challenge row, which has no at."
+  stop: true

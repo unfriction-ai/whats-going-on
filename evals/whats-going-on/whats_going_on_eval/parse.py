@@ -12,7 +12,7 @@ import yaml
 from .challenge import ChallengeAssessment, operator_ask, parse_challenge
 from .manifest import SKILL_DIR
 from .principles import WireKind, load_principles
-from .smart import SmartProposal, parse_smart, partition_unresolved
+from .smart import Proposed, SmartProposal, parse_smart, partition_unresolved
 from .wire import ContractViolation, Unresolved
 from .worksheet import WorksheetAssessment, parse_worksheet
 
@@ -258,7 +258,9 @@ def _validate_wire(raw: dict[str, Any], preamble: str) -> Outcome | ContractViol
     if isinstance(sheet, ContractViolation):
         return sheet
 
-    challenge = parse_challenge(raw, sheet)
+    gap_count = len(smart.gaps) if isinstance(smart, Proposed) else 0
+    primary = problems_t[0].statement if problems_t else None
+    challenge = parse_challenge(raw, sheet, unresolved_t, gap_count, primary)
     if isinstance(challenge, ContractViolation):
         return challenge
 

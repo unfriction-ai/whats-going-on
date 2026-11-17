@@ -1,0 +1,89 @@
+turns:
+  - input: |
+      The first capacity note quotes the checkout API p99 at 800ms, and the review treats that figure as the target. Should we keep it for the Q1 hardware budget? Finance decides in the budget meeting. No one named how we would know the target is the right one.
+      
+      Context and constraints: Around "Should we keep the 800ms checkout API target for the Q1 hardware budget?", what background or pressures shape how you solve it, and what cannot change?
+      
+      Finance locked the review agenda around the first capacity note.
+      
+      Success criteria: For "Should we keep the 800ms checkout API target for the Q1 hardware budget?", what has to be true for the answer to count as success, and what would make it fail?
+      
+      Success is a target Finance can defend without a second meeting.
+      
+      Stakeholders: Who can make or block the decision behind "Should we keep the 800ms checkout API target for the Q1 hardware budget?", and who must agree? Say "I am the decider" if that is you.
+      
+      Finance decides the hardware budget. The checkout owner must sign the target.
+      
+      Scope and sources: For "Should we keep the 800ms checkout API target for the Q1 hardware budget?", what is in and out of scope, and where does evidence already exist?
+      
+      In scope is the checkout API p99 target. Out of scope is the catalog API. The capacity note is the source.
+    restatement: "The review asks whether to keep the checkout API target from the first capacity note for the Q1 hardware budget. Finance decides, and nobody named how to tell the figure is the right one."
+    expect:
+      kind: classify
+      statuses: [partial]
+      problems:
+        - anchor: [800ms, checkout]
+          quadrants: [conceptual-convergent]
+      unresolved: []
+      smart:
+        proposal: proposed
+        gaps: [measurable]
+      worksheet:
+        stop: complete
+        cells:
+          context_constraints: filled
+          success_criteria: filled
+          stakeholders: filled
+          scope_sources: filled
+      challenge:
+        round: open
+        biases: [anchoring]
+    tripwires:
+      invented:
+        - "1200ms"
+        - "1,200"
+      methodNotProblem: []
+      solveLeak:
+        - "\\braise the target\\b"
+    gold: |
+      ```yaml
+      status: partial
+      main_question: "Should we keep the 800ms checkout API target for the Q1 hardware budget?"
+      problems:
+        - statement: "Should we keep the 800ms checkout API target for the Q1 hardware budget?"
+          classification:
+            nature: conceptual
+            direction: convergent
+          confidence: high
+          why: "The ask is a keep-or-change decision about one named target. The first figure in the note is doing the deciding."
+          next_method: "Separate the capacity note's first figure from the choice of target. Do not set the budget in this slice."
+      smart_question: "Should we keep the 800ms checkout API target for the Q1 hardware budget?"
+      smart_gaps: [measurable]
+      worksheet:
+        context_constraints:
+          status: filled
+          text: "Finance locked the review agenda around the first capacity note."
+        success_criteria:
+          status: filled
+          text: "Success is a target Finance can defend without a second meeting."
+        stakeholders:
+          status: filled
+          text: "Finance decides the hardware budget. The checkout owner must sign the target."
+        scope_sources:
+          status: filled
+          text: "In scope is the checkout API p99 target. Out of scope is the catalog API. The capacity note is the source."
+      challenge:
+        round: open
+        findings:
+          anchoring: "800ms"
+        reply: null
+      unresolved:
+        - observation: "The definition treats the first figure as given."
+          reason: "The challenge round is open."
+          clarification: "Challenge: \"800ms\" may be the first figure or option you heard, not the right one. What would you ask if you had never seen it? Reply under this line, or say \"I hold this framing.\""
+        - observation: "The note never says how we would know the target is the right one."
+          reason: "SMART measurable is open. The input names no way to tell the target is solved."
+          clarification: "Ask yourself: How will we know it is solved?"
+      applied: []
+      stop: true
+      ```
