@@ -1,0 +1,41 @@
+expect_ok: false
+expect_kind: status_constraints
+# Interrogate probe: needs_split with all-pass notes and no unresolved cut ask
+body: |
+  status: needs_split
+  root_question: "Why are checkout API calls timing out?"
+  main_question: "Why are checkout API calls timing out?"
+  smart_question: null
+  classification: null
+  breakdowns:
+    - id: A
+      frame: "By layer"
+      depth_max_used: 1
+      status: needs_split
+      tree:
+        id: root
+        question: "Why are checkout API calls timing out?"
+        level: 0
+        children:
+          - id: A.1
+            question: "Is the pool rejecting?"
+            level: 1
+            hypothesis: "The pool is rejecting checkout calls."
+            children: []
+          - id: A.2
+            question: "Is upstream slow?"
+            level: 1
+            hypothesis: "An upstream service is slow."
+            children: []
+      mece:
+        - path: A.tree.children
+          mutually_exclusive: fail
+          collectively_exhaustive: pass
+          note: "Pool and upstream share the same timeout path."
+  selected:
+    breakdown_ids: []
+    branch_ids: []
+    parallel: false
+  unresolved: []
+  applied: []
+  stop: true
