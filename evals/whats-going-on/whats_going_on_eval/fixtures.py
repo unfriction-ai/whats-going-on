@@ -19,7 +19,9 @@ from .challenge import (
     NotRun,
     Open,
 )
-from .parse import PREAMBLE_BUDGET, AtMostOne, Response, parse_response
+from .parse import PREAMBLE_BUDGET, AtMostOne, Halt, Response, StructureResponse, parse_response
+from .structure import STRUCTURE_STATUSES
+from .wire import ContractViolation
 from .smart import (
     REQUIRED_TO_PROPOSE,
     NoPrimary,
@@ -41,7 +43,7 @@ from .worksheet import (
     WorksheetAssessment,
 )
 
-Kind = Literal["abstain", "classify"]
+Kind = Literal["abstain", "classify", "structure"]
 Split = Literal["seed", "holdout"]
 
 REQUIRED_FAMILIES = frozenset(
@@ -53,6 +55,7 @@ REQUIRED_FAMILIES = frozenset(
         "compound",
         "successive_asks",
         "challenged",
+        "structure",
     }
 )
 
@@ -116,6 +119,9 @@ class Expectation:
     smart: SmartExpect | None
     worksheet: WorksheetExpect | None
     challenge: ChallengeExpect | None = None
+    root_anchor: tuple[re.Pattern[str], ...] = ()
+    min_breakdowns: int = 0
+    selection_ask: bool = False
 
 
 def _bias_ids(findings: tuple[Finding, ...]) -> tuple[BiasId, ...]:
@@ -184,7 +190,8 @@ class Turn:
     tripwires: Tripwires
     restatement: str
     gold_text: str
-    gold: Response
+    gold: Response | StructureResponse
+    command: str = "/whats-going-on"
 
 
 @dataclass(frozen=True)
@@ -216,6 +223,8 @@ def derive_families(fixture_id: str, turns: tuple[Turn, ...]) -> frozenset[str]:
     families: set[str] = set()
     if len(turns) > 1:
         families.add("successive_asks")
+    if any(turn.expect.kind == "structure" for turn in turns):
+        families.add("structure")
 
     classify_turns = [t for t in turns if t.expect.kind == "classify"]
     abstain_turns = [t for t in turns if t.expect.kind == "abstain"]
@@ -269,11 +278,14 @@ def _flat_unresolved(turn: Turn) -> tuple[re.Pattern[str], ...]:
 
 def _parse_expectation(raw: dict[str, Any]) -> Expectation:
     kind = raw.get("kind")
-    if kind not in ("abstain", "classify"):
-        raise ValueError("expect.kind must be abstain or classify")
+    if kind not in ("abstain", "classify", "structure"):
+        raise ValueError("expect.kind must be abstain, classify, or structure")
     statuses = raw.get("statuses")
     if not isinstance(statuses, list) or not statuses:
         raise ValueError("expect.statuses must be a non-empty list")
+    status_names = tuple(str(s) for s in statuses)
+    if kind == "structure":
+        return _parse_structure_expectation(raw, status_names)
 
     unresolved_raw = raw.get("unresolved") or []
     unresolved: list[ExpectedUnresolved] = []
@@ -296,7 +308,7 @@ def _parse_expectation(raw: dict[str, Any]) -> Expectation:
             asks.append(_compile_anchor_list(item, f"asks[{i}]"))
         return Expectation(
             kind="abstain",
-            statuses=tuple(str(s) for s in statuses),
+            statuses=status_names,
             problems=(),
             unresolved=tuple(unresolved),
             asks=tuple(asks),
@@ -322,7 +334,7 @@ def _parse_expectation(raw: dict[str, Any]) -> Expectation:
     worksheet = _parse_worksheet_expect(raw, smart)
     return Expectation(
         kind="classify",
-        statuses=tuple(str(s) for s in statuses),
+        statuses=status_names,
         problems=(primary,),
         unresolved=tuple(unresolved),
         asks=(),
@@ -330,6 +342,60 @@ def _parse_expectation(raw: dict[str, Any]) -> Expectation:
         worksheet=worksheet,
         challenge=_parse_challenge_expect(raw, worksheet),
     )
+
+
+def _parse_structure_expectation(raw: dict[str, Any], statuses: tuple[str, ...]) -> Expectation:
+    allowed = {"kind", "statuses", "root_anchor", "min_breakdowns", "selection_ask"}
+    extra = set(raw) - allowed
+    if extra:
+        raise ValueError(f"structure expect has unknown keys: {sorted(extra)}")
+    if any(status not in STRUCTURE_STATUSES for status in statuses):
+        raise ValueError("structure expect.statuses must be structured, needs_split, or blocked")
+    blocked_only = set(statuses) <= {"blocked"}
+    if "root_anchor" in raw:
+        root_anchor = _compile_anchor_list(raw["root_anchor"], "expect.root_anchor")
+    elif blocked_only:
+        root_anchor = ()
+    else:
+        raise ValueError("expect.root_anchor is required unless status is blocked")
+    if "min_breakdowns" in raw:
+        min_breakdowns = raw["min_breakdowns"]
+        if type(min_breakdowns) is not int or min_breakdowns < 0:
+            raise ValueError("expect.min_breakdowns must be a non-negative integer")
+    else:
+        min_breakdowns = 0 if blocked_only else 1
+    if "selection_ask" in raw:
+        selection_ask = raw["selection_ask"]
+        if type(selection_ask) is not bool:
+            raise ValueError("expect.selection_ask must be true or false")
+    else:
+        selection_ask = statuses == ("structured",)
+    return Expectation(
+        kind="structure",
+        statuses=statuses,
+        problems=(),
+        unresolved=(),
+        asks=(),
+        smart=None,
+        worksheet=None,
+        challenge=None,
+        root_anchor=root_anchor,
+        min_breakdowns=min_breakdowns,
+        selection_ask=selection_ask,
+    )
+
+
+def _parse_command(raw: dict[str, Any]) -> str | None:
+    if "command" not in raw:
+        return None
+    command = raw["command"]
+    if (
+        not isinstance(command, str)
+        or not command.startswith("/")
+        or any(ch.isspace() for ch in command)
+    ):
+        raise ValueError("turn.command must be a slash command")
+    return command
 
 
 def _parse_challenge_expect(
@@ -434,17 +500,30 @@ def _parse_turn(raw: dict[str, Any]) -> Turn:
         raise ValueError("turn.gold must be a non-empty string")
     gold_response_text = _gold_response_text(restatement, gold_text)
     parsed = parse_response(gold_response_text)
-    if not isinstance(parsed, Response):
-        raise ValueError(f"gold does not parse: {parsed.kind} {parsed.detail}")
+    if isinstance(parsed, ContractViolation):
+        raise ValueError(f"gold does not parse: {parsed.kind} {parsed.detail}".strip())
+    if isinstance(parsed, Halt):
+        raise ValueError("gold does not parse: halt")
+    if not isinstance(parsed, (Response, StructureResponse)):
+        assert_never(parsed)
     if len(parsed.view.restatement) > PREAMBLE_BUDGET:
         raise ValueError("gold restatement over budget")
+    expect = _parse_expectation(raw["expect"])
+    if expect.kind == "structure" and not isinstance(parsed, StructureResponse):
+        raise ValueError("structure expect requires structure gold")
+    if expect.kind != "structure" and isinstance(parsed, StructureResponse):
+        raise ValueError("structure gold requires expect.kind structure")
+    command = _parse_command(raw)
+    if expect.kind == "structure" and command != "/where-to-focus":
+        raise ValueError("structure turns must set command: /where-to-focus")
     return Turn(
         input=input_text,
-        expect=_parse_expectation(raw["expect"]),
+        expect=expect,
         tripwires=_parse_tripwires(raw.get("tripwires")),
         restatement=restatement.strip(),
         gold_text=gold_text,
         gold=parsed,
+        command=command or "/whats-going-on",
     )
 
 

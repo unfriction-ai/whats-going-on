@@ -6,7 +6,7 @@ Tagline: Understand the situation before deciding what to solve.
 
 Works with Cursor Agent Skills, Claude Code skills, and Codex skills. Same `SKILL.md` body. Install path differs by tool.
 
-Stage 1 capability name: problem mapping. Method: analytical or conceptual, crossed with convergent or divergent. Stage 2 (`structure-the-problem`, also `/where-to-focus`, `/break-it-down`, `/where-to-start`) proposes MECE issue-tree breakdowns for the solver to pick. Entry to stage 2 needs only a main or SMART problem statement, not a finished stage-1 status. Stages 3–7 remain named on the coordinator chain and Halt until their playbooks exist.
+Stage 1 capability name: problem mapping. Method: analytical or conceptual, crossed with convergent or divergent. Stage 2 (`structure-the-problem`, also `/where-to-focus`, `/break-it-down`, `/where-to-start`) proposes MECE issue-tree breakdowns for the solver to pick. Entry to stage 2 needs only a main or SMART problem statement, not a finished stage-1 status. Run `/where-to-focus` with that statement. Stages 3–7 remain named on the coordinator chain and Halt until their playbooks exist.
 
 ## What stage 1 does
 
