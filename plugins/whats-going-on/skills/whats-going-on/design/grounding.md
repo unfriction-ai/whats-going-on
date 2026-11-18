@@ -62,7 +62,8 @@ Executable shape:
 - Deterministic schema and hard-fail assertions (status, required fields, `applied` pointers, solve-leak).
 - Optional LLM judge for softer axes is not wired yet (`judge_evidence` raises).
 - Operator can run pstack-style blinded A/B via `/poteto-mode` eval when comparing skill revisions.
-- `disable-model-invocation: true` so evals must invoke the skill explicitly.
+- The coordinator omits `disable-model-invocation`. Claude hosts route a user slash through the Skill tool, and that tool rejects a skill that sets the flag.
+- Leaf skills and principles keep `disable-model-invocation: true`. Evals invoke those leaves by name.
 
 ## Design constraints that still hold
 

@@ -9,7 +9,6 @@ description: >-
   /where-to-focus, /break-it-down, or /where-to-start with a bug, email, Slack
   thread, incident notes, or similar text, or with "continue" after a prior
   result.
-disable-model-invocation: true
 ---
 
 # What's going on
