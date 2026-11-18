@@ -43,3 +43,4 @@ Each feature file starts with an H1 title and one paragraph describing the user-
 - [Local host install](./local-host-install.md) — Cursor, Claude, Codex install without copying evals.
 - [Abstain on a vague ask](./abstain-vague-ask.md) — Case A needs_clarification without inventing metrics.
 - [Split a compound ask](./compound-classification.md) — Case F one primary plus deferred prevention.
+- [Claude Skill tool first invoke](./claude-skill-tool-first-invoke.md) — coordinator omits `disable-model-invocation` so the Claude Skill tool accepts the first slash. CLI proof. Desktop window untested.

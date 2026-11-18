@@ -117,16 +117,35 @@ def lint_chain(chain: Chain) -> list[ChainProblem]:
     if not (skill_dir / "SKILL.md").is_file():
         return [ChainProblem("missing_coordinator", "SKILL.md is missing")]
 
+    coordinator_problems = _lint_coordinator_invocation(skill_dir)
+
     if not chain.stages:
-        return [ChainProblem("empty_chain", "chain has no stages")]
+        return coordinator_problems + [ChainProblem("empty_chain", "chain has no stages")]
 
     principle_problems = [
         ChainProblem(item.kind, item.detail) for item in lint_principles(skill_dir)
     ]
     if chain.mode == "monolith":
-        return principle_problems + _lint_monolith(chain)
+        return coordinator_problems + principle_problems + _lint_monolith(chain)
 
-    return principle_problems + _lint_playbooks(chain)
+    return coordinator_problems + principle_problems + _lint_playbooks(chain)
+
+
+def _lint_coordinator_invocation(skill_dir: Path) -> list[ChainProblem]:
+    text = (skill_dir / "SKILL.md").read_text(encoding="utf-8")
+    match = FRONTMATTER_RE.match(text)
+    if not match:
+        return []
+    data = yaml.safe_load(match.group("body")) or {}
+    if isinstance(data, dict) and data.get("disable-model-invocation") is True:
+        return [
+            ChainProblem(
+                "coordinator_invocation",
+                "Claude hosts route user slash through the Skill tool, so the "
+                "coordinator must omit disable-model-invocation; leaves keep it",
+            )
+        ]
+    return []
 
 
 def _lint_monolith(chain: Chain) -> list[ChainProblem]:
